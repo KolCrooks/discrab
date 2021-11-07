@@ -102,7 +102,3 @@ impl CommandTrait for Subcommand {
     }
 }
 ```
-
-
-
-- Unit testing integration
