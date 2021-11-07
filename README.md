@@ -5,6 +5,7 @@ Just a rust discord wrapper.
 - Highly scalable and resource efficient framework
 - Easy to use, intuitive, and generally high level
 - Highly Customizable
+- Very well documented
 - A framework that is ready for commercial use
 
 ## Core features:
