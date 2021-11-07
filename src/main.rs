@@ -1,9 +1,4 @@
-pub mod typing {
-    pub mod snowflake;
-    pub mod user;
-    pub mod resources;
-}
-
+pub mod typing;
 fn main() {
     println!("Hello, world!");
 }
