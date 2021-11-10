@@ -3,7 +3,7 @@ use std::{
     sync::Mutex,
 };
 
-use super::{request_future, RequestRoute};
+use super::{rate_limit_client::RequestRoute, request_future};
 
 pub struct Queue {
     pub queue_map: HashMap<RequestRoute, Mutex<LinkedList<*mut request_future::HttpFuture>>>,

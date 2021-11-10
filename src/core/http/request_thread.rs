@@ -9,7 +9,9 @@ use hyper::{client::ResponseFuture, Client};
 
 use crate::util::Requests::get_header_as;
 
-use super::{request_bucket, request_future, request_queue::Queue, RequestRoute};
+use super::{
+    rate_limit_client::RequestRoute, request_bucket, request_future, request_queue::Queue,
+};
 
 const GLOBAL_RATE_LIMIT_PER_SEC: u64 = 50;
 
