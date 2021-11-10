@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /**
  * Possible basic image formats. This excludes animated formats (GIF).
  * If you are looking for the one with GIFs, see ImageFormats::Animated
@@ -18,40 +20,23 @@ pub enum Animated {
     GIF,
 }
 
-impl Basic {
-    pub fn to_string(&self) -> String {
+impl Display for Basic {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Basic::PNG => "png".to_string(),
-            Basic::JPG => "jpg".to_string(),
-            Basic::WEBP => "webp".to_string(),
+            Basic::PNG => write!(f, "png"),
+            Basic::JPG => write!(f, "jpg"),
+            Basic::WEBP => write!(f, "webp"),
         }
     }
 }
 
-impl Animated {
-    pub fn to_string(&self) -> String {
+impl Display for Animated {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Animated::PNG => "png".to_string(),
-            Animated::JPG => "jpg".to_string(),
-            Animated::WEBP => "webp".to_string(),
-            Animated::GIF => "gif".to_string(),
+            Animated::PNG => write!(f, "png"),
+            Animated::JPG => write!(f, "jpg"),
+            Animated::WEBP => write!(f, "webp"),
+            Animated::GIF => write!(f, "gif"),
         }
     }
 }
-
-// pub fn basic_to_str(format: Basic) -> &'static str {
-//     match format {
-//         Basic::PNG => "png",
-//         Basic::JPG => "jpg",
-//         Basic::WEBP => "webp",
-//     }
-// }
-
-// pub fn animated_to_str(format: Animated) -> &'static str {
-//     match format {
-//         Animated::PNG => "png",
-//         Animated::JPG => "jpg",
-//         Animated::WEBP => "webp",
-//         Animated::GIF => "gif",
-//     }
-// }

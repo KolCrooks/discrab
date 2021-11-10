@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use bitfield::bitfield;
 
 bitfield! {
@@ -8,9 +10,8 @@ bitfield! {
     pub increment, _: 11, 0;
 }
 
-impl Snowflake {
-    pub fn to_string(&self) -> String {
-        format!("{}", self.0)
+impl Display for Snowflake {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
-

@@ -1,8 +1,5 @@
-use super::super::{
-    imageformats,
-    snowflake::Snowflake,
-};
- 
+use super::super::{imageformats, snowflake::Snowflake};
+
 use super::UserFlags;
 
 pub struct User {
@@ -11,7 +8,7 @@ pub struct User {
      * Example: `250726400149946368`
      * Required OAuth2 Scope: **identify**
      */
-    pub id:	Snowflake,
+    pub id: Snowflake,
 
     /**
      * The user's username, not unique across the platform identify
@@ -67,21 +64,21 @@ pub struct User {
      * Required OAuth2 Scope: **identify**
      */
     pub accent_color: Option<u32>,
-    
+
     /**
      * The user's chosen language option
      * Example: `false`
      * Required OAuth2 Scope: **identify**
      */
     pub locale: Option<String>,
-    
+
     /**
      * Whether the email on this account has been verified
      * Example: `false`
      * Required OAuth2 Scope: **email**
      */
     pub verified: Option<bool>,
-    
+
     /**
      * The user's email
      * Example: "example@email.com"
@@ -112,55 +109,55 @@ pub struct User {
 }
 
 impl User {
-
     /**
      * Gets the user's avatar url
-     * 
+     *
      * @param fmt Image format of the avatar
-     * 
+     *
      * @param size Size of the avatar. If none specified, the largest size will be used.
-     * The size must be a power of 2 between `16` and `4096` 
+     * The size must be a power of 2 between `16` and `4096`
      */
     pub fn get_avatar_url(&self, fmt: imageformats::Animated, size: Option<u32>) -> Option<String> {
         let size_str = match size {
             Some(s) => format!("?size={}", s),
-            None => "".to_string()
+            None => "".to_string(),
         };
-          
+
         match self.avatar {
-            Some(ref avatar) => 
-                Some(format!("https://cdn.discordapp.com/avatars/{}/{}.{}{}",
-                            self.id.to_string(),
-                            avatar,
-                            fmt.to_string(),
-                            size_str)),
-            None => None
+            Some(ref avatar) => Some(format!(
+                "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
+                self.id.to_string(),
+                avatar,
+                fmt.to_string(),
+                size_str
+            )),
+            None => None,
         }
     }
 
     /**
      * Gets the user's banner url
-     * 
+     *
      * @param fmt Image format of the banner
-     * 
+     *
      * @param size Size of the banner. If none specified, the largest size will be used.
-     * The size must be a power of 2 between `16` and `4096` 
+     * The size must be a power of 2 between `16` and `4096`
      */
     pub fn get_banner_url(&self, fmt: imageformats::Animated, size: Option<u32>) -> Option<String> {
         let size_str = match size {
             Some(s) => format!("?size={}", s),
-            None => "".to_string()
+            None => "".to_string(),
         };
 
         match self.banner {
-            Some(ref banner) => 
-            Some(format!("https://cdn.discordapp.com/avatars/{}/{}.{}{}",
-                    self.id.to_string(),
-                    banner,
-                    fmt.to_string(),
-                    size_str)),
-            None => None
+            Some(ref banner) => Some(format!(
+                "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
+                self.id.to_string(),
+                banner,
+                fmt.to_string(),
+                size_str
+            )),
+            None => None,
         }
     }
-
 }

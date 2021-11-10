@@ -1,1 +1,1 @@
-pub mod HttpClient;
+pub mod http;

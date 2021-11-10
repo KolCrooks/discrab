@@ -7,11 +7,11 @@ pub enum UserFlags {
      */
     NONE = 0,
     /**
-     * 	Discord Employee
+     * Discord Employee
      */
     STAFF = 1,
     /**
-     * 	Partnered Server Owner
+     * Partnered Server Owner
      */
     PARTNER = 1 << 1,
     /**

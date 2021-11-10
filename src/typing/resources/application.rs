@@ -14,7 +14,7 @@ pub struct Application {
      */
     name: String,
     /**
-     * 	the icon hash of the app
+     * The icon hash of the app
      */
     icon: Option<String>,
     /**

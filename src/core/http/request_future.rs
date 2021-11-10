@@ -12,9 +12,9 @@ pub struct ReqFuture {
     pub shared_state: Arc<Mutex<RequestState>>,
 }
 
-struct RequestState {
+pub struct RequestState {
     /// The request
-    pub request: Request<Body>,
+    pub request: Option<Request<Body>>,
 
     /// The response that gets created once it is done
     pub response: Option<Result<hyper::Response<Body>, Error>>,
@@ -23,10 +23,19 @@ struct RequestState {
     pub waker: Option<Waker>,
 }
 
+impl RequestState {
+    pub fn commit(&mut self, response: Result<hyper::Response<Body>, Error>) {
+        self.response = Some(response);
+        if let Some(waker) = self.waker.as_ref() {
+            waker.wake_by_ref()
+        }
+    }
+}
+
 impl ReqFuture {
     pub fn new(request: Request<Body>) -> Self {
         let shared_state = Arc::new(Mutex::new(RequestState {
-            request,
+            request: Some(request),
             response: None,
             waker: None,
         }));
