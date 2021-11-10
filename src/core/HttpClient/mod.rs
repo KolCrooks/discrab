@@ -1,34 +1,21 @@
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::HashMap,
     sync::{Arc, Mutex},
     thread,
-    time::{self, SystemTime},
 };
 
-use hyper::{
-    client::{self, ResponseFuture},
-    Body, Client, Error, Request,
-};
+use hyper::{client::ResponseFuture, Body, Client, Error, Request};
+
+use crate::util::Requests::get_header_as;
 
 mod RequestBucket;
 mod RequestFuture;
 mod RequestQueue;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
-struct RequestRoute {
+pub struct RequestRoute {
     base_route: String,
     major_param: String,
-}
-
-fn get_header_as<T>(headers: &hyper::header::HeaderMap, key: &str) -> Option<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
-{
-    headers
-        .get(key)
-        .and_then(|header| header.to_str().ok())
-        .and_then(|header_str| header_str.parse().ok())
 }
 
 pub struct HttpSchedulerClient {
@@ -56,20 +43,19 @@ impl HttpSchedulerClient {
             loop {
                 let Routes = {
                     let locked = send_queue.lock().unwrap();
-                    locked.active_requests_queue.clone()
+                    let reqs = locked.active_requests_queue.clone();
+                };
+                let mut queue_mut = {
+                    send_queue
+                        .lock()
+                        .unwrap()
+                        .queue_map
+                        .get_mut(&route)
+                        .unwrap()
                 };
 
                 for route in Routes {
                     // TODO Break out if hit global rate limit
-
-                    let mut queue_mut = {
-                        send_queue
-                            .lock()
-                            .unwrap()
-                            .queue_map
-                            .get_mut(&route)
-                            .unwrap()
-                    };
 
                     let now = chrono::Utc::now().timestamp();
 
