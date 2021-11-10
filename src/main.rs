@@ -1,4 +1,9 @@
 pub mod typing;
+pub mod core;
+use hyper;
+
 fn main() {
-    println!("Hello, world!");
+    let client = core::http::HttpSchedulerClient::new();
+    let req = hyper::Request::builder().
+    client.send_request()
 }
