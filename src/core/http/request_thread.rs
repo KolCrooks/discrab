@@ -10,17 +10,22 @@ use hyper::{client::ResponseFuture, Client};
 use crate::util::Requests::get_header_as;
 
 use super::{
-    rate_limit_client::RequestRoute, request_bucket, request_future, request_queue::Queue,
+    rate_limit_client::RequestRoute,
+    request_bucket, request_future,
+    request_queue::{BasicHttpQueue, HttpQueue},
 };
 
 const GLOBAL_RATE_LIMIT_PER_SEC: u64 = 50;
 
 /**
  * Creates the request thread that will batch requests out according to rate limit headers that are returned by discord, and also the
- * Global rate limit of 50
+ * Global rate limit of GLOBAL_RATE_LIMIT_PER_SEC
  * @param send_queue The Shared Queue that requests can be added to
  */
-pub fn create_thread(send_queue: Arc<Mutex<Queue>>) {
+pub fn create_thread<T>(send_queue: Arc<Mutex<T>>)
+where
+    T: HttpQueue + Send + 'static,
+{
     thread::Builder::new()
         .name("Request_Thread".to_string())
         .spawn(move || {
@@ -119,21 +124,19 @@ pub fn create_thread(send_queue: Arc<Mutex<Queue>>) {
  * @param global_allowance The global rate limit allowance
  * @return A vector of futures that can be be sent without violating the rate limit.
  */
-fn get_requests<'a>(
-    send_queue: &Arc<Mutex<Queue>>,
+fn get_requests<'a, T>(
+    send_queue: &Arc<Mutex<T>>,
     buckets: &mut HashMap<RequestRoute, request_bucket::Bucket>,
     global_allowance: &mut u64,
-) -> Vec<(RequestRoute, &'a mut request_future::HttpFuture)> {
+) -> Vec<(RequestRoute, &'a mut request_future::HttpFuture)>
+where
+    T: HttpQueue + Send,
+{
     let mut futures = Vec::new();
     let mut locked = send_queue.lock().unwrap();
 
-    // TODO this implementation technically doesn't guarantee that the requests will be sent in the order they were added
-    // It only gets called in the order that the request routes were added, so if someone adds a request route that is already
-    // low on the list, it will skip the waitlist and get grouped in with older requests. This is fine for now, but it would be
-    // better if we made this in a way that guarantees that the requests are sent in (about) the order they were added.
-    let requests = locked.active_requests_queue.clone();
+    let requests = locked.get_timesorted_requests();
 
-    let mut i = 0;
     let mut to_remove: Vec<i32> = Vec::new();
 
     // Iterate through all of the requests in the queue, and add them to the futures vector if they can be executed
@@ -157,18 +160,19 @@ fn get_requests<'a>(
 
         // get the queue for the route, and then get as many requests as possible from the queue
         // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
-        let queue = locked.queue_map.get_mut(&route).unwrap();
+        let queue = locked.get_BucketQueue(&route).unwrap();
         while bucket.remaining_requests > 0 && *global_allowance != 0 {
             // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
-            match queue.get_mut().unwrap().pop_front() {
-                Some(req_future) => {
+            match queue.pop() {
+                Some((u64, req_future)) => {
                     futures.push((req.clone(), unsafe { &mut *req_future }));
                     bucket.remaining_requests -= 1;
                     *global_allowance -= 1;
                 }
                 None => {
-                    to_remove.push(i);
-                    i -= 1;
+                    // Remove the empty queues from the active requests because
+                    // there are no more queued requests for that route
+                    locked.notify_empty(&route);
                     break;
                 }
             }
@@ -176,13 +180,7 @@ fn get_requests<'a>(
         if *global_allowance == 0 {
             break;
         }
-        i += 1;
     }
 
-    // Remove the empty queues from the active requests set and queue because it means there are no more queued requests for that route
-    for i in to_remove {
-        let route = locked.active_requests_queue.remove(i as usize).unwrap();
-        locked.active_requests_set.remove(&route);
-    }
     futures
 }

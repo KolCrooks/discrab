@@ -2,11 +2,16 @@ pub mod core;
 pub mod typing;
 mod util;
 
-use crate::core::http::RequestRoute;
+use crate::core::http::{
+    rate_limit_client::{RateLimitedHttpClient, RequestRoute},
+    request_queue::BasicHttpQueue,
+};
 
 #[tokio::main]
 async fn main() {
-    let mut client = core::http::RateLimitedHttpClient::new();
+    unsafe impl Send for BasicHttpQueue {}
+
+    let mut client = RateLimitedHttpClient::<BasicHttpQueue>::new();
     client.spawn_req_thread();
 
     let req = hyper::Request::builder()

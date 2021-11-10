@@ -2,7 +2,11 @@ use std::sync::{Arc, Mutex};
 
 use hyper::{Body, Error, Request};
 
-use super::{request_future, request_queue, request_thread};
+use super::{
+    request_future,
+    request_queue::{self, HttpQueue},
+    request_thread,
+};
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct RequestRoute {
@@ -10,20 +14,29 @@ pub struct RequestRoute {
     pub major_param: String,
 }
 
-pub struct RateLimitedHttpClient {
-    send_queue: Arc<Mutex<request_queue::Queue>>,
+pub struct RateLimitedHttpClient<T>
+where
+    T: HttpQueue + Send + 'static,
+{
+    send_queue: Arc<Mutex<T>>,
 }
 
-impl Default for RateLimitedHttpClient {
+impl<T> Default for RateLimitedHttpClient<T>
+where
+    T: HttpQueue + Send + 'static,
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl RateLimitedHttpClient {
-    pub fn new() -> RateLimitedHttpClient {
+impl<T> RateLimitedHttpClient<T>
+where
+    T: HttpQueue + Send + 'static,
+{
+    pub fn new() -> RateLimitedHttpClient<T> {
         RateLimitedHttpClient {
-            send_queue: Arc::new(Mutex::new(request_queue::Queue::new())),
+            send_queue: Arc::new(Mutex::new(T::new())),
         }
     }
 
@@ -33,7 +46,6 @@ impl RateLimitedHttpClient {
     // TODO maybe make this be called automatically when the client is created?
     pub fn spawn_req_thread(&mut self) {
         let send_queue = self.send_queue.clone();
-        unsafe impl Send for request_queue::Queue {}
 
         request_thread::create_thread(send_queue);
     }

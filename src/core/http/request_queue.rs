@@ -1,35 +1,111 @@
 use std::{
     collections::{HashMap, HashSet, LinkedList, VecDeque},
     sync::Mutex,
+    time::Instant,
 };
 
 use super::{rate_limit_client::RequestRoute, request_future};
 
-pub struct Queue {
-    pub queue_map: HashMap<RequestRoute, Mutex<LinkedList<*mut request_future::HttpFuture>>>,
-    pub active_requests_set: HashSet<RequestRoute>,
-    pub active_requests_queue: VecDeque<RequestRoute>,
+pub struct BucketQueue {
+    time_of_empty: Instant,
+    queue: LinkedList<(u64, *mut request_future::HttpFuture)>,
 }
 
-impl Queue {
-    pub fn new() -> Queue {
-        Queue {
-            queue_map: HashMap::new(),
-            active_requests_set: HashSet::new(),
-            active_requests_queue: VecDeque::new(),
+impl BucketQueue {
+    pub fn new() -> BucketQueue {
+        BucketQueue {
+            time_of_empty: Instant::now(),
+            queue: LinkedList::new(),
         }
     }
 
-    pub fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
+    pub fn push(&mut self, time: u64, future: *mut request_future::HttpFuture) {
+        self.queue.push_back((time, future));
+    }
+
+    pub fn get_oldest(&self) -> Option<&(u64, *mut request_future::HttpFuture)> {
+        self.queue.front()
+    }
+
+    pub fn pop(&mut self) -> Option<(u64, *mut request_future::HttpFuture)> {
+        self.queue.pop_front()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+}
+impl Default for BucketQueue {
+    fn default() -> Self {
+        BucketQueue::new()
+    }
+}
+
+pub struct BasicHttpQueue {
+    req_id_cnt: u64,
+    queue_map: HashMap<RequestRoute, BucketQueue>,
+    active_requests_set: HashSet<RequestRoute>,
+}
+
+pub trait HttpQueue {
+    fn new() -> Self;
+    fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture);
+    fn get_timesorted_requests(&self) -> Vec<RequestRoute>;
+    fn get_BucketQueue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue>;
+    fn notify_empty(&mut self, route: &RequestRoute);
+    fn clean_up(&mut self, route: &RequestRoute);
+}
+
+impl HttpQueue for BasicHttpQueue {
+    fn new() -> BasicHttpQueue {
+        BasicHttpQueue {
+            req_id_cnt: 0,
+            queue_map: HashMap::new(),
+            active_requests_set: HashSet::new(),
+        }
+    }
+    fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
         let queue = self
             .queue_map
             .entry(route.clone())
-            .or_insert_with(|| Mutex::new(LinkedList::new()));
+            .or_insert_with(|| BucketQueue::new());
 
-        queue.get_mut().unwrap().push_back(future);
-        if !self.active_requests_set.contains(route) {
-            self.active_requests_set.insert(route.clone());
-            self.active_requests_queue.push_back(route.clone());
-        }
+        queue.push(self.req_id_cnt, future);
+        self.req_id_cnt += 1;
+        self.active_requests_set.insert(route.clone());
+    }
+
+    /**
+     * Gets the request groups in order by the first item's age. This will prioritize
+     * Requests with older requests, but will not mean that all requests will be processed in order
+     */
+    fn get_timesorted_requests(&self) -> Vec<RequestRoute> {
+        // TODO: Probably not the fastest way to do this since it is running O(n) and then O(nlogn)
+        // You could probably do this with a single O(nlogn)
+        let mut q: Vec<RequestRoute> = self.active_requests_set.clone().into_iter().collect();
+
+        q.sort_by(|a, b| {
+            let a_time = self.queue_map.get(a).unwrap().get_oldest().unwrap().0;
+            let b_time = self.queue_map.get(b).unwrap().get_oldest().unwrap().0;
+
+            a_time.cmp(&b_time)
+        });
+        q
+    }
+
+    /**
+     *
+     */
+    fn clean_up(&mut self, route: &RequestRoute) {
+        self.active_requests_set.remove(route);
+    }
+
+    fn get_BucketQueue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue> {
+        self.queue_map.get_mut(route)
+    }
+
+    fn notify_empty(&mut self, route: &RequestRoute) {
+        self.active_requests_set.remove(&route);
+        self.queue_map.get_mut(route).unwrap().time_of_empty = Instant::now()
     }
 }
