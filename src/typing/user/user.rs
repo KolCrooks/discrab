@@ -123,16 +123,15 @@ impl User {
             None => "".to_string(),
         };
 
-        match self.avatar {
-            Some(ref avatar) => Some(format!(
+        self.avatar.as_ref().map(|avatar| {
+            format!(
                 "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
                 self.id.to_string(),
                 avatar,
                 fmt.to_string(),
                 size_str
-            )),
-            None => None,
-        }
+            )
+        })
     }
 
     /**
@@ -149,15 +148,14 @@ impl User {
             None => "".to_string(),
         };
 
-        match self.banner {
-            Some(ref banner) => Some(format!(
+        self.banner.as_ref().map(|banner| {
+            format!(
                 "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
                 self.id.to_string(),
                 banner,
                 fmt.to_string(),
                 size_str
-            )),
-            None => None,
-        }
+            )
+        })
     }
 }

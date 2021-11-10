@@ -6,7 +6,7 @@ use crate::core::http::RequestRoute;
 
 #[tokio::main]
 async fn main() {
-    let mut client = core::http::HttpSchedulerClient::new();
+    let mut client = core::http::RateLimitedHttpClient::new();
     client.spawn_req_thread();
 
     let req = hyper::Request::builder()

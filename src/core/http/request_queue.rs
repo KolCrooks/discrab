@@ -6,7 +6,7 @@ use std::{
 use super::{request_future, RequestRoute};
 
 pub struct Queue {
-    pub queue_map: HashMap<RequestRoute, Mutex<LinkedList<*mut request_future::ReqFuture>>>,
+    pub queue_map: HashMap<RequestRoute, Mutex<LinkedList<*mut request_future::HttpFuture>>>,
     pub active_requests_set: HashSet<RequestRoute>,
     pub active_requests_queue: VecDeque<RequestRoute>,
 }
@@ -20,7 +20,7 @@ impl Queue {
         }
     }
 
-    pub fn push(&mut self, route: &RequestRoute, future: *mut request_future::ReqFuture) {
+    pub fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
         let queue = self
             .queue_map
             .entry(route.clone())

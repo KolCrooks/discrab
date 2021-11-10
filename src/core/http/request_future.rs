@@ -7,7 +7,7 @@ use std::{
 
 use hyper::{Body, Error, Request};
 
-pub struct ReqFuture {
+pub struct HttpFuture {
     /// State of the request
     pub shared_state: Arc<Mutex<RequestState>>,
 }
@@ -32,7 +32,7 @@ impl RequestState {
     }
 }
 
-impl ReqFuture {
+impl HttpFuture {
     pub fn new(request: Request<Body>) -> Self {
         let shared_state = Arc::new(Mutex::new(RequestState {
             request: Some(request),
@@ -40,11 +40,11 @@ impl ReqFuture {
             waker: None,
         }));
 
-        ReqFuture { shared_state }
+        HttpFuture { shared_state }
     }
 }
 
-impl Future for ReqFuture {
+impl Future for HttpFuture {
     type Output = Result<hyper::Response<Body>, Error>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
