@@ -17,7 +17,7 @@ use super::{
     request_queue::HttpQueue,
 };
 
-const GLOBAL_RATE_LIMIT_PER_SEC: u64 = 50;
+const GLOBAL_RATE_LIMIT_PER_SEC: f64 = 50f64;
 
 /**
  * Creates the request thread that will batch requests out according to rate limit headers that are returned by discord, and also the
@@ -32,7 +32,7 @@ where
         .name("Request_Thread".to_string())
         .spawn(move || {
             let client = Client::new();
-            let mut global_allowance: u64 = GLOBAL_RATE_LIMIT_PER_SEC;
+            let mut global_allowance: f64 = GLOBAL_RATE_LIMIT_PER_SEC;
             let mut last_timestamp = Instant::now();
 
             // TODO: Clean the buckets at certain times, also clean the send_queue so that the hashmap doesn't continuously grow in size
@@ -47,14 +47,14 @@ where
 
                 // Add more allowance to the global limit
                 let temp_time = Instant::now();
-                global_allowance += (temp_time.duration_since(last_timestamp).as_secs_f32()
-                    * GLOBAL_RATE_LIMIT_PER_SEC as f32) as u64;
+                global_allowance += temp_time.duration_since(last_timestamp).as_secs_f64()
+                    * GLOBAL_RATE_LIMIT_PER_SEC; // Need to subract by 1 rn or else it will send 50.5 requests per second
 
                 if global_allowance > GLOBAL_RATE_LIMIT_PER_SEC {
                     global_allowance = GLOBAL_RATE_LIMIT_PER_SEC;
                 }
 
-                last_timestamp = temp_time;
+                last_timestamp = Instant::now();
 
                 let sorted_routes = http_queue.get_sorted_requests();
 
@@ -84,7 +84,7 @@ where
                     // get the queue for the route, and then get as many requests as possible from the queue
                     // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
                     let queue = http_queue.get_bucket_queue(&route).unwrap();
-                    while bucket.remaining_requests > 0 && global_allowance != 0 {
+                    while bucket.remaining_requests > 0 && global_allowance >= 1f64 {
                         // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
                         match queue.pop() {
                             Some((_, req_future)) => {
@@ -97,7 +97,7 @@ where
                                 responses.push((route.clone(), future_ptr, req));
 
                                 bucket.remaining_requests -= 1;
-                                global_allowance -= 1;
+                                global_allowance -= 1f64;
                             }
                             None => {
                                 // Remove the empty queues from the active requests because
@@ -107,7 +107,7 @@ where
                             }
                         }
                     }
-                    if global_allowance == 0 {
+                    if global_allowance < 1f64 {
                         break;
                     }
                 }

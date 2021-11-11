@@ -73,12 +73,12 @@ pub trait HttpQueue {
 impl HttpQueue for BasicHttpQueue {
     fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
         let queue = self.queue_map.entry(route.clone()).or_insert_with(|| {
-            self.empty_buckets += 1;
+            // self.empty_buckets += 1;
             BucketQueue::new()
         });
 
         if queue.is_empty() {
-            self.empty_buckets -= 1;
+            // self.empty_buckets -= 1;
         }
 
         queue.push(self.req_id_cnt, future);
@@ -117,7 +117,7 @@ impl HttpQueue for BasicHttpQueue {
 
     fn notify_empty(&mut self, route: &RequestRoute) {
         self.active_requests_set.remove(&route);
-        self.empty_buckets += 1;
+        // self.empty_buckets += 1;
         self.queue_map.get_mut(route).unwrap().time_of_empty = Instant::now()
     }
 }

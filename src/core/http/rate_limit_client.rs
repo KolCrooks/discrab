@@ -79,7 +79,8 @@ impl RateLimitedHttpClient {
         // We could maybe get around this by having a parked flag, but this would require a mutex which also increases the power required.
 
         self.sender
-            .send(RequestObject::new(route, &mut future as *mut _));
+            .send(RequestObject::new(route, &mut future as *mut _))
+            .unwrap();
 
         future.await
     }

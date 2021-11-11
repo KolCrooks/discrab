@@ -13,15 +13,16 @@ async fn main() {
 
     let client = RateLimitedHttpClient::default();
 
-    let req = hyper::Request::builder()
-        .uri("http://localhost:8000/")
-        .body(hyper::Body::empty())
-        .unwrap();
-
-    let route = RequestRoute {
-        base_route: "".to_string(),
-        major_param: "".to_string(),
-    };
-    let res = client.send_request(route, req).await.unwrap();
-    println!("{:?}", res);
+    loop {
+        let req = hyper::Request::builder()
+            .uri("http://localhost:8000/")
+            .body(hyper::Body::empty())
+            .unwrap();
+        let route = RequestRoute {
+            base_route: "".to_string(),
+            major_param: "".to_string(),
+        };
+        let res = client.send_request(route, req).await.unwrap();
+    }
+    // println!("{:?}", res);
 }
