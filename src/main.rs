@@ -11,8 +11,7 @@ use crate::core::http::{
 async fn main() {
     unsafe impl Send for BasicHttpQueue {}
 
-    let mut client = RateLimitedHttpClient::<BasicHttpQueue>::new();
-    client.spawn_req_thread();
+    let client = RateLimitedHttpClient::default();
 
     let req = hyper::Request::builder()
         .uri("http://localhost:8000/")

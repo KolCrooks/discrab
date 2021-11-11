@@ -5,14 +5,16 @@ use std::{
     time::Instant,
 };
 
+use crossbeam_channel::Receiver;
 use hyper::{client::ResponseFuture, Client};
 
 use crate::util::requests::get_header_as;
 
 use super::{
-    rate_limit_client::RequestRoute,
-    request_bucket, request_future,
-    request_queue::{BasicHttpQueue, HttpQueue},
+    rate_limit_client::{RequestObject, RequestRoute},
+    request_bucket,
+    request_future::{self, HttpFuture},
+    request_queue::HttpQueue,
 };
 
 const GLOBAL_RATE_LIMIT_PER_SEC: u64 = 50;
@@ -22,7 +24,7 @@ const GLOBAL_RATE_LIMIT_PER_SEC: u64 = 50;
  * Global rate limit of GLOBAL_RATE_LIMIT_PER_SEC
  * @param send_queue The Shared Queue that requests can be added to
  */
-pub fn create_thread<T>(send_queue: Arc<Mutex<T>>)
+pub fn create_thread<T>(mut http_queue: T, reciever: Receiver<RequestObject>)
 where
     T: HttpQueue + Send + 'static,
 {
@@ -34,10 +36,15 @@ where
             let mut last_timestamp = Instant::now();
 
             // TODO: Clean the buckets at certain times, also clean the send_queue so that the hashmap doesn't continuously grow in size
-            let mut buckets: HashMap<RequestRoute, request_bucket::Bucket> = HashMap::new();
+            let mut rate_buckets: HashMap<RequestRoute, request_bucket::Bucket> = HashMap::new();
 
             // Main Request Loop
             loop {
+                while !reciever.is_empty() {
+                    let mut obj = reciever.recv().unwrap();
+                    http_queue.push(&obj.route, obj.future);
+                }
+
                 // Add more allowance to the global limit
                 let temp_time = Instant::now();
                 global_allowance += (temp_time.duration_since(last_timestamp).as_secs_f32()
@@ -49,24 +56,63 @@ where
 
                 last_timestamp = temp_time;
 
-                let futures: Vec<(RequestRoute, &mut request_future::HttpFuture)> =
-                    get_requests(&send_queue, &mut buckets, &mut global_allowance);
+                let sorted_routes = http_queue.get_sorted_requests();
 
-                // Convert the requests into a vector of response futures by having the hyper client make them
-                let responses: Vec<(
+                let mut responses: Vec<(
                     RequestRoute,
                     &mut request_future::HttpFuture,
                     ResponseFuture,
-                )> = futures
-                    .into_iter()
-                    .map(|(route, req_future)| {
-                        let req = {
-                            let mut shared_state = req_future.shared_state.lock().unwrap();
-                            client.request(shared_state.request.take().unwrap())
-                        };
-                        (route, req_future, req)
-                    })
-                    .collect();
+                )> = Vec::new();
+
+                // Iterate through all of the requests in the queue, and add them to the futures vector if they can be executed
+                for route in sorted_routes {
+                    // Get the bucket for this route, or create it if it doesn't exist
+                    let bucket = match rate_buckets.get_mut(&route) {
+                        Some(bucket) => bucket,
+                        None => {
+                            let new_bucket = request_bucket::Bucket::new();
+                            rate_buckets.insert(route.clone(), new_bucket);
+                            rate_buckets.get_mut(&route).unwrap()
+                        }
+                    };
+
+                    // Reset the bucket if it is past the reset time
+                    if bucket.reset_at < chrono::Utc::now().timestamp() {
+                        bucket.remaining_requests = bucket.max_requests;
+                    }
+
+                    // get the queue for the route, and then get as many requests as possible from the queue
+                    // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
+                    let queue = http_queue.get_bucket_queue(&route).unwrap();
+                    while bucket.remaining_requests > 0 && global_allowance != 0 {
+                        // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
+                        match queue.pop() {
+                            Some((_, req_future)) => {
+                                let future_ptr = unsafe { &mut *req_future };
+
+                                let req = {
+                                    let mut shared_state = future_ptr.shared_state.lock().unwrap();
+                                    client.request(shared_state.request.take().unwrap())
+                                };
+                                responses.push((route.clone(), future_ptr, req));
+
+                                bucket.remaining_requests -= 1;
+                                global_allowance -= 1;
+                            }
+                            None => {
+                                // Remove the empty queues from the active requests because
+                                // there are no more queued requests for that route
+                                http_queue.notify_empty(&route);
+                                break;
+                            }
+                        }
+                    }
+                    if global_allowance == 0 {
+                        break;
+                    }
+                }
+
+                // Convert the requests into a vector of response futures by having the hyper client make them
 
                 let mut last_date_map: HashMap<RequestRoute, i64> = HashMap::new();
 
@@ -87,7 +133,7 @@ where
                             // Only update rate limit information if this request is more recent than the rest
                             if date > *last_date_map.get(&route).or(Some(&0)).unwrap() {
                                 last_date_map.insert(route.clone(), date);
-                                let bucket = buckets.get_mut(&route).unwrap();
+                                let bucket = rate_buckets.get_mut(&route).unwrap();
                                 bucket.remaining_requests = get_header_as::<i32>(
                                     received.headers(),
                                     "X-RateLimit-Remaining",
@@ -113,74 +159,4 @@ where
             }
         })
         .unwrap();
-}
-
-/**
- * Get as many requests from the queue as possible. This means that it will obey both the global rate limit,
- *  and the individual rate limit for each route (bucket). It will try to prioritize older requests.
- *
- * @param send_queue The queue containing the requests to be sent
- * @param buckets Buckets map to reference for rate limit information for each route
- * @param global_allowance The global rate limit allowance
- * @return A vector of futures that can be be sent without violating the rate limit.
- */
-fn get_requests<'a, T>(
-    send_queue: &Arc<Mutex<T>>,
-    buckets: &mut HashMap<RequestRoute, request_bucket::Bucket>,
-    global_allowance: &mut u64,
-) -> Vec<(RequestRoute, &'a mut request_future::HttpFuture)>
-where
-    T: HttpQueue + Send,
-{
-    let mut futures = Vec::new();
-    let mut locked = send_queue.lock().unwrap();
-
-    let requests = locked.get_sorted_requests();
-
-    let mut to_remove: Vec<i32> = Vec::new();
-
-    // Iterate through all of the requests in the queue, and add them to the futures vector if they can be executed
-    for req in requests {
-        let route = req.clone();
-
-        // Get the bucket for this route, or create it if it doesn't exist
-        let bucket = match buckets.get_mut(&route) {
-            Some(bucket) => bucket,
-            None => {
-                let new_bucket = request_bucket::Bucket::new();
-                buckets.insert(route.clone(), new_bucket);
-                buckets.get_mut(&route).unwrap()
-            }
-        };
-
-        // Reset the bucket if it is past the reset time
-        if bucket.reset_at < chrono::Utc::now().timestamp() {
-            bucket.remaining_requests = bucket.max_requests;
-        }
-
-        // get the queue for the route, and then get as many requests as possible from the queue
-        // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
-        let queue = locked.get_bucket_queue(&route).unwrap();
-        while bucket.remaining_requests > 0 && *global_allowance != 0 {
-            // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
-            match queue.pop() {
-                Some((u64, req_future)) => {
-                    futures.push((req.clone(), unsafe { &mut *req_future }));
-                    bucket.remaining_requests -= 1;
-                    *global_allowance -= 1;
-                }
-                None => {
-                    // Remove the empty queues from the active requests because
-                    // there are no more queued requests for that route
-                    locked.notify_empty(&route);
-                    break;
-                }
-            }
-        }
-        if *global_allowance == 0 {
-            break;
-        }
-    }
-
-    futures
 }

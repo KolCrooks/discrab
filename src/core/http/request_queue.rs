@@ -51,7 +51,7 @@ pub struct BasicHttpQueue {
 }
 
 impl BasicHttpQueue {
-    fn new(memory_limit: usize) -> BasicHttpQueue {
+    pub fn new(memory_limit: usize) -> BasicHttpQueue {
         BasicHttpQueue {
             req_id_cnt: 0,
             memory_limit,

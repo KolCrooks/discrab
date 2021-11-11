@@ -3,10 +3,12 @@ use std::sync::{Arc, Mutex};
 use hyper::{Body, Error, Request};
 
 use super::{
-    request_future,
+    request_future::{self, HttpFuture},
     request_queue::{self, BasicHttpQueue, HttpQueue},
     request_thread,
 };
+
+use crossbeam_channel::{unbounded, Receiver, Sender};
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct RequestRoute {
@@ -14,40 +16,49 @@ pub struct RequestRoute {
     pub major_param: String,
 }
 
-pub struct RateLimitedHttpClient<T>
-where
-    T: HttpQueue + Send + 'static,
-{
-    send_queue: Arc<Mutex<T>>,
+pub struct RequestObject {
+    pub route: RequestRoute,
+    pub future: *mut request_future::HttpFuture,
 }
 
-// impl<BasicHttpQueue> Default for RateLimitedHttpClient<BasicHttpQueue>
-// where
-//     T: HttpQueue + Send + 'static,
-// {
-//     fn default() -> Self {
-//         Self::new(BasicHttpQueue::new(2));
-//     }
-// }
+unsafe impl Send for RequestObject {}
 
-impl<T> RateLimitedHttpClient<T>
-where
-    T: HttpQueue + Send + 'static,
-{
-    pub fn new(queue: T) -> RateLimitedHttpClient<T> {
-        RateLimitedHttpClient {
-            send_queue: Arc::new(Mutex::new(queue)),
-        }
+impl RequestObject {
+    pub fn new(route: RequestRoute, future: *mut request_future::HttpFuture) -> RequestObject {
+        RequestObject { route, future }
+    }
+}
+
+pub struct RateLimitedHttpClient {
+    sender: Sender<RequestObject>,
+}
+
+impl Default for RateLimitedHttpClient {
+    fn default() -> Self {
+        Self::new(BasicHttpQueue::new(2))
+    }
+}
+
+impl RateLimitedHttpClient {
+    pub fn new<T>(queue: T) -> RateLimitedHttpClient
+    where
+        T: HttpQueue + Send + 'static,
+    {
+        let (s, r) = unbounded();
+        let mut c = RateLimitedHttpClient { sender: s };
+        c.spawn_req_thread::<T>(queue, r);
+        c
     }
 
     /**
      * Spawn the request loop
      */
     // TODO maybe make this be called automatically when the client is created?
-    pub fn spawn_req_thread(&mut self) {
-        let send_queue = self.send_queue.clone();
-
-        request_thread::create_thread(send_queue);
+    pub fn spawn_req_thread<T>(&mut self, queue: T, receiver: Receiver<RequestObject>)
+    where
+        T: HttpQueue + Send + 'static,
+    {
+        request_thread::create_thread::<T>(queue, receiver);
     }
 
     /**
@@ -67,12 +78,8 @@ where
         // This would have the downside of increasing the power required make a request since we have to attempt to unpark it every time.
         // We could maybe get around this by having a parked flag, but this would require a mutex which also increases the power required.
 
-        match self.send_queue.lock() {
-            Ok(mut to_send) => to_send.push(&route, &mut future as *mut _),
-            Err(e) => {
-                panic!("{}", e);
-            }
-        };
+        self.sender
+            .send(RequestObject::new(route, &mut future as *mut _));
 
         future.await
     }
