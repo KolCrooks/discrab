@@ -7,7 +7,7 @@ use std::{
 
 use hyper::{client::ResponseFuture, Client};
 
-use crate::util::Requests::get_header_as;
+use crate::util::requests::get_header_as;
 
 use super::{
     rate_limit_client::RequestRoute,
@@ -135,7 +135,7 @@ where
     let mut futures = Vec::new();
     let mut locked = send_queue.lock().unwrap();
 
-    let requests = locked.get_timesorted_requests();
+    let requests = locked.get_sorted_requests();
 
     let mut to_remove: Vec<i32> = Vec::new();
 
@@ -160,7 +160,7 @@ where
 
         // get the queue for the route, and then get as many requests as possible from the queue
         // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
-        let queue = locked.get_BucketQueue(&route).unwrap();
+        let queue = locked.get_bucket_queue(&route).unwrap();
         while bucket.remaining_requests > 0 && *global_allowance != 0 {
             // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
             match queue.pop() {

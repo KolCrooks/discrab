@@ -4,7 +4,7 @@ use hyper::{Body, Error, Request};
 
 use super::{
     request_future,
-    request_queue::{self, HttpQueue},
+    request_queue::{self, BasicHttpQueue, HttpQueue},
     request_thread,
 };
 
@@ -21,22 +21,22 @@ where
     send_queue: Arc<Mutex<T>>,
 }
 
-impl<T> Default for RateLimitedHttpClient<T>
-where
-    T: HttpQueue + Send + 'static,
-{
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// impl<BasicHttpQueue> Default for RateLimitedHttpClient<BasicHttpQueue>
+// where
+//     T: HttpQueue + Send + 'static,
+// {
+//     fn default() -> Self {
+//         Self::new(BasicHttpQueue::new(2));
+//     }
+// }
 
 impl<T> RateLimitedHttpClient<T>
 where
     T: HttpQueue + Send + 'static,
 {
-    pub fn new() -> RateLimitedHttpClient<T> {
+    pub fn new(queue: T) -> RateLimitedHttpClient<T> {
         RateLimitedHttpClient {
-            send_queue: Arc::new(Mutex::new(T::new())),
+            send_queue: Arc::new(Mutex::new(queue)),
         }
     }
 
