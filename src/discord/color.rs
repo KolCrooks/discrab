@@ -11,6 +11,6 @@ bitfield! {
 
 impl Display for Color {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        write!(&mut f, "{:#08x}", self.0)
+        write!(f, "{:#08x}", self.0)
     }
 }

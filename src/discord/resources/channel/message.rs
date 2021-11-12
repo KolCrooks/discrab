@@ -1,7 +1,12 @@
 use crate::{
-    core::interactions::typing::Interaction,
+    core::interactions::{message::MessageComponent, typing::Interaction},
     discord::{
-        resources::{application::Application, guild::guild_member::GuildMember, user::User},
+        resources::{
+            application::Application,
+            guild::guild_member::GuildMember,
+            sticker::{Sticker, StickerItem},
+            user::User,
+        },
         snowflake::Snowflake,
     },
 };
@@ -12,6 +17,7 @@ use super::{
     mention::ChannelMention,
     reaction::Reaction,
     typing::{MessageActivity, MessageFlags, MessageReference, MessageType},
+    Channel,
 };
 /**
  * Message Object
@@ -72,7 +78,7 @@ pub struct Message {
     /// Message flags combined as a bitfield
     pub flags: MessageFlags,
     /// The message associated with the message_reference
-    pub referenced_message: Option<Message>,
+    pub referenced_message: Option<Box<Message>>,
     /// Sent if the message is a response to an Interaction
     pub interaction: Option<Box<Interaction>>,
     /// The thread that was started from this message, includes thread member object
@@ -80,7 +86,7 @@ pub struct Message {
     /// Sent if the message contains components like buttons, action rows, or other interactive components
     pub components: Option<Vec<MessageComponent>>,
     /// Sent if the message contains stickers
-    pub sticker_items: Option<Vec<MessageStickerItem>>,
+    pub sticker_items: Option<Vec<StickerItem>>,
     /// Deprecated the stickers sent with the message
     pub stickers: Option<Vec<Sticker>>,
 }

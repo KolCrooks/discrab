@@ -44,7 +44,7 @@ where
             loop {
                 // Add incoming requests to the queue
                 while !reciever.is_empty() {
-                    let mut obj = reciever.recv().unwrap();
+                    let obj = reciever.recv().unwrap();
                     http_queue.push(&obj.route, obj.future);
                 }
 

@@ -1,3 +1,4 @@
+use crate::discord::snowflake::Snowflake;
 use bitfield::bitfield;
 
 /**
@@ -116,4 +117,66 @@ bitfield! {
     pub EPHEMERAL, _: 6, 7;
     /// this message is an Interaction Response and the bot is "thinking"
     pub LOADING, _: 7, 8;
+}
+
+/**
+ * Overwrite Object
+ * See permissions for more information about the allow and deny fields.
+ * @docs https://discord.com/developers/docs/resources/channel#overwrite-object-overwrite-structure
+ */
+pub struct PermissionsOverwriteObject {
+    /// The id of the role or user
+    pub id: Snowflake,
+    /// The type of the role or user
+    pub type_: u8,
+    /// The permissions that the role or user has
+    pub allow: u64,
+    /// The permissions that the role or user does not have
+    pub deny: u64,
+}
+
+/**
+* Thread Metadata Object
+* The thread metadata object contains a number of thread-specific channel fields that are not needed by other channel types.
+* @docs https://discord.com/developers/docs/resources/channel#message-object-thread-metadata-structure
+*/
+pub struct ThreadMetadata {
+    /// Whether the thread is archived
+    pub archived: Option<bool>,
+    /// Duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
+    pub auto_archive_duration: Option<u64>,
+    /// Timestamp when the thread's archive status was last changed, used for calculating recent activity
+    pub archive_timestamp: Option<String>,
+    /// Whether the thread is locked; when a thread is locked, only users with MANAGE_THREADS can unarchive it
+    pub locked: Option<bool>,
+    /// Whether non-moderators can add other non-moderators to a thread; only available on private threads
+    pub invitable: Option<bool>,
+}
+
+/**
+ * Thread Member Object
+ * A thread member is used to indicate whether a user has joined a thread or not.
+* @docs https://discord.com/developers/docs/resources/channel#message-object-thread-member-structure
+*/
+pub struct ThreadMember {
+    /// The id of the thread
+    pub id: Snowflake,
+    /// The id of the user
+    pub user_id: Snowflake,
+    /// The time the current user last joined the thread
+    pub join_timestamp: String,
+    /// Any user-thread settings, currently only used for notifications
+    pub flags: u64,
+}
+
+/**
+ * Video Quality
+ * @docs https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
+ */
+
+pub enum VideoQualityMode {
+    /// Discord chooses the quality for optimal performance
+    AUTO = 1,
+    /// 720p
+    FULL = 2,
 }

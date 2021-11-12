@@ -22,7 +22,7 @@ async fn main() {
             base_route: "".to_string(),
             major_param: "".to_string(),
         };
-        let res = client.send_request(route, req).await.unwrap();
+        client.send_request(route, req).await.unwrap();
     }
     // println!("{:?}", res);
 }

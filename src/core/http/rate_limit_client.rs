@@ -1,10 +1,8 @@
-use std::sync::{Arc, Mutex};
-
 use hyper::{Body, Error, Request};
 
 use super::{
-    request_future::{self, HttpFuture},
-    request_queue::{self, BasicHttpQueue, HttpQueue},
+    request_future::{self},
+    request_queue::{BasicHttpQueue, HttpQueue},
     request_thread,
 };
 

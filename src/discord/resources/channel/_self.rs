@@ -2,7 +2,9 @@ use chrono::{DateTime, Utc};
 
 use crate::discord::{resources::user::User, snowflake::Snowflake};
 
-use super::typing::ChannelType;
+use super::typing::{
+    ChannelType, PermissionsOverwriteObject, ThreadMember, ThreadMetadata, VideoQualityMode,
+};
 
 /**
  * Represents a guild or DM channel within Discord.
@@ -18,7 +20,7 @@ pub struct Channel {
     /// Sorting position of the channel
     position: Option<u64>,
     /// Explicit permission overwrites for members and roles
-    permission_overwrites: Option<Vec<PermissionOverwrite>>,
+    permission_overwrites: Option<Vec<PermissionsOverwriteObject>>,
     /// The name of the channel (1-100 characters)
     name: Option<String>,
     /// The channel topic (0-1024 characters)
@@ -48,7 +50,7 @@ pub struct Channel {
     /// Voice region id for the voice channel, automatic when set to null
     rtc_region: Option<String>,
     /// The camera video quality mode of the voice channel, 1 when not present
-    video_quality_mode: Option<u64>,
+    video_quality_mode: Option<VideoQualityMode>,
     /// An approximate count of messages in a thread, stops counting at 50
     message_count: Option<u64>,
     /// An approximate count of users in a thread, stops counting at 50
