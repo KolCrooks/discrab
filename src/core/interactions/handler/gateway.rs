@@ -1,6 +1,6 @@
 use std::borrow::BorrowMut;
 
-use hyper::{body, Body, Error, Request};
+use hyper::{body, Body, Error, Method, Request};
 
 use crate::core::http::rate_limit_client::{RLClient, RequestRoute};
 use serde::Deserialize;
@@ -34,7 +34,7 @@ pub struct SessionStartLimit {
     /// The number of milliseconds after which the limit resets
     pub reset_after: u64,
     /// The number of identify requests allowed per 5 seconds
-    max_concurrency: u64,
+    pub max_concurrency: u64,
 }
 
 pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::Error> {
@@ -43,7 +43,9 @@ pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::E
         major_param: "".to_string(),
     };
     let requestBuilder = Request::builder()
-        .uri("https://discord.com/api/gateway".to_string())
+        .method(Method::GET)
+        .uri("https://discord.com/api/gateway/bot")
+        .header("content-type", "application/json")
         .body(Body::empty())
         .unwrap();
 

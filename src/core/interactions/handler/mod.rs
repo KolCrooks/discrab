@@ -1,6 +1,6 @@
 use super::typing::Interaction;
-mod gateway;
-mod websocket;
+pub mod gateway;
+pub mod websocket;
 
 trait InteractionHandler {
     fn get_incoming(&self) -> Vec<Interaction>;

@@ -50,6 +50,7 @@ pub struct BasicHttpQueue {
     queue_map: HashMap<RequestRoute, BucketQueue>,
     active_requests_set: HashSet<RequestRoute>,
 }
+unsafe impl Send for BasicHttpQueue {}
 
 impl BasicHttpQueue {
     /**

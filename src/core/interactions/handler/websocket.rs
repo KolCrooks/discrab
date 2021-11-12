@@ -15,7 +15,7 @@ use hyper::{body::Body, Request};
 use simd_json;
 use tungstenite::{connect, Message, WebSocket};
 
-struct WebsocketInteractionHandler {
+pub struct WebsocketInteractionHandler {
     receiver: Receiver<Interaction>,
 }
 

@@ -5,6 +5,7 @@ use hyper::{
     client::{self, ResponseFuture},
     Client,
 };
+use hyper_tls::HttpsConnector;
 
 use crate::util::requests::get_header_as;
 
@@ -30,7 +31,9 @@ where
     thread::Builder::new()
         .name("Request_Thread".to_string())
         .spawn(move || {
-            let client = Client::new();
+            let https = HttpsConnector::new();
+            let client = Client::builder().build::<_, hyper::Body>(https);
+
             let mut global_allowance: f64 = GLOBAL_RATE_LIMIT_PER_SEC;
             let mut last_timestamp = Instant::now();
             let mut requests_sent: u64 = 0;

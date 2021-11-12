@@ -1,4 +1,6 @@
-use hyper::{body::Body, Error, Request};
+use std::borrow::BorrowMut;
+
+use hyper::{body::Body, header::AUTHORIZATION, Error, Request};
 
 use super::{
     request_future::{self},
@@ -28,22 +30,17 @@ impl RequestObject {
 }
 
 pub struct RLClient {
+    token: String,
     sender: Sender<RequestObject>,
 }
 
-impl Default for RLClient {
-    fn default() -> Self {
-        Self::new(BasicHttpQueue::new(60))
-    }
-}
-
 impl RLClient {
-    pub fn new<T>(queue: T) -> RLClient
+    pub fn new<T>(token: String, queue: T) -> RLClient
     where
         T: HttpQueue + Send + 'static,
     {
         let (s, r) = unbounded();
-        let mut c = RLClient { sender: s };
+        let mut c = RLClient { token, sender: s };
         c.spawn_req_thread::<T>(queue, r);
         c
     }
@@ -69,13 +66,17 @@ impl RLClient {
     pub async fn send_request(
         &self,
         route: RequestRoute,
-        request: Request<Body>,
+        mut request: Request<Body>,
     ) -> Result<hyper::Response<Body>, Error> {
+        request.headers_mut().insert(
+            AUTHORIZATION,
+            format!("Bot {}", self.token).parse().unwrap(),
+        );
+
         let mut future = request_future::HttpFuture::new(request);
         // TODO Maybe use req_thread.unpark() to reduce cpu load while the thread is waiting for requests.
         // This would have the downside of increasing the power required make a request since we have to attempt to unpark it every time.
         // We could maybe get around this by having a parked flag, but this would require a mutex which also increases the power required.
-
         self.sender
             .send(RequestObject::new(route, &mut future as *mut _))
             .unwrap();
