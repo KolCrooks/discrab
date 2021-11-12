@@ -1,7 +1,10 @@
 use std::{collections::HashMap, thread, time::Instant};
 
 use crossbeam_channel::Receiver;
-use hyper::{client::ResponseFuture, Client};
+use hyper::{
+    client::{self, ResponseFuture},
+    Client,
+};
 
 use crate::util::requests::get_header_as;
 
@@ -124,6 +127,7 @@ where
                 // Collect the responses, and resolve all of the Request Futures
                 for (route, req, future) in responses {
                     // Block execution until the future is resolved, and then process the rate limit information from the response
+                    // TODO figure out how to make this run in parallel
                     let receives = match async_std::task::block_on(future) {
                         Ok(received) => {
                             // Get the date of the response execution so that we know the last time the route was used,

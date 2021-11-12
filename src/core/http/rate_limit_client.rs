@@ -1,4 +1,4 @@
-use hyper::{Body, Error, Request};
+use hyper::{body::Body, Error, Request};
 
 use super::{
     request_future::{self},
@@ -27,23 +27,23 @@ impl RequestObject {
     }
 }
 
-pub struct RateLimitedHttpClient {
+pub struct RLClient {
     sender: Sender<RequestObject>,
 }
 
-impl Default for RateLimitedHttpClient {
+impl Default for RLClient {
     fn default() -> Self {
         Self::new(BasicHttpQueue::new(60))
     }
 }
 
-impl RateLimitedHttpClient {
-    pub fn new<T>(queue: T) -> RateLimitedHttpClient
+impl RLClient {
+    pub fn new<T>(queue: T) -> RLClient
     where
         T: HttpQueue + Send + 'static,
     {
         let (s, r) = unbounded();
-        let mut c = RateLimitedHttpClient { sender: s };
+        let mut c = RLClient { sender: s };
         c.spawn_req_thread::<T>(queue, r);
         c
     }

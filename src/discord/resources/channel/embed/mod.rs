@@ -1,4 +1,4 @@
-mod _self;
+mod embed_object;
 mod typing;
 
-pub use _self::Embed;
+pub use embed_object::Embed;

@@ -1,3 +1,3 @@
-mod _self;
+mod message_object;
 
-pub use _self::*;
+pub use message_object::*;

@@ -3,7 +3,7 @@ pub mod discord;
 mod util;
 
 use crate::core::http::{
-    rate_limit_client::{RateLimitedHttpClient, RequestRoute},
+    rate_limit_client::{RLClient, RequestRoute},
     request_queue::BasicHttpQueue,
 };
 
@@ -11,7 +11,7 @@ use crate::core::http::{
 async fn main() {
     unsafe impl Send for BasicHttpQueue {}
 
-    let client = RateLimitedHttpClient::default();
+    let client = RLClient::default();
 
     loop {
         let req = hyper::Request::builder()
