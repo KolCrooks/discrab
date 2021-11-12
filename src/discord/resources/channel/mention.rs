@@ -8,11 +8,11 @@ use super::typing::ChannelType;
  */
 pub struct ChannelMention {
     /// id of the channel
-    id: Snowflake,
+    pub id: Snowflake,
     /// id of the guild containing the channel
-    guild_id: Snowflake,
+    pub guild_id: Snowflake,
     /// the type of channel
-    type_: ChannelType,
+    pub type_: ChannelType,
     /// the name of the channel
-    name: String,
+    pub name: String,
 }

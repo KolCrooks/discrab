@@ -12,55 +12,55 @@ use super::typing::{
  */
 pub struct Channel {
     /// The id of this channel
-    id: Snowflake,
+    pub id: Snowflake,
     /// The type of channel
-    channel_type: ChannelType,
+    pub channel_type: ChannelType,
     /// The id of the guild (may be missing for some channel objects received over gateway guild dispatches)
-    guild_id: Option<Snowflake>,
+    pub guild_id: Option<Snowflake>,
     /// Sorting position of the channel
-    position: Option<u64>,
+    pub position: Option<u64>,
     /// Explicit permission overwrites for members and roles
-    permission_overwrites: Option<Vec<PermissionsOverwriteObject>>,
+    pub permission_overwrites: Option<Vec<PermissionsOverwriteObject>>,
     /// The name of the channel (1-100 characters)
-    name: Option<String>,
+    pub name: Option<String>,
     /// The channel topic (0-1024 characters)
-    topic: Option<String>,
+    pub topic: Option<String>,
     /// Whether the channel is nsfw
-    nsfw: Option<bool>,
+    pub nsfw: Option<bool>,
     /// The id of the last message sent in this channel (may not point to an existing or valid message)
-    last_message_id: Option<Snowflake>,
+    pub last_message_id: Option<Snowflake>,
     /// The bitrate (in bits) of the voice channel
-    bitrate: Option<u64>,
+    pub bitrate: Option<u64>,
     /// The user limit of the voice channel
-    user_limit: Option<u64>,
+    pub user_limit: Option<u64>,
     /// Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected
-    rate_limit_per_user: Option<u64>,
+    pub rate_limit_per_user: Option<u64>,
     /// The recipients of the DM
-    recipients: Option<Vec<User>>,
+    pub recipients: Option<Vec<User>>,
     /// Icon hash
-    icon: Option<String>,
+    pub icon: Option<String>,
     /// Id of the creator of the group DM or thread
-    owner_id: Option<Snowflake>,
+    pub owner_id: Option<Snowflake>,
     /// Application id of the group DM creator if it is bot-created
-    application_id: Option<Snowflake>,
+    pub application_id: Option<Snowflake>,
     /// The id of the parent category for a channel (each parent category can contain up to 50 channels), for threads: id of the text channel this thread was created
-    parent_id: Option<Snowflake>,
+    pub parent_id: Option<Snowflake>,
     /// When the last pinned message was pinned. This may be null in events such as GUILD_CREATE when a message is not pinned.
-    last_pin_timestamp: Option<DateTime<Utc>>,
+    pub last_pin_timestamp: Option<DateTime<Utc>>,
     /// Voice region id for the voice channel, automatic when set to null
-    rtc_region: Option<String>,
+    pub rtc_region: Option<String>,
     /// The camera video quality mode of the voice channel, 1 when not present
-    video_quality_mode: Option<VideoQualityMode>,
+    pub video_quality_mode: Option<VideoQualityMode>,
     /// An approximate count of messages in a thread, stops counting at 50
-    message_count: Option<u64>,
+    pub message_count: Option<u64>,
     /// An approximate count of users in a thread, stops counting at 50
-    member_count: Option<u64>,
+    pub member_count: Option<u64>,
     /// Thread-specific fields not needed by other channels
-    thread_metadata: Option<ThreadMetadata>,
+    pub thread_metadata: Option<ThreadMetadata>,
     /// Thread member object for the current user, if they have joined the thread, only included on certain API endpoints
-    member: Option<ThreadMember>,
+    pub member: Option<ThreadMember>,
     /// Default duration that the clients (not the API) will use for newly created threads, in minutes, to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
-    default_auto_archive_duration: Option<u64>,
+    pub default_auto_archive_duration: Option<u64>,
     /// Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction
-    permissions: Option<String>,
+    pub permissions: Option<String>,
 }

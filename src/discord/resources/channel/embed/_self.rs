@@ -12,29 +12,29 @@ use super::typing::{
  */
 pub struct Embed {
     /// Title of Embed
-    title: Option<String>,
+    pub title: Option<String>,
     /// type of embed (always "rich" for webhook embeds)
-    type_: Option<EmbedType>,
+    pub type_: Option<EmbedType>,
     /// description of embed
-    description: Option<String>,
+    pub description: Option<String>,
     /// URL of Embed
-    url: Option<String>,
+    pub url: Option<String>,
     /// timestamp of embed content
-    timestamp: Option<String>,
+    pub timestamp: Option<String>,
     /// color code of the embed
-    color: Option<Color>,
+    pub color: Option<Color>,
     /// footer information
-    footer: Option<EmbedFooter>,
+    pub footer: Option<EmbedFooter>,
     /// image information
-    image: Option<EmbedImage>,
+    pub image: Option<EmbedImage>,
     /// thumbnail information
-    thumbnail: Option<EmbedThumbnail>,
+    pub thumbnail: Option<EmbedThumbnail>,
     /// video information
-    video: Option<EmbedVideo>,
+    pub video: Option<EmbedVideo>,
     /// provider information
-    provider: Option<EmbedProvider>,
+    pub provider: Option<EmbedProvider>,
     /// author information
-    author: Option<EmbedAuthor>,
+    pub author: Option<EmbedAuthor>,
     /// fields information
-    fields: Option<Vec<EmbedField>>,
+    pub fields: Option<Vec<EmbedField>>,
 }
