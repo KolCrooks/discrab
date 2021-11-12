@@ -52,12 +52,12 @@ bitfield! {
     pub struct ApplicationFlags(u64);
 
     u8;
-    pub GATEWAY_PRESENCE, _: 0, 1;
-    pub GATEWAY_PRESENCE_LIMITED, _: 1, 2;
-    pub GATEWAY_GUILD_MEMBERS, _: 2, 3;
-    pub GATEWAY_GUILD_MEMBERS_LIMITED, _: 3, 4;
-    pub VERIFICATION_PENDING_GUILD_LIMIT, _: 4, 5;
-    pub EMBEDDED, _: 5, 6;
-    pub GATEWAY_MESSAGE_CONTENT, _: 6, 7;
-    pub GATEWAY_MESSAGE_CONTENT_LIMITED, _: 7, 8;
+    pub gateway_presence, _: 0, 1;
+    pub gateway_presence_limited, _: 1, 2;
+    pub gateway_guild_members, _: 2, 3;
+    pub gateway_guild_members_limited, _: 3, 4;
+    pub verification_pending_guild_limit, _: 4, 5;
+    pub embedded, _: 5, 6;
+    pub gateway_message_content, _: 6, 7;
+    pub gateway_message_content_limited, _: 7, 8;
 }

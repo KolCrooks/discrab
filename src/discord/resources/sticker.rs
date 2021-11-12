@@ -55,9 +55,9 @@ pub struct StickerItem {
  */
 pub enum StickerType {
     /// an official sticker in a pack, part of Nitro or in a removed purchasable pack
-    STANDARD = 1,
+    Standard = 1,
     /// a sticker uploaded to a Boosted guild for the guild's members
-    GUILD = 2,
+    Guild = 2,
 }
 
 /**
@@ -67,5 +67,5 @@ pub enum StickerType {
 pub enum StickerFormatType {
     PNG = 1,
     APNG = 2,
-    LOTTIE = 3,
+    Lottie = 3,
 }

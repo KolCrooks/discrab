@@ -7,28 +7,28 @@ use std::fmt::{Display, Error, Formatter};
  */
 pub enum EmbedType {
     /// generic embed rendered from embed attributes
-    RICH = 0,
+    Rich = 0,
     /// image embed
-    IMAGE = 1,
+    Image = 1,
     /// video embed
-    VIDEO = 2,
+    Video = 2,
     /// animated gif image embed rendered as a video embed
-    GIFV = 3,
+    GifV = 3,
     /// article embed
-    ARTICLE = 4,
+    Article = 4,
     /// link embed
-    LINK = 5,
+    Link = 5,
 }
 
 impl Display for EmbedType {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
-            EmbedType::RICH => write!(f, "rich"),
-            EmbedType::IMAGE => write!(f, "image"),
-            EmbedType::VIDEO => write!(f, "video"),
-            EmbedType::GIFV => write!(f, "gifv"),
-            EmbedType::ARTICLE => write!(f, "article"),
-            EmbedType::LINK => write!(f, "link"),
+            EmbedType::Rich => write!(f, "rich"),
+            EmbedType::Image => write!(f, "image"),
+            EmbedType::Video => write!(f, "video"),
+            EmbedType::GifV => write!(f, "gifv"),
+            EmbedType::Article => write!(f, "article"),
+            EmbedType::Link => write!(f, "link"),
         }
     }
 }

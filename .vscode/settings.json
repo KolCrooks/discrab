@@ -1,3 +1,17 @@
 {
-  "rust-analyzer.checkOnSave.command": "clippy"
+  "rust-analyzer.checkOnSave.command": "clippy",
+  "cSpell.words": [
+    "bitfield",
+    "blurple",
+    "chrono",
+    "crosspost",
+    "crossposted",
+    "gifv",
+    "hypesquad",
+    "invitable",
+    "proxied",
+    "Requalified",
+    "unpark",
+    "WEBP"
+  ]
 }

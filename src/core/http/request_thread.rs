@@ -1,9 +1,4 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-    thread,
-    time::Instant,
-};
+use std::{collections::HashMap, thread, time::Instant};
 
 use crossbeam_channel::Receiver;
 use hyper::{client::ResponseFuture, Client};
@@ -13,7 +8,7 @@ use crate::util::requests::get_header_as;
 use super::{
     rate_limit_client::{RequestObject, RequestRoute},
     request_bucket,
-    request_future::{self, HttpFuture},
+    request_future::{self},
     request_queue::HttpQueue,
 };
 
@@ -25,7 +20,7 @@ const CLEAN_EVERY_N_REQUESTS: u64 = 10_000;
  * Global rate limit of GLOBAL_RATE_LIMIT_PER_SEC
  * @param send_queue The Shared Queue that requests can be added to
  */
-pub fn create_thread<T>(mut http_queue: T, reciever: Receiver<RequestObject>)
+pub fn create_thread<T>(mut http_queue: T, receiver: Receiver<RequestObject>)
 where
     T: HttpQueue + Send + 'static,
 {
@@ -43,8 +38,8 @@ where
             // Main Request Loop
             loop {
                 // Add incoming requests to the queue
-                while !reciever.is_empty() {
-                    let obj = reciever.recv().unwrap();
+                while !receiver.is_empty() {
+                    let obj = receiver.recv().unwrap();
                     http_queue.push(&obj.route, obj.future);
                 }
 
