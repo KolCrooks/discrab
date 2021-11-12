@@ -1,4 +1,4 @@
-use super::snowflake::Snowflake;
+use crate::discord::snowflake::Snowflake;
 /**
  * Emoji Object
  * @docs https://discord.com/developers/docs/resources/emoji#emoji-object

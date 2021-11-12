@@ -1,3 +1,3 @@
-mod interaction_handler;
-mod typing;
-mod websocket_handler;
+pub mod interaction_handler;
+pub mod typing;
+pub mod websocket_handler;

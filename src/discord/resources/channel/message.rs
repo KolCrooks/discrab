@@ -1,8 +1,17 @@
-use crate::discord::{guild::guild_member::GuildMember, snowflake::Snowflake, user::User};
+use crate::{
+    core::interactions::typing::Interaction,
+    discord::{
+        resources::{application::Application, guild::guild_member::GuildMember, user::User},
+        snowflake::Snowflake,
+    },
+};
 
 use super::{
-    attachment::Attachment, embed::Embed, mention::ChannelMention, reaction::Reaction,
-    typing::MessageType,
+    attachment::Attachment,
+    embed::Embed,
+    mention::ChannelMention,
+    reaction::Reaction,
+    typing::{MessageActivity, MessageFlags, MessageReference, MessageType},
 };
 /**
  * Message Object
@@ -55,7 +64,7 @@ pub struct Message {
     /// Sent with Rich Presence-related chat embeds
     pub activity: Option<MessageActivity>,
     /// Sent with Rich Presence-related chat embeds
-    pub application: Option<PartialApplication>,
+    pub application: Option<Application>,
     /// If the message is a response to an Interaction, this is the id of the interaction's application
     pub application_id: Option<Snowflake>,
     /// Data showing the source of a crosspost, channel follow add, pin, or reply message
@@ -65,7 +74,7 @@ pub struct Message {
     /// The message associated with the message_reference
     pub referenced_message: Option<Message>,
     /// Sent if the message is a response to an Interaction
-    pub interaction: Option<MessageInteraction>,
+    pub interaction: Option<Box<Interaction>>,
     /// The thread that was started from this message, includes thread member object
     pub thread: Option<Channel>,
     /// Sent if the message contains components like buttons, action rows, or other interactive components

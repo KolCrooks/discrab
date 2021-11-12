@@ -1,4 +1,4 @@
-use super::super::snowflake::Snowflake;
+use crate::discord::snowflake::Snowflake;
 /**
  * Attachment Object
  * @docs https://discord.com/developers/docs/resources/channel#attachment-object

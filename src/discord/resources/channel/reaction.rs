@@ -1,4 +1,4 @@
-use crate::discord::emoji::Emoji;
+use crate::discord::resources::emoji::Emoji;
 
 /**
  * Reaction Object

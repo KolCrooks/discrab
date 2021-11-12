@@ -1,4 +1,4 @@
-use super::super::{imageformats, snowflake::Snowflake};
+use crate::discord::{image_formats, snowflake::Snowflake};
 
 use super::UserFlags;
 
@@ -117,7 +117,11 @@ impl User {
      * @param size Size of the avatar. If none specified, the largest size will be used.
      * The size must be a power of 2 between `16` and `4096`
      */
-    pub fn get_avatar_url(&self, fmt: imageformats::Animated, size: Option<u32>) -> Option<String> {
+    pub fn get_avatar_url(
+        &self,
+        fmt: image_formats::Animated,
+        size: Option<u32>,
+    ) -> Option<String> {
         let size_str = match size {
             Some(s) => format!("?size={}", s),
             None => "".to_string(),
@@ -142,7 +146,11 @@ impl User {
      * @param size Size of the banner. If none specified, the largest size will be used.
      * The size must be a power of 2 between `16` and `4096`
      */
-    pub fn get_banner_url(&self, fmt: imageformats::Animated, size: Option<u32>) -> Option<String> {
+    pub fn get_banner_url(
+        &self,
+        fmt: image_formats::Animated,
+        size: Option<u32>,
+    ) -> Option<String> {
         let size_str = match size {
             Some(s) => format!("?size={}", s),
             None => "".to_string(),

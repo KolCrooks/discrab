@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 
-use super::super::snowflake::Snowflake;
-use crate::discord::user::User;
+use crate::discord::{resources::user::User, snowflake::Snowflake};
 
 /**
  * guild member object
