@@ -35,7 +35,7 @@ pub struct RateLimitedHttpClient {
 
 impl Default for RateLimitedHttpClient {
     fn default() -> Self {
-        Self::new(BasicHttpQueue::new(2))
+        Self::new(BasicHttpQueue::new(60))
     }
 }
 

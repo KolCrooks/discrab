@@ -1,7 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet, LinkedList, VecDeque},
-    mem::size_of_val,
-    sync::Mutex,
+    collections::{HashMap, HashSet, LinkedList},
     time::Instant,
 };
 
@@ -35,6 +33,10 @@ impl BucketQueue {
     pub fn is_empty(&self) -> bool {
         self.queue.is_empty()
     }
+
+    pub fn get_time_of_empty(&self) -> Instant {
+        self.time_of_empty
+    }
 }
 impl Default for BucketQueue {
     fn default() -> Self {
@@ -43,19 +45,20 @@ impl Default for BucketQueue {
 }
 
 pub struct BasicHttpQueue {
-    memory_limit: usize,
-    empty_buckets: u32,
     req_id_cnt: u64,
+    inactive_bucket_timeout: u64,
     queue_map: HashMap<RequestRoute, BucketQueue>,
     active_requests_set: HashSet<RequestRoute>,
 }
 
 impl BasicHttpQueue {
-    pub fn new(memory_limit: usize) -> BasicHttpQueue {
+    /**
+     * @param inactive_bucket_timeout: the time in seconds after which a bucket is considered inactive, and can be deleted
+     */
+    pub fn new(inactive_bucket_timeout: u64) -> BasicHttpQueue {
         BasicHttpQueue {
             req_id_cnt: 0,
-            memory_limit,
-            empty_buckets: 0,
+            inactive_bucket_timeout,
             queue_map: HashMap::new(),
             active_requests_set: HashSet::new(),
         }
@@ -67,19 +70,15 @@ pub trait HttpQueue {
     fn get_sorted_requests(&self) -> Vec<RequestRoute>;
     fn get_bucket_queue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue>;
     fn notify_empty(&mut self, route: &RequestRoute);
-    fn clean_up(&mut self, route: &RequestRoute);
+    fn clean(&mut self);
 }
 
 impl HttpQueue for BasicHttpQueue {
     fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
-        let queue = self.queue_map.entry(route.clone()).or_insert_with(|| {
-            // self.empty_buckets += 1;
-            BucketQueue::new()
-        });
-
-        if queue.is_empty() {
-            // self.empty_buckets -= 1;
-        }
+        let queue = self
+            .queue_map
+            .entry(route.clone())
+            .or_insert_with(BucketQueue::new);
 
         queue.push(self.req_id_cnt, future);
         self.req_id_cnt += 1;
@@ -104,11 +103,14 @@ impl HttpQueue for BasicHttpQueue {
         q
     }
 
-    /**
-     * Scheduled cleanup that runs every 10 sec, or when
-     */
-    fn clean_up(&mut self, route: &RequestRoute) {
-        let mut total_usage = 0;
+    fn clean(&mut self) {
+        self.queue_map.retain(|_, v| {
+            v.is_empty()
+                && (Instant::now()
+                    .duration_since(v.get_time_of_empty())
+                    .as_secs()
+                    > self.inactive_bucket_timeout)
+        });
     }
 
     fn get_bucket_queue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue> {
@@ -116,8 +118,7 @@ impl HttpQueue for BasicHttpQueue {
     }
 
     fn notify_empty(&mut self, route: &RequestRoute) {
-        self.active_requests_set.remove(&route);
-        // self.empty_buckets += 1;
+        self.active_requests_set.remove(route);
         self.queue_map.get_mut(route).unwrap().time_of_empty = Instant::now()
     }
 }

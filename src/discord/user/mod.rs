@@ -1,5 +1,5 @@
+mod _self;
 mod flags;
-mod user;
 
+pub use _self::User;
 pub use flags::UserFlags;
-pub use user::User;

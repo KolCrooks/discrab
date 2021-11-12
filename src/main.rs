@@ -1,5 +1,5 @@
 pub mod core;
-pub mod typing;
+pub mod discord;
 mod util;
 
 use crate::core::http::{

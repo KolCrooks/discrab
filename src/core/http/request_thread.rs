@@ -18,6 +18,7 @@ use super::{
 };
 
 const GLOBAL_RATE_LIMIT_PER_SEC: f64 = 50f64;
+const CLEAN_EVERY_N_REQUESTS: u64 = 10_000;
 
 /**
  * Creates the request thread that will batch requests out according to rate limit headers that are returned by discord, and also the
@@ -34,21 +35,29 @@ where
             let client = Client::new();
             let mut global_allowance: f64 = GLOBAL_RATE_LIMIT_PER_SEC;
             let mut last_timestamp = Instant::now();
+            let mut requests_sent: u64 = 0;
 
             // TODO: Clean the buckets at certain times, also clean the send_queue so that the hashmap doesn't continuously grow in size
             let mut rate_buckets: HashMap<RequestRoute, request_bucket::Bucket> = HashMap::new();
 
             // Main Request Loop
             loop {
+                // Add incoming requests to the queue
                 while !reciever.is_empty() {
                     let mut obj = reciever.recv().unwrap();
                     http_queue.push(&obj.route, obj.future);
                 }
 
+                // TODO Figure out a smarter way to do this
+                // // check if we should clean the queue, and the buckets
+                // if requests_sent % CLEAN_EVERY_N_REQUESTS == 0 {
+                //     http_queue.clean();
+                // }
+
                 // Add more allowance to the global limit
                 let temp_time = Instant::now();
                 global_allowance += temp_time.duration_since(last_timestamp).as_secs_f64()
-                    * GLOBAL_RATE_LIMIT_PER_SEC; // Need to subract by 1 rn or else it will send 50.5 requests per second
+                    * GLOBAL_RATE_LIMIT_PER_SEC;
 
                 if global_allowance > GLOBAL_RATE_LIMIT_PER_SEC {
                     global_allowance = GLOBAL_RATE_LIMIT_PER_SEC;
@@ -95,17 +104,18 @@ where
                                     client.request(shared_state.request.take().unwrap())
                                 };
                                 responses.push((route.clone(), future_ptr, req));
+                                requests_sent += 1;
 
                                 bucket.remaining_requests -= 1;
                                 global_allowance -= 1f64;
                             }
                             None => {
-                                // Remove the empty queues from the active requests because
-                                // there are no more queued requests for that route
-                                http_queue.notify_empty(&route);
                                 break;
                             }
                         }
+                    }
+                    if queue.is_empty() {
+                        http_queue.notify_empty(&route);
                     }
                     if global_allowance < 1f64 {
                         break;
