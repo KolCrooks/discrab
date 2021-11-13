@@ -1,8 +1,11 @@
 use std::thread;
 
 use crate::core::{
-    http::rate_limit_client::{RLClient, RequestRoute},
-    interactions::typing::Interaction,
+    http::rate_limit_client::RLClient,
+    interactions::{
+        handler::gateway_payload::{HelloPayloadData, Payload},
+        typing::Interaction,
+    },
 };
 
 use super::{
@@ -11,20 +14,26 @@ use super::{
 };
 use async_std::task::block_on;
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use hyper::{body::Body, Request};
-use simd_json;
-use tungstenite::{connect, Message, WebSocket};
+
+// use simd_json;
+use serde_json::Value;
+
+use tungstenite::connect;
 
 pub struct WebsocketInteractionHandler {
     receiver: Receiver<Interaction>,
+    thread_handle: Option<thread::JoinHandle<()>>,
 }
 
 impl WebsocketInteractionHandler {
     pub fn new(http_client: &RLClient) -> WebsocketInteractionHandler {
         let (s, r) = unbounded();
-        let handler = WebsocketInteractionHandler { receiver: r };
+        let mut handler = WebsocketInteractionHandler {
+            receiver: r,
+            thread_handle: None,
+        };
 
-        block_on(async {
+        handler.thread_handle = Some(block_on(async {
             // TODO so the gateway says that it shouldn't be cached. WHAT DOES THIS MEAN????
             // does it mean not cached between instances, and having it get a new gateway on startup?
             // or does it want use to periodically get a new gateway while the bot is running? plz help
@@ -32,18 +41,31 @@ impl WebsocketInteractionHandler {
             thread::Builder::new()
                 .name("Websocket_Interaction_Handler".to_string())
                 .spawn(move || block_on(WebsocketInteractionHandler::run(s, gateway)))
-                .unwrap();
-        });
+                .unwrap()
+        }));
         handler
     }
 
     async fn run(sender: Sender<Interaction>, gateway: Gateway) {
-        println!("Connecting to {}", gateway.url);
-        let (mut socket, response) = connect(gateway.url).unwrap();
-        // loop {
-        //     let mut x = socket.read_message().unwrap().into_data();
-        //     let json = simd_json::from_slice(&mut x);
-        // }
+        let url = url::Url::parse(&format!("{}/?v=9&encoding=json", gateway.url)).unwrap();
+        // println!("Connecting to {}", url);
+
+        let (mut socket, response) = connect(url).expect("Can't connect");
+        // println!("{}", response.status());
+
+        let mut hello_msg = socket.read_message().unwrap().into_data();
+
+        let hello_payload: Payload<HelloPayloadData> =
+            simd_json::from_slice(&mut *hello_msg).expect("PLEASE WORK");
+        let heartbeat_interval = hello_payload.data.heartbeat_interval;
+
+        loop {
+            thread::sleep(std::time::Duration::from_millis(heartbeat_interval));
+            while let Ok(x) = socket.read_message() {
+                println!("Message: {}", x.into_text().unwrap());
+            }
+            // let json = simd_json::from_slice(&mut x);
+        }
     }
 }
 

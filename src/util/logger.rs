@@ -6,9 +6,9 @@ pub fn print_with_scope(module: &str, message: String) {
     stdout
         .set_color(ColorSpec::new().set_fg(Some(Color::Cyan)))
         .unwrap();
-    write!(&mut stdout, "[{}]: ", module);
+    write!(&mut stdout, "[{}]: ", module).unwrap();
     stdout
         .set_color(ColorSpec::new().set_fg(Some(Color::White)))
         .unwrap();
-    writeln!(&mut stdout, "{}", message);
+    writeln!(&mut stdout, "{}", message).unwrap();
 }

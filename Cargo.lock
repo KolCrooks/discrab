@@ -313,10 +313,13 @@ dependencies = [
  "hyper",
  "hyper-tls",
  "serde",
+ "serde_json",
+ "serde_repr",
  "simd-json",
  "termcolor",
  "tokio",
  "tungstenite",
+ "url",
 ]
 
 [[package]]
@@ -1040,6 +1043,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_repr"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98d0516900518c29efa217c298fa1f4e6c6ffc85ae29fd7f4ee48f176e1a9ed5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "sha-1"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1281,6 +1295,7 @@ dependencies = [
  "http",
  "httparse",
  "log",
+ "native-tls",
  "rand",
  "sha-1",
  "thiserror",

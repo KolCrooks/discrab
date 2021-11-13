@@ -7,39 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'rust-discord-wrapper'",
+            "name": "Cargo launch",
             "cargo": {
                 "args": [
-                    "build",
-                    "--bin=rust-discord-wrapper",
-                    "--package=rust-discord-wrapper"
-                ],
-                "filter": {
-                    "name": "rust-discord-wrapper",
-                    "kind": "bin"
-                }
+                    "run",
+                    "--example",
+                    "basic"
+                ]
             },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'rust-discord-wrapper'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=rust-discord-wrapper",
-                    "--package=rust-discord-wrapper"
-                ],
-                "filter": {
-                    "name": "rust-discord-wrapper",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
+            "program": "${cargo:program}",
+            "args": []
         }
     ]
 }

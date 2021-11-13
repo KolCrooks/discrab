@@ -42,7 +42,7 @@ pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::E
         base_route: "/gateway".to_string(),
         major_param: "".to_string(),
     };
-    let requestBuilder = Request::builder()
+    let request_builder = Request::builder()
         .method(Method::GET)
         .uri("https://discord.com/api/gateway/bot")
         .header("content-type", "application/json")
@@ -50,7 +50,7 @@ pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::E
         .unwrap();
 
     let route = http_client
-        .send_request(route, requestBuilder)
+        .send_request(route, request_builder)
         .await
         .unwrap();
 
