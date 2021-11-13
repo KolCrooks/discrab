@@ -1,4 +1,5 @@
 use super::typing::Interaction;
+mod events;
 pub mod gateway;
 mod gateway_payload;
 pub mod websocket;

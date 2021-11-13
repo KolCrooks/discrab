@@ -1,8 +1,16 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+// #[derive(Serialize, Deserialize)]
+// #[serde(untagged)]
+// enum Payload
+//     Dispatch(Payload_Base<>),
+//     HeartBeat(Payload_Base<>),
+// }
+
 #[derive(Serialize, Deserialize)]
-pub struct Payload<T> {
+pub struct PayloadBase<T> {
     #[serde(rename = "op")]
     pub op_code: PayloadOpcode,
     #[serde(rename = "d")]
@@ -75,11 +83,4 @@ pub enum PayloadOpcode {
      * Client Action: Receive
      */
     HeartbeatAck = 11,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct HelloPayloadData {
-    pub heartbeat_interval: u64,
-
-    pub _trace: Vec<String>,
 }

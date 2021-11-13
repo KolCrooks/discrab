@@ -3,7 +3,7 @@ use std::thread;
 use crate::core::{
     http::rate_limit_client::RLClient,
     interactions::{
-        handler::gateway_payload::{HelloPayloadData, Payload},
+        handler::{events::hello::HelloPayloadData, gateway_payload::PayloadBase},
         typing::Interaction,
     },
 };
@@ -55,12 +55,16 @@ impl WebsocketInteractionHandler {
 
         let mut hello_msg = socket.read_message().unwrap().into_data();
 
-        let hello_payload: Payload<HelloPayloadData> =
+        let hello_payload: PayloadBase<HelloPayloadData> =
             simd_json::from_slice(&mut *hello_msg).expect("PLEASE WORK");
-        let heartbeat_interval = hello_payload.data.heartbeat_interval;
+        // let heartbeat_interval = serde_json::from_value::<HelloPayloadData>(hello_payload.data)
+        //     .unwrap()
+        //     .heartbeat_interval;
 
         loop {
-            thread::sleep(std::time::Duration::from_millis(heartbeat_interval));
+            thread::sleep(std::time::Duration::from_millis(
+                hello_payload.data.heartbeat_interval,
+            ));
             while let Ok(x) = socket.read_message() {
                 println!("Message: {}", x.into_text().unwrap());
             }
