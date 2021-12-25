@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 
-use crate::discord::resources::user::User;
+use crate::discord::resources::{
+    application::Application, guild::guild::UnavailableGuild, user::User,
+};
 
 #[derive(Serialize, Deserialize)]
 /**
- * Sent on connection to the websocket. Defines the heartbeat interval that the client should heartbeat to.
- * @docs https://discord.com/developers/docs/topics/gateway#hello
- */
+   Sent on connection to the websocket. Defines the heartbeat interval that the client should heartbeat to.
+   @docs https://discord.com/developers/docs/topics/gateway#hello
+*/
 pub struct HelloPayloadData {
     /// the interval (in milliseconds) the client should heartbeat with
     pub heartbeat_interval: u64,
@@ -31,5 +33,5 @@ pub struct ReadyPayloadData {
     /// the shard information associated with this session, if sent when identifying
     pub shard: Option<(u64, u64)>,
     /// contains id and flags
-    pub application: Option<PartialApplication>,
+    pub application: Option<Application>,
 }

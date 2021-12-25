@@ -3,7 +3,7 @@ use std::thread;
 use crate::core::{
     http::rate_limit_client::RLClient,
     interactions::{
-        handler::{events::hello::HelloPayloadData, gateway_payload::PayloadBase},
+        handler::{events::core::HelloPayloadData, gateway_payload::PayloadBase},
         typing::Interaction,
     },
 };
@@ -15,8 +15,7 @@ use super::{
 use async_std::task::block_on;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 
-// use simd_json;
-use serde_json::Value;
+use simd_json;
 
 use tungstenite::connect;
 

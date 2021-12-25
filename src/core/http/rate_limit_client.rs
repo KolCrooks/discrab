@@ -1,10 +1,8 @@
-use std::borrow::BorrowMut;
-
 use hyper::{body::Body, header::AUTHORIZATION, Error, Request};
 
 use super::{
     request_future::{self},
-    request_queue::{BasicHttpQueue, HttpQueue},
+    request_queue::HttpQueue,
     request_thread,
 };
 

@@ -1,6 +1,4 @@
-use std::borrow::BorrowMut;
-
-use hyper::{body, Body, Error, Method, Request};
+use hyper::{Body, Method, Request};
 
 use crate::core::http::rate_limit_client::{RLClient, RequestRoute};
 use serde::Deserialize;

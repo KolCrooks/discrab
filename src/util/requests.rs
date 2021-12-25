@@ -1,7 +1,3 @@
-use hyper::{Body, Response};
-use serde;
-use simd_json;
-
 pub fn get_header_as<T>(headers: &hyper::header::HeaderMap, key: &str) -> Option<T>
 where
     T: std::str::FromStr,

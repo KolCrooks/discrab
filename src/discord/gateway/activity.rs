@@ -1,7 +1,6 @@
-use crate::discord::{
-    resources::{emoji::Emoji, user::User},
-    snowflake::Snowflake,
-};
+use bitflags::bitflags;
+
+use crate::discord::{resources::emoji::Emoji, snowflake::Snowflake};
 
 /**
  * Activity Object
@@ -29,15 +28,15 @@ pub struct Activity {
     /// information for the current party of the player
     pub party: Option<ActivityParty>,
     /// images for the presence and their hover texts
-    pub assets: Option<Assets>,
+    pub assets: Option<ActivityAssets>,
     /// secrets for Rich Presence joining and spectating
-    pub secrets: Option<Secrets>,
+    pub secrets: Option<ActivitySecrets>,
     /// whether or not the activity is an instanced game session
     pub instance: Option<bool>,
     /// activity flags ORd together, describes what the payload includes
-    pub flags: Option<i32>,
+    pub flags: Option<ActivityFlags>,
     /// the custom buttons shown in the Rich Presence (max 2)
-    pub buttons: Option<Vec<Button>>,
+    pub buttons: Option<Vec<ActivityButton>>,
 }
 
 /**
@@ -85,4 +84,62 @@ pub struct ActivityTimestamps {
     pub start: Option<i64>,
     /// unix timestamp (in milliseconds) of when the activity ends
     pub end: Option<i64>,
+}
+
+/**
+* Activity Assets
+* @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-assets
+*/
+pub struct ActivityAssets {
+    /// the id for a large asset of the activity, usually a snowflake
+    pub large_image: Option<String>,
+    /// text displayed when hovering over the large image of the activity
+    pub large_text: Option<String>,
+    /// the id for a small asset of the activity, usually a snowflake
+    pub small_image: Option<String>,
+    /// text displayed when hovering over the small image of the activity
+    pub small_text: Option<String>,
+}
+
+/**
+ * Activity Secrets
+ * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-secrets
+ */
+pub struct ActivitySecrets {
+    /// the secret for joining a party
+    pub join: Option<String>,
+    /// the secret for spectating a game
+    pub spectate: Option<String>,
+    /// the secret for a specific instanced match
+    pub _match: Option<String>,
+}
+
+bitflags! {
+    /**
+     * Activity Flags
+     * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-flags
+     */
+    pub struct ActivityFlags: u32 {
+        const INSTANCE = 1 << 0;
+        const JOIN = 1 << 1;
+        const SPECTATE = 1 << 2;
+        const JOIN_REQUEST = 1 << 3;
+        const SYNC = 1 << 4;
+        const PLAY = 1 << 5;
+        const PARTY_PRIVACY_FRIENDS = 1 << 6;
+        const PARTY_PRIVACY_VOICE_CHANNEL = 1 << 7;
+        const EMBEDDED = 1 << 8;
+    }
+}
+
+/**
+ * Activity Buttons
+ * When received over the gateway, the buttons field is an array of strings, which are the button labels. Bots cannot access a user's activity button URLs. When sending, the buttons field must be an array of the below object:
+ * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-buttons
+ */
+pub struct ActivityButton {
+    /// the text shown on the button (1-32 characters)
+    pub label: String,
+    /// the url opened when clicking the button (1-512 characters)
+    pub url: String,
 }

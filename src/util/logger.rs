@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 pub fn print_with_scope(module: &str, message: String) {

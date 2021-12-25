@@ -1,9 +1,13 @@
 use crate::discord::{
+    gateway::presence::PresenceUpdateEvent,
     resources::{channel::Channel, emoji::Emoji, sticker::Sticker, voice::VoiceState},
     snowflake::Snowflake,
 };
 
-use super::guild_member::GuildMember;
+use super::{
+    guild_member::GuildMember, role::Role, stage_instance::StageInstance,
+    welcome_screen::WelcomeScreen,
+};
 
 /**
  * Guild Structure
@@ -77,7 +81,7 @@ pub struct Guild {
     /// all active threads in the guild that current user has permission to view
     pub threads: Option<Vec<Channel>>,
     /// presences of the members in the guild, will only include non-offline members if the size is greater than large threshold
-    pub presences: Option<Vec<Presence>>,
+    pub presences: Option<Vec<PresenceUpdateEvent>>,
     /// the maximum number of presences for the guild (null is always returned, apart from the largest of guilds)
     pub max_presences: Option<i64>,
     /// the maximum number of members for the guild
@@ -110,4 +114,9 @@ pub struct Guild {
     pub stage_instances: Option<Vec<StageInstance>>,
     /// custom guild stickers
     pub stickers: Option<Vec<Sticker>>,
+}
+
+pub struct UnavailableGuild {
+    id: Snowflake,
+    unavailable: bool,
 }
