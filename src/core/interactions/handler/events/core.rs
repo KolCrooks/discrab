@@ -1,8 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-use crate::discord::resources::{
-    application::Application, guild::guild::UnavailableGuild, user::User,
+use crate::{
+    core::interactions::handler::gateway_payload::{PayloadBase, PayloadOpcode},
+    discord::resources::{application::Application, guild::guild::UnavailableGuild, user::User},
 };
+
+pub trait PayloadData {
+    fn get_opcode(&self) -> PayloadOpcode;
+}
 
 #[derive(Serialize, Deserialize)]
 /**
@@ -12,6 +17,20 @@ use crate::discord::resources::{
 pub struct HelloPayloadData {
     /// the interval (in milliseconds) the client should heartbeat with
     pub heartbeat_interval: u64,
+}
+
+pub type HeartBeatPayloadData = Option<u64>;
+
+impl PayloadData for HeartBeatPayloadData {
+    fn get_opcode(&self) -> PayloadOpcode {
+        PayloadOpcode::Heartbeat
+    }
+}
+
+impl PayloadData for HelloPayloadData {
+    fn get_opcode(&self) -> PayloadOpcode {
+        PayloadOpcode::Heartbeat
+    }
 }
 
 /**
