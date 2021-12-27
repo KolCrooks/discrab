@@ -1,6 +1,9 @@
 use hyper::{Body, Method, Request};
 
-use crate::core::http::rate_limit_client::{RLClient, RequestRoute};
+use crate::core::{
+    abstraction::context::Context,
+    http::rate_limit_client::{send_request, RequestRoute},
+};
 use serde::Deserialize;
 use simd_json;
 
@@ -35,7 +38,7 @@ pub struct SessionStartLimit {
     pub max_concurrency: u64,
 }
 
-pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::Error> {
+pub async fn get_gateway(ctx: Context) -> Result<Gateway, simd_json::Error> {
     let route = RequestRoute {
         base_route: "/gateway".to_string(),
         major_param: "".to_string(),
@@ -47,12 +50,5 @@ pub async fn get_gateway(http_client: &RLClient) -> Result<Gateway, simd_json::E
         .body(Body::empty())
         .unwrap();
 
-    let route = http_client
-        .send_request(route, request_builder)
-        .await
-        .unwrap();
-
-    let mut bytes = hyper::body::to_bytes(route).await.unwrap().to_vec();
-
-    simd_json::from_slice::<Gateway>(&mut bytes)
+    send_request(ctx, route, request_builder).await
 }

@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 use crate::discord::{resources::user::User, snowflake::Snowflake};
 
@@ -6,6 +6,7 @@ use crate::discord::{resources::user::User, snowflake::Snowflake};
  * guild member object
  * @docs https://discord.com/developers/docs/resources/guild#guild-member-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct GuildMember {
     /// The user this guild member represents
     pub user: Option<User>,
@@ -16,9 +17,9 @@ pub struct GuildMember {
     /// array of role object ids
     pub roles: Vec<Snowflake>,
     /// when the user joined the guild
-    pub joined_at: DateTime<Utc>,
+    pub joined_at: String,
     /// when the user started boosting the guild
-    pub premium_since: Option<DateTime<Utc>>,
+    pub premium_since: Option<String>,
     /// whether the user is deafened in voice channels
     pub deaf: bool,
     /// whether the user is muted in voice channels

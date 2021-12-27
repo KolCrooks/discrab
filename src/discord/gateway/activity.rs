@@ -1,4 +1,6 @@
 use bitflags::bitflags;
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::discord::{resources::emoji::Emoji, snowflake::Snowflake};
 
@@ -6,10 +8,12 @@ use crate::discord::{resources::emoji::Emoji, snowflake::Snowflake};
  * Activity Object
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Activity {
     /// The activity's name
     pub name: String,
     /// activity type
+    #[serde(rename = "type")]
     pub type_: ActivityType,
     /// stream url, is validated when type is 1
     pub url: Option<String>,
@@ -43,6 +47,8 @@ pub struct Activity {
  * Activity Type
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum ActivityType {
     /// Playing {name}
     /// Example: "Playing Rocket League"
@@ -68,6 +74,7 @@ pub enum ActivityType {
  * Activity Party
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object-party-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityParty {
     /// the id of the party
     pub id: Option<String>,
@@ -79,6 +86,7 @@ pub struct ActivityParty {
  * Timestamps for when the activity started and ended
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-timestamps
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityTimestamps {
     /// unix timestamp (in milliseconds) of when the activity started
     pub start: Option<i64>,
@@ -90,6 +98,7 @@ pub struct ActivityTimestamps {
 * Activity Assets
 * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-assets
 */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityAssets {
     /// the id for a large asset of the activity, usually a snowflake
     pub large_image: Option<String>,
@@ -105,13 +114,15 @@ pub struct ActivityAssets {
  * Activity Secrets
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-secrets
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ActivitySecrets {
     /// the secret for joining a party
     pub join: Option<String>,
     /// the secret for spectating a game
     pub spectate: Option<String>,
     /// the secret for a specific instanced match
-    pub _match: Option<String>,
+    #[serde(rename = "match")]
+    pub match_: Option<String>,
 }
 
 bitflags! {
@@ -119,7 +130,8 @@ bitflags! {
      * Activity Flags
      * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-flags
      */
-    pub struct ActivityFlags: u32 {
+    #[derive(Serialize)]
+    pub struct ActivityFlags: u64 {
         const INSTANCE = 1 << 0;
         const JOIN = 1 << 1;
         const SPECTATE = 1 << 2;
@@ -132,11 +144,26 @@ bitflags! {
     }
 }
 
+impl<'de> Deserialize<'de> for ActivityFlags {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bits = u64::deserialize(deserializer)?;
+
+        ActivityFlags::from_bits(bits).ok_or(serde::de::Error::custom(format!(
+            "Unexpected flags value {}",
+            bits
+        )))
+    }
+}
+
 /**
  * Activity Buttons
  * When received over the gateway, the buttons field is an array of strings, which are the button labels. Bots cannot access a user's activity button URLs. When sending, the buttons field must be an array of the below object:
  * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-buttons
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityButton {
     /// the text shown on the button (1-32 characters)
     pub label: String,

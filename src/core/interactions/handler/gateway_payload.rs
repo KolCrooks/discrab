@@ -1,21 +1,14 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use super::events::core::PayloadData;
-
-// #[derive(Serialize, Deserialize)]
-// #[serde(untagged)]
-// enum Payload
-//     Dispatch(Payload_Base<>),
-//     HeartBeat(Payload_Base<>),
-// }
+use super::events::PayloadData;
 
 #[derive(Serialize, Deserialize)]
 pub struct PayloadBase<T> {
     #[serde(rename = "op")]
     pub op_code: PayloadOpcode,
     #[serde(rename = "d")]
-    pub data: Box<T>,
+    pub data: T,
     #[serde(rename = "s")]
     pub sequence_num: Option<u32>,
     #[serde(rename = "t")]
@@ -26,7 +19,7 @@ impl<T: PayloadData> PayloadBase<T> {
     pub fn new(data: T) -> Self {
         PayloadBase {
             op_code: data.get_opcode(),
-            data: Box::new(data),
+            data,
             sequence_num: None,
             event_name: None,
         }

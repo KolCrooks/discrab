@@ -1,14 +1,19 @@
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 use crate::discord::resources::emoji::Emoji;
 
 /**
  * Message Component Object
  * @docs https://discord.com/developers/docs/interactions/message-components#component-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MessageComponent {
     /**
      * Component Type
      * @valid-for All
      */
+    #[serde(rename = "type")]
     pub type_: MessageComponentType,
     /**
      * A developer-defined identifier for the component, max 100 characters
@@ -71,6 +76,8 @@ pub struct MessageComponent {
  * Component Type
  * @docs https://discord.com/developers/docs/interactions/message-components#component-object-component-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum MessageComponentType {
     /// A container for other components
     ActionRow = 1,
@@ -84,6 +91,8 @@ pub enum MessageComponentType {
  * Button Styles
  * @docs https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum MessageButtonStyle {
     /**
      * Color: blurple
@@ -116,6 +125,7 @@ pub enum MessageButtonStyle {
  * Select Option
  * @docs https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MessageSelectOption {
     /// The user-facing name of the option, max 100 characters
     pub label: String,

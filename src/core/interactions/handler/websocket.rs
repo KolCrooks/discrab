@@ -1,21 +1,18 @@
 use std::{
-    sync::{atomic::AtomicI64, Arc, Mutex},
+    sync::{Arc, Mutex},
     thread,
 };
 
 use crate::core::{
-    http::rate_limit_client::RLClient,
-    interactions::{
-        handler::{events::core::HelloPayloadData, gateway_payload::PayloadBase},
-        typing::Interaction,
-    },
+    abstraction::context::Context,
+    interactions::handler::{events::core::HelloPayloadData, gateway_payload::PayloadBase},
 };
 
 use super::{
     events::core::HeartBeatPayloadData,
     gateway::{get_gateway, Gateway},
     gateway_payload::PayloadOpcode,
-    InteractionHandler,
+    SocketClient,
 };
 use async_std::task::block_on;
 use crossbeam_channel::{unbounded, Receiver, Sender};
@@ -25,43 +22,43 @@ use simd_json::{self};
 
 use futures_util::{
     stream::{SplitSink, SplitStream, StreamExt},
-    Sink, SinkExt,
+    SinkExt,
 };
 use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
-pub struct WebsocketInteractionHandler {
-    interaction_receiver: Receiver<Interaction>,
-    command_sender: Sender<String>,
-    thread_handle: thread::JoinHandle<()>,
+pub struct WebsocketEventHandler {
+    event_receiver: Receiver<(String, Value)>,
+    command_sender: Sender<Message>,
 }
 
-impl WebsocketInteractionHandler {
-    pub async fn create(http_client: &RLClient) -> WebsocketInteractionHandler {
+impl WebsocketEventHandler {
+    pub async fn create(ctx: Context) -> WebsocketEventHandler {
         let (s, r) = unbounded();
         let (s2, r2) = unbounded();
 
-        let handler = WebsocketInteractionHandler {
-            interaction_receiver: r,
+        let handler = WebsocketEventHandler {
+            event_receiver: r,
             command_sender: s2,
-            thread_handle: async {
-                // TODO so the gateway says that it shouldn't be cached. WHAT DOES THIS MEAN????
-                // does it mean not cached between instances, and having it get a new gateway on startup?
-                // or does it want use to periodically get a new gateway while the bot is running? plz help
-                let gateway = get_gateway(http_client).await.unwrap();
-                thread::Builder::new()
-                    .name("Websocket_Interaction_Handler".to_string())
-                    .spawn(move || block_on(WebsocketInteractionHandler::run(s, r2, gateway)))
-                    .unwrap()
-            }
-            .await,
         };
+        async {
+            // TODO so the gateway says that it shouldn't be cached. WHAT DOES THIS MEAN????
+            // does it mean not cached between instances, and having it get a new gateway on startup?
+            // or does it want use to periodically get a new gateway while the bot is running? plz help
+            let gateway = get_gateway(ctx).await.unwrap();
+            thread::Builder::new()
+                .name("Websocket_Interaction_Handler".to_string())
+                .spawn(move || block_on(WebsocketEventHandler::run(s, r2, gateway)))
+                .unwrap()
+        }
+        .await;
+
         handler
     }
 
     async fn run(
-        interaction_output: Sender<Interaction>,
-        incomming_commands: Receiver<String>,
+        event_output: Sender<(String, Value)>,
+        incoming_commands: Receiver<Message>,
         gateway: Gateway,
     ) {
         let url = url::Url::parse(&format!("{}/?v=9&encoding=json", gateway.url)).unwrap();
@@ -82,49 +79,62 @@ impl WebsocketInteractionHandler {
 
         // This is required so that everything is forwarded through here
         thread::spawn(move || {
-            block_on(WebsocketInteractionHandler::sender(
+            block_on(WebsocketEventHandler::sender(
                 socket_sink,
+                incoming_commands,
                 socket_to_send,
             ))
         });
 
         let socket_send1 = socket_send.clone();
-        let socket_send2 = socket_send.clone();
 
         let seq_num_cp = sequence_num.clone();
 
-        // We want 3 things
-        // 1. Heartbeat loop
+        // Heartbeat loop
         thread::spawn(move || {
-            block_on(WebsocketInteractionHandler::heartbeat_loop(
+            block_on(WebsocketEventHandler::heartbeat_loop(
                 socket_send1,
                 hello_payload.data.heartbeat_interval,
                 seq_num_cp,
             ))
         });
-        // 2. Listen for commands, and then send them when they are available
-        thread::spawn(move || {
-            block_on(WebsocketInteractionHandler::command_handler(
-                incomming_commands,
-                socket_send2,
-            ))
-        });
-        // 3. Listen for interactions, and then send them when they are available
-        WebsocketInteractionHandler::interaction_receiver(
-            interaction_output,
-            socket_recv,
-            socket_send,
-            sequence_num,
-        )
-        .await;
+        // Listen for events, and then send them when they are available
+        WebsocketEventHandler::event_receiver(event_output, socket_recv, socket_send, sequence_num)
+            .await;
     }
 
     async fn sender(
         mut socket_send: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
         to_send: Receiver<Message>,
+        to_send_heartbeat: Receiver<Message>,
     ) {
-        while let Ok(msg) = to_send.recv() {
-            socket_send.send(msg).await.unwrap();
+        // Allowance per second
+        let allowance_rate = 120.0 / 60.0;
+
+        let mut allowance: f64 = 120.0;
+        loop {
+            let start = std::time::Instant::now();
+
+            while let Ok(msg) = to_send_heartbeat.try_recv() {
+                if allowance <= 1.0 {
+                    break;
+                }
+                socket_send.send(msg).await.unwrap();
+                allowance -= 1.0;
+            }
+
+            while let Ok(msg) = to_send.try_recv() {
+                if allowance <= 1.0 {
+                    break;
+                }
+                socket_send.send(msg).await.unwrap();
+                allowance -= 1.0;
+            }
+
+            allowance += start.elapsed().as_secs_f64() * allowance_rate;
+            if allowance > 120.0 {
+                allowance = 120.0;
+            }
         }
     }
 
@@ -141,22 +151,15 @@ impl WebsocketInteractionHandler {
         }
     }
 
-    async fn command_handler(commands: Receiver<String>, socket_send: Sender<Message>) {
-        while let Ok(command) = commands.recv() {
-            let message = Message::Text(command);
-            socket_send.send(message).unwrap();
-        }
-    }
-
-    async fn interaction_receiver(
-        interactions: Sender<Interaction>,
+    async fn event_receiver(
+        events: Sender<(String, Value)>,
         mut socket_recv: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
         socket_send: Sender<Message>,
         sequence_num: Arc<Mutex<HeartBeatPayloadData>>,
     ) {
         loop {
             let message = socket_recv.next().await.unwrap().unwrap();
-            println!("{}", message);
+            // println!("{}", message);
             let payload: PayloadBase<Value> =
                 simd_json::from_slice(&mut *message.into_data()).unwrap();
 
@@ -165,7 +168,9 @@ impl WebsocketInteractionHandler {
                     {
                         *sequence_num.lock().unwrap() = Some(payload.sequence_num.unwrap() as u64);
                     }
-                    println!("{}", payload.data)
+                    let event_name = payload.event_name.unwrap();
+                    events.send((event_name.to_string(), payload.data)).unwrap();
+                    // println!("{}", payload.data)
                 }
                 PayloadOpcode::Heartbeat => {
                     let seq = *sequence_num.lock().unwrap();
@@ -189,12 +194,12 @@ impl WebsocketInteractionHandler {
     }
 }
 
-impl InteractionHandler for WebsocketInteractionHandler {
-    fn get_incoming(&self) -> Vec<Interaction> {
-        self.interaction_receiver.try_iter().collect()
+impl SocketClient for WebsocketEventHandler {
+    fn send_command(&self, command: String) {
+        self.command_sender.send(Message::Text(command)).unwrap();
     }
 
-    fn send_command(&self, command: String) {
-        self.command_sender.send(command).unwrap();
+    fn get_command_channel(&self) -> Receiver<(String, Value)> {
+        self.event_receiver.clone()
     }
 }

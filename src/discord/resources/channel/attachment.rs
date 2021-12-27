@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::snowflake::Snowflake;
 /**
  * Attachment Object
  * @docs https://discord.com/developers/docs/resources/channel#attachment-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Attachment {
     /// attachment id
     pub id: Snowflake,

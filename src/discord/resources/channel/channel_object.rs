@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 use crate::discord::{resources::user::User, snowflake::Snowflake};
 
@@ -10,6 +10,7 @@ use super::typing::{
  * Represents a guild or DM channel within Discord.
  * @docs https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Channel {
     /// The id of this channel
     pub id: Snowflake,
@@ -46,7 +47,7 @@ pub struct Channel {
     /// The id of the parent category for a channel (each parent category can contain up to 50 channels), for threads: id of the text channel this thread was created
     pub parent_id: Option<Snowflake>,
     /// When the last pinned message was pinned. This may be null in events such as GUILD_CREATE when a message is not pinned.
-    pub last_pin_timestamp: Option<DateTime<Utc>>,
+    pub last_pin_timestamp: Option<String>,
     /// Voice region id for the voice channel, automatic when set to null
     pub rtc_region: Option<String>,
     /// The camera video quality mode of the voice channel, 1 when not present

@@ -1,7 +1,21 @@
-use crate::discord::{image_formats, snowflake::Snowflake};
+use hyper::{Body, Method, Request};
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    core::{
+        abstraction::context::Context,
+        http::rate_limit_client::{send_request, RequestRoute},
+    },
+    discord::{image_formats, snowflake::Snowflake},
+};
 
 use super::UserFlags;
 
+/**
+ * User Object
+ * @docs https://discord.com/developers/docs/resources/user#user-object
+ */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct User {
     /**
      * The user's id
@@ -130,10 +144,7 @@ impl User {
         self.avatar.as_ref().map(|avatar| {
             format!(
                 "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
-                self.id.to_string(),
-                avatar,
-                fmt.to_string(),
-                size_str
+                self.id, avatar, fmt, size_str
             )
         })
     }
@@ -159,11 +170,26 @@ impl User {
         self.banner.as_ref().map(|banner| {
             format!(
                 "https://cdn.discordapp.com/avatars/{}/{}.{}{}",
-                self.id.to_string(),
-                banner,
-                fmt.to_string(),
-                size_str
+                self.id, banner, fmt, size_str
             )
         })
+    }
+
+    pub async fn get(ctx: Context, id: String) -> Option<User> {
+        let route = RequestRoute {
+            base_route: "/users".to_string(),
+            major_param: "".to_string(),
+        };
+        let request_builder = Request::builder()
+            .method(Method::GET)
+            .uri(format!("https://discord.com/api/users/{}", id))
+            .header("content-type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+
+        match send_request::<User>(ctx, route, request_builder).await {
+            Ok(user) => Some(user),
+            Err(_) => None,
+        }
     }
 }

@@ -1,10 +1,15 @@
 use std::fmt::{Display, Error, Formatter};
 
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 /**
  * Embed Types
  * Embed types are "loosely defined" and, for the most part, are not used by our clients for rendering. Embed attributes power what is rendered. Embed types should be considered deprecated and might be removed in a future API version.
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-types
  */
+#[derive(Clone, Debug, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
 pub enum EmbedType {
     /// generic embed rendered from embed attributes
     Rich = 0,
@@ -37,6 +42,7 @@ impl Display for EmbedType {
  * Embed Thumbnail Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedThumbnail {
     /// Source url of thumbnail (only supports http(s) and attachments)
     pub url: String,
@@ -52,6 +58,7 @@ pub struct EmbedThumbnail {
  * Embed Image Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedImage {
     /// Source url of image (only supports http(s) and attachments)
     pub url: String,
@@ -67,6 +74,7 @@ pub struct EmbedImage {
  * Embed Footer Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedFooter {
     /// Footer text
     pub text: String,
@@ -80,6 +88,7 @@ pub struct EmbedFooter {
  * Embed Video Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-video-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedVideo {
     /// Source url of video (only supports http(s) and attachments)
     pub url: String,
@@ -95,6 +104,7 @@ pub struct EmbedVideo {
  * Embed Provider Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedProvider {
     /// Name of provider
     pub name: Option<String>,
@@ -106,6 +116,7 @@ pub struct EmbedProvider {
  * Embed Author Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedAuthor {
     /// Name of author
     pub name: Option<String>,
@@ -121,6 +132,7 @@ pub struct EmbedAuthor {
  * Embed Field Structure
  * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
  */
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedField {
     /// Name of field
     pub name: String,

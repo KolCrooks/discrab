@@ -1,9 +1,13 @@
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 use crate::discord::snowflake::Snowflake;
 
 /**
  * Stage Instance Structure
  * @docs https://discord.com/developers/docs/resources/stage-instance#stage-instance-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct StageInstance {
     /// The id of this Stage instance
     pub id: Snowflake,
@@ -23,6 +27,8 @@ pub struct StageInstance {
  * Privacy Level
  * @docs https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum PrivacyLevel {
     /// The Stage instance is visible publicly, such as on Stage Discovery.
     Public = 1,

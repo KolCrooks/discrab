@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::{
     gateway::presence::PresenceUpdateEvent,
     resources::{channel::Channel, emoji::Emoji, sticker::Sticker, voice::VoiceState},
@@ -13,6 +15,7 @@ use super::{
  * Guild Structure
  * @docs https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Guild {
     /// guild id
     pub id: Snowflake,
@@ -116,7 +119,8 @@ pub struct Guild {
     pub stickers: Option<Vec<Sticker>>,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UnavailableGuild {
-    id: Snowflake,
-    unavailable: bool,
+    pub id: Snowflake,
+    pub unavailable: bool,
 }

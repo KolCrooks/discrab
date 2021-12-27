@@ -1,10 +1,14 @@
 use crate::discord::snowflake::Snowflake;
-use bitfield::bitfield;
+use bitflags::bitflags;
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
  * Channel Types
  * @docs https://discord.com/developers/docs/resources/channel#channel-object-channel-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum ChannelType {
     /// A text channel within a server
     GuildText = 0,
@@ -34,6 +38,9 @@ pub enum ChannelType {
  * Message Types
  * @docs https://discord.com/developers/docs/resources/channel#message-object-message-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
+
 pub enum MessageType {
     Default = 0,
     RecipientAdd = 1,
@@ -64,6 +71,8 @@ pub enum MessageType {
  * Message Activity Types
  * @docs https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum MessageActivityType {
     Join = 1,
     Spectate = 2,
@@ -75,8 +84,10 @@ pub enum MessageActivityType {
  * Message Activity Object
  * @docs https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MessageActivity {
     /// The type of message activity
+    #[serde(rename = "type")]
     pub type_: MessageActivityType,
     /// The party_id from a Rich Presence event
     pub party_id: Option<String>,
@@ -86,6 +97,7 @@ pub struct MessageActivity {
  * Message Reference Object
  * @docs https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct MessageReference {
     /// The id of the originating message
     pub message_id: Option<String>,
@@ -97,26 +109,32 @@ pub struct MessageReference {
     pub fail_if_not_exists: Option<bool>,
 }
 
-bitfield! {
-    pub struct MessageFlags(u64);
+bitflags! {
+    /// Message Flags
+    /// @docs https://discord.com/developers/docs/resources/channel#message-object-message-flags
+    #[derive(Serialize)]
+    pub struct MessageFlags: u64 {
+        const CROSSPOSTED = 1 << 0;
+        const IS_CROSSPOST = 1 << 1;
+        const SUPPRESS_EMBEDS = 1 << 2;
+        const SOURCE_MESSAGE_DELETED = 1 << 3;
+        const URGENT = 1 << 4;
+        const HAS_THREAD = 1 << 5;
+        const EPHEMERAL = 1 << 6;
+        const LOADING = 1 << 7;
+    }
+}
 
-    u8;
-    /// this message has been published to subscribed channels (via Channel Following)
-    pub crossposted, _: 0, 1;
-    /// this message originated from a message in another channel (via Channel Following)
-    pub is_crosspost, _: 1, 2;
-    /// do not include any embeds when serializing this message
-    pub suppress_embeds, _: 2, 3;
-    /// the source message for this crosspost has been deleted (via Channel Following)
-    pub source_message_deleted, _: 3, 4;
-    /// this message came from the urgent message system
-    pub urgent, _: 4, 5;
-    /// this message has an associated thread, with the same id as the message
-    pub has_thread, _: 5, 6;
-    /// this message is only visible to the user who invoked the Interaction
-    pub ephemeral, _: 6, 7;
-    /// this message is an Interaction Response and the bot is "thinking"
-    pub loading, _: 7, 8;
+impl<'de> Deserialize<'de> for MessageFlags {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bits = u64::deserialize(deserializer)?;
+
+        MessageFlags::from_bits(bits)
+            .ok_or_else(|| serde::de::Error::custom(format!("Unexpected flags value {}", bits)))
+    }
 }
 
 /**
@@ -124,10 +142,12 @@ bitfield! {
  * See permissions for more information about the allow and deny fields.
  * @docs https://discord.com/developers/docs/resources/channel#overwrite-object-overwrite-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct PermissionsOverwriteObject {
     /// The id of the role or user
     pub id: Snowflake,
     /// The type of the role or user
+    #[serde(rename = "type")]
     pub type_: u8,
     /// The permissions that the role or user has
     pub allow: u64,
@@ -140,6 +160,7 @@ pub struct PermissionsOverwriteObject {
 * The thread metadata object contains a number of thread-specific channel fields that are not needed by other channel types.
 * @docs https://discord.com/developers/docs/resources/channel#message-object-thread-metadata-structure
 */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ThreadMetadata {
     /// Whether the thread is archived
     pub archived: Option<bool>,
@@ -158,6 +179,7 @@ pub struct ThreadMetadata {
  * A thread member is used to indicate whether a user has joined a thread or not.
 * @docs https://discord.com/developers/docs/resources/channel#message-object-thread-member-structure
 */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ThreadMember {
     /// The id of the thread
     pub id: Snowflake,
@@ -173,7 +195,8 @@ pub struct ThreadMember {
  * Video Quality
  * @docs https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
  */
-
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum VideoQualityMode {
     /// Discord chooses the quality for optimal performance
     Auto = 1,

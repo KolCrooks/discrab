@@ -1,9 +1,13 @@
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 use super::{resources::user::User, snowflake::Snowflake};
 
 /**
  * Team Object
  * @docs https://discord.com/developers/docs/topics/teams#data-models-team-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Team {
     /// a hash of the image of the team's icon
     pub icon: Option<String>,
@@ -21,6 +25,7 @@ pub struct Team {
  * Team Member Object
  * @docs https://discord.com/developers/docs/topics/teams#data-models-team-member-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct TeamMember {
     /// the user's membership state on the team
     pub membership_state: MembershipState,
@@ -36,6 +41,8 @@ pub struct TeamMember {
  * Membership State Enum
  * @docs https://discord.com/developers/docs/topics/teams#data-models-team-member-object-membership-state
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum MembershipState {
     Invited = 1,
     Accepted = 2,

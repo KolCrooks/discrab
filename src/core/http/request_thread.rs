@@ -1,10 +1,7 @@
 use std::{collections::HashMap, thread, time::Instant};
 
 use crossbeam_channel::Receiver;
-use hyper::{
-    client::{self, ResponseFuture},
-    Client,
-};
+use hyper::{client::ResponseFuture, Client};
 use hyper_tls::HttpsConnector;
 
 use crate::util::requests::get_header_as;

@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::{
     resources::{channel::message::Message, guild::guild_member::GuildMember, user::User},
     snowflake::Snowflake,
@@ -7,6 +9,7 @@ use crate::discord::{
  * Interaction
  * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Interaction {
     /// The id of the interaction
     pub id: Snowflake,

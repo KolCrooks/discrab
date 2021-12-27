@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::color::Color;
 
 use super::typing::{
@@ -10,10 +12,12 @@ use super::typing::{
  * Embed Object
  * @docs https://discord.com/developers/docs/resources/channel#embed-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Embed {
     /// Title of Embed
     pub title: Option<String>,
     /// type of embed (always "rich" for webhook embeds)
+    #[serde(rename = "type")]
     pub type_: Option<EmbedType>,
     /// description of embed
     pub description: Option<String>,

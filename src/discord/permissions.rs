@@ -1,6 +1,8 @@
 use bitflags::bitflags;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 bitflags! {
+    #[derive(Serialize)]
     pub struct Permissions: u64 {
         const CREATE_INSTANT_INVITE = (1 << 0);
         const KICK_MEMBERS = (1 << 1);
@@ -41,5 +43,19 @@ bitflags! {
         const USE_EXTERNAL_STICKERS = (1 << 37);
         const SEND_MESSAGES_IN_THREADS = (1 << 38);
         const START_EMBEDDED_ACTIVITIES = (1 << 39);
+    }
+}
+
+impl<'de> Deserialize<'de> for Permissions {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bits = u64::deserialize(deserializer)?;
+
+        Permissions::from_bits(bits).ok_or(serde::de::Error::custom(format!(
+            "Unexpected flags value {}",
+            bits
+        )))
     }
 }

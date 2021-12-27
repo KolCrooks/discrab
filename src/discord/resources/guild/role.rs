@@ -1,9 +1,12 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::snowflake::Snowflake;
 
 /**
  * Role Structure
  * @docs https://discord.com/developers/docs/topics/permissions#role-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Role {
     /// role id
     pub id: Snowflake,
@@ -33,6 +36,7 @@ pub struct Role {
  * Role Tags Structure
  * @docs https://discord.com/developers/docs/topics/permissions#role-object-role-tags-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct RoleTags {
     /// the id of the bot this role belongs to
     pub bot_id: Option<Snowflake>,

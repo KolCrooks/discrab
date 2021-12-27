@@ -1,9 +1,12 @@
+use serde::{Deserialize, Serialize};
+
 use crate::discord::snowflake::Snowflake;
 
 /**
  * Welcome Screen Object
  * @docs https://discord.com/developers/docs/resources/guild#welcome-screen-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct WelcomeScreen {
     /// the server description shown in the welcome screen
     pub description: Option<String>,
@@ -15,6 +18,7 @@ pub struct WelcomeScreen {
  * Welcome Screen Channel Structure
  * @docs https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct WelcomeScreenChannel {
     /// the channel's id
     pub channel_id: Snowflake,

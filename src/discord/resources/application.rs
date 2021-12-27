@@ -1,6 +1,7 @@
 use crate::discord::{snowflake::Snowflake, teams::Team};
 
-use bitfield::bitfield;
+use bitflags::bitflags;
+use serde::{Deserialize, Deserializer, Serialize};
 
 use super::user::User;
 
@@ -8,6 +9,7 @@ use super::user::User;
  * Represents a Discord application.
  * https://discord.com/developers/docs/resources/application#application-object-application-structure
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Application {
     /// The id of the app
     pub id: Snowflake,
@@ -47,17 +49,32 @@ pub struct Application {
     pub flags: Option<ApplicationFlags>,
 }
 
-bitfield! {
+bitflags! {
     /// Application Flags
-    pub struct ApplicationFlags(u64);
+    /// @docs https://discord.com/developers/docs/resources/application#application-object-application-flags
+    #[derive(Serialize)]
+    pub struct ApplicationFlags: u64 {
+        const GATEWAY_PRESENCE = 1 << 12;
+        const GATEWAY_PRESENCE_LIMITED = 1 << 13;
+        const GATEWAY_GUILD_MEMBERS = 1 << 14;
+        const GATEWAY_GUILD_MEMBERS_LIMITED = 1 << 15;
+        const VERIFICATION_PENDING_GUILD_LIMIT = 1 << 16;
+        const EMBEDDED = 1 << 17;
+        const GATEWAY_MESSAGE_CONTENT = 1 << 18;
+        const GATEWAY_MESSAGE_CONTENT_LIMITED = 1 << 19;
+    }
+}
 
-    u8;
-    pub gateway_presence, _: 0, 1;
-    pub gateway_presence_limited, _: 1, 2;
-    pub gateway_guild_members, _: 2, 3;
-    pub gateway_guild_members_limited, _: 3, 4;
-    pub verification_pending_guild_limit, _: 4, 5;
-    pub embedded, _: 5, 6;
-    pub gateway_message_content, _: 6, 7;
-    pub gateway_message_content_limited, _: 7, 8;
+impl<'de> Deserialize<'de> for ApplicationFlags {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let bits = u64::deserialize(deserializer)?;
+
+        ApplicationFlags::from_bits(bits).ok_or(serde::de::Error::custom(format!(
+            "Unexpected flags value {}",
+            bits
+        )))
+    }
 }

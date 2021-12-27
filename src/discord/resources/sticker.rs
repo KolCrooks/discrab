@@ -1,3 +1,6 @@
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 use crate::discord::snowflake::Snowflake;
 
 use super::user::User;
@@ -5,6 +8,7 @@ use super::user::User;
  * Sticker Object
  * @docs https://discord.com/developers/docs/resources/sticker#sticker-item-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Sticker {
     /// id of the sticker
     pub id: Snowflake,
@@ -22,6 +26,7 @@ pub struct Sticker {
      */
     pub asset: String,
     /// type of sticker
+    #[serde(rename = "type")]
     pub type_: StickerType,
     /// type of sticker format
     pub format_type: StickerFormatType,
@@ -40,6 +45,7 @@ pub struct Sticker {
  * The smallest amount of data required to render a sticker. A partial sticker object.
  * @docs https://discord.com/developers/docs/resources/sticker#sticker-item-object
  */
+#[derive(Serialize, Deserialize, Clone)]
 pub struct StickerItem {
     /// id of the sticker
     pub id: Snowflake,
@@ -53,6 +59,8 @@ pub struct StickerItem {
  * Sticker Types
  * @docs https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum StickerType {
     /// an official sticker in a pack, part of Nitro or in a removed purchasable pack
     Standard = 1,
@@ -64,6 +72,8 @@ pub enum StickerType {
  * Sticker Format Types
  * @docs https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
  */
+#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[repr(u8)]
 pub enum StickerFormatType {
     PNG = 1,
     APNG = 2,
