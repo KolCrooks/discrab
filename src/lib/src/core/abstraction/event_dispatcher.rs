@@ -90,12 +90,13 @@ macro_rules! event_subscriptions {
                 }
             }
 
-            pub fn get_observable<T: Clone>(&mut self, event: Events) -> &mut Observable<T> {
+            pub fn get_observable<T: Clone>(&mut self, event: String) -> &mut Observable<T> {
                 let ptr: &mut bool = unsafe {
-                    match event {
+                    match event.as_str() {
                         $(
-                            Events::$Flag => mem::transmute(&mut self.$Flag),
+                            $EventName => mem::transmute(&mut self.$Flag),
                         )+
+                        _ => panic!("Unhandled event: {}", event),
                     }
                 };
 

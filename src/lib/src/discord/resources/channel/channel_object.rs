@@ -1,6 +1,12 @@
+use hyper::{Body, Method, Request};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-use crate::discord::{resources::user::User, snowflake::Snowflake};
+use crate::{
+    core::http::rate_limit_client::{send_request, RequestRoute},
+    discord::{resources::user::User, snowflake::Snowflake},
+    Context,
+};
 
 use super::typing::{
     ChannelType, PermissionsOverwriteObject, ThreadMember, ThreadMetadata, VideoQualityMode,
@@ -64,4 +70,33 @@ pub struct Channel {
     pub default_auto_archive_duration: Option<u64>,
     /// Computed permissions for the invoking user in the channel, including overwrites, only included when part of the resolved data received on a slash command interaction
     pub permissions: Option<String>,
+}
+
+impl Channel {
+    pub async fn send_message(ctx: Context, channel_id: String, content: String) -> Result<(), ()> {
+        let route = RequestRoute {
+            base_route: format!("/channels/{}/messages", channel_id.clone()),
+            major_param: channel_id.clone(),
+        };
+
+        let body = Body::from(format!("{{\"content\": \"{}\"}}", content));
+
+        let request_builder = Request::builder()
+            .method(Method::POST)
+            .uri(format!(
+                "https://discord.com/api/channels/{}/messages",
+                channel_id.clone()
+            ))
+            .header("content-type", "application/json")
+            .body(body)
+            .unwrap();
+
+        match send_request::<Value>(ctx, route, request_builder).await {
+            Ok(v) => Ok(()),
+            Err(e) => {
+                println!("Error sending message {}", e);
+                Err(())
+            }
+        }
+    }
 }

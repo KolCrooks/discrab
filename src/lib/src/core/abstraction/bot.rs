@@ -1,4 +1,5 @@
 use async_std::task::block_on;
+use futures_util::Future;
 use serde_json::json;
 
 use crate::{
@@ -7,9 +8,10 @@ use crate::{
         interactions::handler::{websocket::WebsocketEventHandler, SocketClient},
     },
     discord::resources::user::User,
+    Events, Registerable,
 };
 
-use super::{context::Context, event_dispatcher::EventDispatcher, event_handler::EventHandler};
+use super::{context::Context, event_dispatcher::EventDispatcher};
 
 pub struct Bot {
     ctx: Context,
@@ -39,10 +41,10 @@ impl BotBuilder {
         }
     }
 
-    pub fn add_event_handler<T: EventHandler<T> + Clone + 'static>(&mut self) {
-        self.event_dispatcher
-            .get_observable(T::EVENT)
-            .subscribe(&move |ctx, val| block_on(T::handle(ctx, val)));
+    pub fn register_all(&mut self, to_register: Vec<&dyn Registerable>) {
+        for event in to_register.iter() {
+            event.register(&mut self.event_dispatcher);
+        }
     }
 
     pub fn build(self) -> Bot {

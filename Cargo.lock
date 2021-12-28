@@ -239,10 +239,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "codegen"
-version = "0.1.0"
-
-[[package]]
 name = "concurrent-queue"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -325,6 +321,7 @@ dependencies = [
  "bitflags",
  "chrono",
  "crossbeam-channel",
+ "discordrs_codegen",
  "dotenv",
  "futures-util",
  "hyper",
@@ -337,6 +334,14 @@ dependencies = [
  "tokio",
  "tokio-tungstenite",
  "url",
+]
+
+[[package]]
+name = "discordrs_codegen"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]

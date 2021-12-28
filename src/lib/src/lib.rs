@@ -4,7 +4,9 @@ mod util;
 
 pub use crate::core::abstraction::{
     bot::{Bot, BotBuilder},
+    commands::Registerable,
     context::Context,
-    event_dispatcher::Events,
-    event_handler::EventHandler,
+    event_dispatcher::{EventDispatcher, Events},
 };
+
+pub use discordrs_codegen;
