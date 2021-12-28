@@ -1,3 +1,7 @@
+use async_trait::async_trait;
+use discord_rs::{core::abstraction::event_dispatcher, EventHandler, Events};
+
+#[macro_use]
 use discord_rs::{
     core::{
         http::{rate_limit_client::RLClient, request_queue::BasicHttpQueue},
@@ -14,8 +18,17 @@ use serde_json::json;
 // use dotenv::dotenv;
 use std::{env, thread, time::Duration};
 
-fn test_msg_send(ctx: Context, msg: Message) {
-    println!("{}", msg.content);
+pub struct msgEvent;
+
+#[async_trait]
+impl<T> EventHandler<T> for msgEvent {
+    const EVENT: Events = Events::message_create;
+
+    async fn handle(ctx: Context, msg: Message) {
+        if msg.content.starts_with("!ping") {
+            ctx.send_message(msg.channel_id, "pong").await.unwrap();
+        }
+    }
 }
 
 #[tokio::main]
@@ -26,12 +39,9 @@ async fn main() {
     let mut builder = discord_rs::BotBuilder::new(token);
     builder
         .event_dispatcher
-        .message_create
+        .get_observable(Events::message_create)
         .subscribe(&test_msg_send);
 
-    let bot = builder.build().await;
-
-    loop {
-        thread::sleep(Duration::from_millis(1));
-    }
+    let bot = builder.build();
+    bot.listen().await;
 }
