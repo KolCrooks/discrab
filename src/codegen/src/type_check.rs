@@ -1,127 +1,29 @@
-#![allow(non_camel_case_types)]
-
-use super::context::Context;
-use crate::core::interactions::handler::events::dispatch_payloads::{
-    ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
-    GuildMemberAdd, GuildMemberRemove, GuildMemberUpdate, GuildMembersChunk,
-    GuildRoleCreateUpdateDelete, GuildScheduledEventUserAddRemove, GuildStickersUpdate,
-    IntegrationCreateUpdate, IntegrationDelete, InviteCreate, InviteDelete, MessageDelete,
-    MessageDeleteBulk, MessageReactionAdd, MessageReactionRemove, MessageReactionRemoveAll,
-    MessageReactionRemoveEmoji, ThreadListSync, ThreadMemberUpdate, ThreadMembersUpdate,
-    TypingStart, VoiceServerUpdate, WebhooksUpdate,
-};
-use crate::core::interactions::typing::Interaction;
-use crate::discord::gateway::presence::PresenceUpdate;
-use crate::discord::resources::channel::message::Message;
-use crate::discord::resources::channel::Channel;
-use crate::discord::resources::guild::guild_object::{Guild, UnavailableGuild};
-use crate::discord::resources::guild::stage_instance::StageInstance;
-use crate::discord::resources::guild_scheduled_event::GuildScheduledEvent;
-use crate::discord::resources::user::User;
-use crate::discord::resources::voice::VoiceState;
-use serde_json::Value;
-use std::mem;
-
-pub struct Observable<T: Clone> {
-    subscribers: Vec<Box<dyn Fn(Context, T) + Send>>,
-}
-
-impl<T: Clone> Observable<T> {
-    pub fn new() -> Self {
-        Observable {
-            subscribers: Vec::new(),
-        }
-    }
-
-    pub async fn notify(&self, ctx: Context, data: T) {
-        for listener in &self.subscribers {
-            listener(ctx.clone(), data.clone());
-        }
-    }
-
-    pub fn subscribe(&mut self, listener: &'static (dyn Fn(Context, T) + Send + Sync)) {
-        self.subscribers.push(Box::new(listener));
-    }
-}
-
-impl<T: Clone> Default for Observable<T> {
-    fn default() -> Self {
-        Observable::new()
-    }
-}
-
-macro_rules! event_subscriptions {
-    (
-        $(#[$outer:meta])*
-        pub struct $EventSubs:ident {
-            $(
-                $(#[$inner:meta])*
-                const $Flag:ident: $x:ty = $EventName:expr;
-            )+
-        }
-    ) => {
-        $(#[$outer])*
-        pub struct $EventSubs {
-            $(
-                $(#[$inner])*
-                pub $Flag: Observable<$x>,
-            )+
-        }
-        impl $EventSubs {
-            pub fn new() -> Self {
-                $EventSubs {
-                    $(
-                        $Flag: Observable::new(),
-                    )+
-                }
-            }
-
-            pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
-                match event.as_ref() {
-                    $(
-                        $EventName => {
-                            let data = serde_json::from_value::<$x>(data).unwrap();
-                            self.$Flag.notify(ctx, data).await;
+macro_rules! check_type_gen {
+    ($(
+        $(#[$inner:meta])*
+        const $Flag:ident: $x:ty = $EventName:expr;
+    )+) => {
+        pub fn check_type(event: String, type_name: String) -> Result<(), String> {
+            match event.as_str() {
+                $(
+                    stringify!($Flag) => {
+                        if type_name == stringify!($x) {
+                            Ok(())
+                        } else {
+                            Err(stringify!($x).to_string())
                         }
-                    )+
-                    _ => {
-                        println!("Unhandled event: {}", event);
                     }
-                }
-            }
-
-            pub fn get_observable<T: Clone>(&mut self, event: Events) -> &mut Observable<T> {
-                let ptr: &mut bool = unsafe {
-                    match event {
-                        $(
-                            Events::$Flag => mem::transmute(&mut self.$Flag),
-                        )+
-                    }
-                };
-
-                unsafe { mem::transmute(ptr) }
+                )+
+                _ => Err("UNKNOWN".to_string()),
             }
         }
-
-        impl Default for $EventSubs {
-            fn default() -> Self {
-                $EventSubs::new()
-            }
-        }
-
-        pub enum Events {
-            $(
-                #[doc="$x"]
-                $Flag,
-            )+
-        }
-     };
+    };
 }
 
-event_subscriptions! {
-    /// * This is the event dispatcher for the bot.
-    /// * It is responsible for routing events to the correct event handlers.
-    pub struct EventDispatcher {
+// TODO rn, I am just copy and pasting from `event_dispatcher.rs`.
+// There should be a permanent solution for this.
+
+check_type_gen! {
         //================
         //    Channels
         //================
@@ -259,5 +161,4 @@ event_subscriptions! {
         const voice_server_update: VoiceServerUpdate = "VOICE_SERVER_UPDATE";
         /// guild channel webhook was created, update, or deleted
         const webhooks_update: WebhooksUpdate = "WEBHOOKS_UPDATE";
-    }
 }

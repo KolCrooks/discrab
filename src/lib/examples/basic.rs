@@ -14,7 +14,7 @@ use std::{env, thread, time::Duration};
 struct MsgEvent;
 
 #[async_trait]
-#[event_handler("MESSAGE_CREATE")]
+#[event_handler(Events::message_create)]
 impl EventHandler<Message> for MsgEvent {
     async fn handler(ctx: Context, msg: Message) {
         if msg.content.starts_with("!ping") {
@@ -24,6 +24,21 @@ impl EventHandler<Message> for MsgEvent {
         }
     }
 }
+struct MsgEvent2;
+
+#[async_trait]
+#[event_handler(Events::message_update)]
+impl EventHandler<Channel> for MsgEvent2 {
+    async fn handler(ctx: Context, msg: Channel) {
+        Channel::send_message(
+            ctx.clone(),
+            msg.application_id.unwrap().to_string(),
+            format!("message with id {} updated", msg.id).to_string(),
+        )
+        .await
+        .unwrap();
+    }
+}
 
 #[tokio::main]
 async fn main() {
@@ -31,7 +46,7 @@ async fn main() {
     let token = env::var("TOKEN").unwrap();
 
     let mut builder = discord_rs::BotBuilder::new(token);
-    builder.register_all(vec![&MsgEvent]);
+    builder.register_all(vec![&MsgEvent, &MsgEvent2]);
     let bot = builder.build();
     bot.listen().await;
 }
