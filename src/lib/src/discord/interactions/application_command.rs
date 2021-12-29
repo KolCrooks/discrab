@@ -1,11 +1,12 @@
 use crate::{
     core::http::rate_limit_client::{send_request, RequestRoute},
-    resources::channel::typing::ChannelType,
+    resources::{application::Application, channel::typing::ChannelType, user::User},
     util::error::Error,
     Context, Snowflake,
 };
 use hyper::{Body, Method, Request};
 use serde::{self, Deserialize, Serialize};
+use serde_json::Value;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
@@ -121,19 +122,89 @@ pub enum ApplicationCommandOptionChoiceValue {
     Number(f64),
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct CreateApplicationCommand {
+    /// The name of the command
+    pub name: String,
+    /// The description of the command
+    pub description: Option<String>,
+    /// The options of the command
+    pub options: Option<Vec<ApplicationCommandOption>>,
+    /// Whether the command is enabled by default when the app is added to a guild
+    pub default_permission: Option<bool>,
+    /// The type of command
+    #[serde(rename = "type")]
+    pub type_: Option<ApplicationCommandType>,
+}
+
 impl ApplicationCommand {
-    pub async fn get(ctx: Context, id: Snowflake) -> Result<ApplicationCommand, Error> {
+    pub async fn get_global(ctx: Context, id: Snowflake) -> Result<ApplicationCommand, Error> {
+        let slf = Application::get_self(ctx.clone()).await?;
+
         let route = RequestRoute {
-            base_route: "/gateway".to_string(),
+            base_route: "/applications/{application.id}/commands/{command.id}/".to_string(),
             major_param: "".to_string(),
         };
         let request_builder = Request::builder()
             .method(Method::GET)
-            .uri("https://discord.com/api/gateway/bot")
+            .uri(format!(
+                "https://discord.com/api/applications/{}/commands/{}/",
+                slf.id, id
+            ))
             .header("content-type", "application/json")
             .body(Body::empty())
             .unwrap();
 
         send_request(ctx, route, request_builder).await
+    }
+
+    pub async fn list_global(ctx: Context) -> Result<Vec<ApplicationCommand>, Error> {
+        let slf = Application::get_self(ctx.clone()).await?;
+
+        let route = RequestRoute {
+            base_route: "/applications/{application.id}/commands".to_string(),
+            major_param: "".to_string(),
+        };
+        let request_builder = Request::builder()
+            .method(Method::GET)
+            .uri(format!(
+                "https://discord.com/api/applications/{}/commands",
+                slf.id,
+            ))
+            .header("content-type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+
+        send_request(ctx, route, request_builder).await
+    }
+
+    /**
+         * POST/applications/{application.id}/commands
+    Creating a command with the same name as an existing command for your application will overwrite the old command.
+    Create a new global command. New global commands will be available in all guilds after 1 hour. Returns 201 and an application command object.
+         */
+    pub async fn create_global(
+        ctx: Context,
+        payload: CreateApplicationCommand,
+    ) -> Result<(), Error> {
+        let slf = Application::get_self(ctx.clone()).await?;
+
+        let route = RequestRoute {
+            base_route: "/applications/{application.id}/commands/".to_string(),
+            major_param: "".to_string(),
+        };
+        let request_builder = Request::builder()
+            .method(Method::POST)
+            .uri(format!(
+                "https://discord.com/api/applications/{}/commands/",
+                slf.id
+            ))
+            .header("content-type", "application/json")
+            .body(Body::from(serde_json::to_string(&payload).unwrap()))
+            .unwrap();
+
+        send_request::<Value>(ctx, route, request_builder)
+            .await
+            .map(|_| ())
     }
 }

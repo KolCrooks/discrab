@@ -43,7 +43,7 @@ pub struct SessionStartLimit {
 
 pub async fn get_gateway(ctx: Context) -> Result<Gateway, Error> {
     let route = RequestRoute {
-        base_route: "/gateway".to_string(),
+        base_route: "/gateway/bot".to_string(),
         major_param: "".to_string(),
     };
     let request_builder = Request::builder()

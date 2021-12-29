@@ -1,6 +1,12 @@
-use crate::discord::{snowflake::Snowflake, teams::Team};
+use crate::{
+    core::http::rate_limit_client::{send_request, RequestRoute},
+    discord::{snowflake::Snowflake, teams::Team},
+    util::error::Error,
+    Context,
+};
 
 use bitflags::bitflags;
+use hyper::{Body, Method, Request};
 use serde::{Deserialize, Deserializer, Serialize};
 
 use super::user::User;
@@ -74,5 +80,22 @@ impl<'de> Deserialize<'de> for ApplicationFlags {
 
         ApplicationFlags::from_bits(bits)
             .ok_or_else(|| serde::de::Error::custom(format!("Unexpected flags value {}", bits)))
+    }
+}
+
+impl Application {
+    pub async fn get_self(ctx: Context) -> Result<Application, Error> {
+        let route = RequestRoute {
+            base_route: "/oauth2/applications".to_string(),
+            major_param: "".to_string(),
+        };
+        let request_builder = Request::builder()
+            .method(Method::GET)
+            .uri("https://discord.com/api/oauth2/applications/@me")
+            .header("content-type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+
+        send_request(ctx, route, request_builder).await
     }
 }

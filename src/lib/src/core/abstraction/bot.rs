@@ -73,7 +73,7 @@ impl Bot {
     pub async fn listen(&self) {
         let event_handler = WebsocketEventHandler::create(self.ctx.clone()).await;
 
-        print_debug("BOT", "Sending ".to_string());
+        print_debug("BOT", "Identifying Self".to_string());
         let cmd = json!({
             "op": 2,
             "d": {
@@ -87,9 +87,9 @@ impl Bot {
             }
         });
         event_handler.send_command(cmd.to_string());
-        print_debug("BOT", "Listening...".to_string());
 
         let cmds = event_handler.get_command_channel();
+        print_debug("BOT", "Listening...".to_string());
         while let Ok((command, data)) = cmds.recv() {
             self.event_dispatcher
                 .route_event(self.ctx.clone(), command, data)
@@ -98,8 +98,6 @@ impl Bot {
     }
 
     pub async fn get_user(&self) -> User {
-        User::get(self.ctx.clone(), "@me".to_string())
-            .await
-            .unwrap()
+        User::get_self(self.ctx.clone()).await.unwrap()
     }
 }

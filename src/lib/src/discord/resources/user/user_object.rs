@@ -8,6 +8,7 @@ use crate::{
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{image_formats, snowflake::Snowflake},
+    util::error::Error,
 };
 
 use super::UserFlags;
@@ -176,7 +177,7 @@ impl User {
         })
     }
 
-    pub async fn get(ctx: Context, id: String) -> Option<User> {
+    pub async fn get(ctx: Context, id: String) -> Result<User, Error> {
         let route = RequestRoute {
             base_route: "/users".to_string(),
             major_param: "".to_string(),
@@ -188,9 +189,10 @@ impl User {
             .body(Body::empty())
             .unwrap();
 
-        match send_request::<User>(ctx, route, request_builder).await {
-            Ok(user) => Some(user),
-            Err(_) => None,
-        }
+        send_request::<User>(ctx, route, request_builder).await
+    }
+
+    pub async fn get_self(ctx: Context) -> Result<User, Error> {
+        User::get(ctx, "@me".to_string()).await
     }
 }

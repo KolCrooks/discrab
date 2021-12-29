@@ -185,7 +185,7 @@ impl WebsocketEventHandler {
                 }
                 PayloadOpcode::HeartbeatAck => {
                     // Acknowledged heartbeat
-                    println!("Heartbeat acknowledged");
+                    // println!("Heartbeat acknowledged");
                 }
                 _ => {}
             }

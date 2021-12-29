@@ -1,24 +1,44 @@
 use async_trait::async_trait;
 
 use discord_rs::{
+    application_command,
+    command_args::Interaction,
+    event_handler,
     resources::{Channel, Message},
-    Context, EventHandler, Events,
+    ApplicationCommand, ApplicationCommandHandler, ApplicationCommandType, Context, EventHandler,
+    Events,
 };
-use discordrs_codegen::event_handler;
 
-// use dotenv::dotenv;
 use std::env;
 
 struct MsgEvent;
 
 #[async_trait]
-#[event_handler(Events::message_create)]
+#[event_handler(Events::MessageCreate)]
 impl EventHandler<Message> for MsgEvent {
     async fn handler(ctx: Context, msg: Message) {
         if msg.content.starts_with("!ping") {
             Channel::send_message(ctx.clone(), msg.channel_id.to_string(), "pong".to_string())
                 .await
                 .unwrap();
+        }
+    }
+}
+
+struct AppCmd;
+
+#[async_trait]
+#[application_command(ApplicationCommandType::ChatInput)]
+impl ApplicationCommandHandler for AppCmd {
+    async fn handler(ctx: Context, msg: Interaction) {
+        if msg.data.unwrap().starts_with("!ping") {
+            Channel::send_message(
+                ctx.clone(),
+                msg.channel_id.unwrap().to_string(),
+                "pong".to_string(),
+            )
+            .await
+            .unwrap();
         }
     }
 }
