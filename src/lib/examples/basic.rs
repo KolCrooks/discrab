@@ -1,15 +1,13 @@
 use async_trait::async_trait;
 
-use async_std::task::block_on;
-use discord_rs::core::abstraction::commands::EventHandler;
-use discord_rs::core::abstraction::event_dispatcher::EventDispatcher;
-use discord_rs::discord::resources::channel::Channel;
-use discord_rs::{discord::resources::channel::message::Message, Context, Events};
+use discord_rs::{
+    resources::{Channel, Message},
+    Context, EventHandler, Events,
+};
 use discordrs_codegen::event_handler;
-use serde_json::json;
 
 // use dotenv::dotenv;
-use std::{env, thread, time::Duration};
+use std::env;
 
 struct MsgEvent;
 
@@ -24,21 +22,6 @@ impl EventHandler<Message> for MsgEvent {
         }
     }
 }
-struct MsgEvent2;
-
-#[async_trait]
-#[event_handler(Events::message_update)]
-impl EventHandler<Channel> for MsgEvent2 {
-    async fn handler(ctx: Context, msg: Channel) {
-        Channel::send_message(
-            ctx.clone(),
-            msg.application_id.unwrap().to_string(),
-            format!("message with id {} updated", msg.id).to_string(),
-        )
-        .await
-        .unwrap();
-    }
-}
 
 #[tokio::main]
 async fn main() {
@@ -46,7 +29,7 @@ async fn main() {
     let token = env::var("TOKEN").unwrap();
 
     let mut builder = discord_rs::BotBuilder::new(token);
-    builder.register_all(vec![&MsgEvent, &MsgEvent2]);
+    builder.register_all(vec![&MsgEvent]);
     let bot = builder.build();
     bot.listen().await;
 }

@@ -1,8 +1,11 @@
 use hyper::{Body, Method, Request};
 
-use crate::core::{
-    abstraction::context::Context,
-    http::rate_limit_client::{send_request, RequestRoute},
+use crate::{
+    core::{
+        abstraction::context::Context,
+        http::rate_limit_client::{send_request, RequestRoute},
+    },
+    util::error::Error,
 };
 use serde::Deserialize;
 use simd_json;
@@ -38,7 +41,7 @@ pub struct SessionStartLimit {
     pub max_concurrency: u64,
 }
 
-pub async fn get_gateway(ctx: Context) -> Result<Gateway, simd_json::Error> {
+pub async fn get_gateway(ctx: Context) -> Result<Gateway, Error> {
     let route = RequestRoute {
         base_route: "/gateway".to_string(),
         major_param: "".to_string(),

@@ -1,7 +1,11 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::interactions::{message::MessageComponent, typing::Interaction},
+    core::{
+        abstraction::commands::CommandArg,
+        interactions::{message::MessageComponent, typing::Interaction},
+    },
     discord::{
         resources::{
             application::Application,
@@ -29,7 +33,7 @@ use super::{
  * content, embeds, attachments, and components will require a privileged intent in 2022. Learn more here.
  * @docs https://discord.com/developers/docs/resources/channel#message-object
 */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Message {
     /// id of the message
     pub id: Snowflake,

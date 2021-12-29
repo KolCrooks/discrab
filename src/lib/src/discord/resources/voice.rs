@@ -1,13 +1,14 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::discord::snowflake::Snowflake;
+use crate::{core::abstraction::commands::CommandArg, discord::snowflake::Snowflake};
 
 use super::guild::guild_member::GuildMember;
 /**
  * Voice State
  * @docs https://discord.com/developers/docs/resources/voice#voice-state-object
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct VoiceState {
     /// the guild id this voice state is for
     pub guild_id: Option<Snowflake>,

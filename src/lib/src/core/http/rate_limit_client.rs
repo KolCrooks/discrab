@@ -1,7 +1,10 @@
 use hyper::{body::Body, header::AUTHORIZATION, Request};
 use serde::de::DeserializeOwned;
 
-use crate::core::abstraction::context::Context;
+use crate::{
+    core::abstraction::context::Context,
+    util::{error::Error, logger::print_debug},
+};
 
 use super::{
     request_future::{self},
@@ -72,7 +75,7 @@ pub async fn send_request<T: DeserializeOwned>(
     ctx: Context,
     route: RequestRoute,
     mut request: Request<Body>,
-) -> Result<T, simd_json::Error> {
+) -> Result<T, Error> {
     request
         .headers_mut()
         .insert(AUTHORIZATION, format!("Bot {}", ctx.token).parse().unwrap());
@@ -85,8 +88,20 @@ pub async fn send_request<T: DeserializeOwned>(
         .send(RequestObject::new(route, &mut future as *mut _))
         .unwrap();
 
-    let res = future.await.unwrap();
+    let res = match future.await {
+        Ok(res) => res,
+        Err(e) => {
+            print_debug("REQUEST", format!("Error: {:?}", e));
+            return Err(Error::new(
+                format!("{:?}", e),
+                crate::util::error::ErrorTypes::REQUEST,
+            ));
+        }
+    };
     let mut bytes = hyper::body::to_bytes(res).await.unwrap().to_vec();
 
-    simd_json::from_slice::<T>(&mut *bytes)
+    simd_json::from_slice::<T>(&mut *bytes).map_err(|e| {
+        print_debug("REQUEST", format!("Error: {:?}", e));
+        Error::new(format!("{:?}", e), crate::util::error::ErrorTypes::PARSE)
+    })
 }

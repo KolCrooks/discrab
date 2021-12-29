@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 
+use super::commands::CommandArg;
 use super::context::Context;
 use crate::core::interactions::handler::events::dispatch_payloads::{
     ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
@@ -12,8 +13,7 @@ use crate::core::interactions::handler::events::dispatch_payloads::{
 };
 use crate::core::interactions::typing::Interaction;
 use crate::discord::gateway::presence::PresenceUpdate;
-use crate::discord::resources::channel::message::Message;
-use crate::discord::resources::channel::Channel;
+use crate::discord::resources::channel::{message::Message, Channel};
 use crate::discord::resources::guild::guild_object::{Guild, UnavailableGuild};
 use crate::discord::resources::guild::stage_instance::StageInstance;
 use crate::discord::resources::guild_scheduled_event::GuildScheduledEvent;
@@ -22,11 +22,11 @@ use crate::discord::resources::voice::VoiceState;
 use serde_json::Value;
 use std::mem;
 
-pub struct Observable<T: Clone> {
+pub struct Observable<T: Clone + CommandArg> {
     subscribers: Vec<Box<dyn Fn(Context, T) + Send>>,
 }
 
-impl<T: Clone> Observable<T> {
+impl<T: Clone + CommandArg> Observable<T> {
     pub fn new() -> Self {
         Observable {
             subscribers: Vec::new(),
@@ -44,7 +44,7 @@ impl<T: Clone> Observable<T> {
     }
 }
 
-impl<T: Clone> Default for Observable<T> {
+impl<T: Clone + CommandArg> Default for Observable<T> {
     fn default() -> Self {
         Observable::new()
     }
@@ -90,11 +90,16 @@ macro_rules! event_subscriptions {
                 }
             }
 
-            pub fn get_observable<T: Clone>(&mut self, event: Events) -> &mut Observable<T> {
+            pub fn get_observable<T: Clone + CommandArg>(&mut self, event: Events, type_str: &str) -> &mut Observable<T> {
                 let ptr: &mut bool = unsafe {
                     match event {
                         $(
-                            Events::$Flag => mem::transmute(&mut self.$Flag),
+                            Events::$Flag => {
+                                if stringify!($x) != type_str {
+                                    panic!("Event type mismatch! Expected type: `{}`, recieved: `{}`", stringify!($x), type_str);
+                                }
+                                mem::transmute(&mut self.$Flag)
+                            },
                         )+
                     }
                 };
@@ -115,7 +120,7 @@ macro_rules! event_subscriptions {
                 $Flag,
             )+
         }
-     };
+   };
 }
 
 event_subscriptions! {

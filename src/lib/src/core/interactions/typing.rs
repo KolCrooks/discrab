@@ -1,15 +1,19 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::discord::{
-    resources::{channel::message::Message, guild::guild_member::GuildMember, user::User},
-    snowflake::Snowflake,
+use crate::{
+    core::abstraction::commands::CommandArg,
+    discord::{
+        resources::{channel::message::Message, guild::guild_member::GuildMember, user::User},
+        snowflake::Snowflake,
+    },
 };
 
 /**
  * Interaction
  * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Interaction {
     /// The id of the interaction
     pub id: Snowflake,

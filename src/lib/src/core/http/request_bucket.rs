@@ -1,3 +1,4 @@
+#[derive(PartialEq)]
 pub struct Bucket {
     pub max_requests: i32,
     pub remaining_requests: i32,
@@ -5,7 +6,7 @@ pub struct Bucket {
 }
 
 impl Bucket {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             max_requests: 1,
             remaining_requests: 1,

@@ -1,6 +1,10 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::discord::{resources::user::User, snowflake::Snowflake};
+use crate::{
+    core::abstraction::commands::CommandArg,
+    discord::{resources::user::User, snowflake::Snowflake},
+};
 
 use super::activity::Activity;
 
@@ -8,7 +12,7 @@ use super::activity::Activity;
  * Presence Update Event
  * @docs https://discord.com/developers/docs/topics/gateway#presence-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct PresenceUpdate {
     /// The user presence is being updated for
     pub user: User,

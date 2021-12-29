@@ -1,13 +1,14 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::discord::snowflake::Snowflake;
+use crate::{core::abstraction::commands::CommandArg, discord::snowflake::Snowflake};
 
 /**
  * Stage Instance Structure
  * @docs https://discord.com/developers/docs/resources/stage-instance#stage-instance-object
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct StageInstance {
     /// The id of this Stage instance
     pub id: Snowflake,

@@ -1,5 +1,6 @@
 {
   "rust-analyzer.checkOnSave.command": "clippy",
+  "rust-analyzer.procMacro.enable": true,
   "cSpell.words": [
     "bitfield",
     "blurple",

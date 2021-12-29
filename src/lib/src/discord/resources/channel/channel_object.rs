@@ -1,9 +1,13 @@
+use discordrs_codegen::CommandArg;
 use hyper::{Body, Method, Request};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{
-    core::http::rate_limit_client::{send_request, RequestRoute},
+    core::{
+        abstraction::commands::CommandArg,
+        http::rate_limit_client::{send_request, RequestRoute},
+    },
     discord::{resources::user::User, snowflake::Snowflake},
     Context,
 };
@@ -16,7 +20,7 @@ use super::typing::{
  * Represents a guild or DM channel within Discord.
  * @docs https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Channel {
     /// The id of this channel
     pub id: Snowflake,
@@ -92,7 +96,7 @@ impl Channel {
             .unwrap();
 
         match send_request::<Value>(ctx, route, request_builder).await {
-            Ok(v) => Ok(()),
+            Ok(_) => Ok(()),
             Err(e) => {
                 println!("Error sending message {}", e);
                 Err(())

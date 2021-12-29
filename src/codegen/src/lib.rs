@@ -1,9 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, FnArg, ImplItem, Meta, NestedMeta, Type, TypePath};
-use type_check::check_type;
-
-mod type_check;
+use syn::{parse_macro_input, DeriveInput, FnArg, ImplItem, Meta, NestedMeta, Type};
 
 #[proc_macro_attribute]
 pub fn event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
@@ -39,28 +36,30 @@ pub fn event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
         panic!("event name must be a string")
     };
 
-    let event_name = event.segments.last().unwrap().ident.to_string();
     let event_type = if let Type::Path(p) = &*handler_arg2 {
         p.path.segments.last().unwrap().ident.to_string()
     } else {
         panic!("handler argument must be a type")
     };
 
-    if let Err(e) = check_type(event_name, event_type) {
-        panic!(
-            "Handler for {} doesn't use type {} as its second argument.",
-            event.segments.last().unwrap().ident,
-            e
-        );
-    }
-
     let output = quote! {
         #input
         impl discord_rs::Registerable for #name {
             fn register(&self, dispatcher: &mut discord_rs::EventDispatcher) {
-                dispatcher.get_observable(#event).subscribe(&move |ctx, val| block_on(#name::handler(ctx, val)));
+                dispatcher.get_observable(#event, #event_type).subscribe(&move |ctx, val| async_std::task::block_on(#name::handler(ctx, val)));
             }
         }
     };
     output.into()
+}
+
+#[proc_macro_derive(CommandArg)]
+pub fn command_arg_derive(input: TokenStream) -> TokenStream {
+    let ast = syn::parse::<DeriveInput>(input).unwrap();
+    let name = ast.ident;
+    let gen = quote! {
+        impl CommandArg for #name {
+        }
+    };
+    gen.into()
 }

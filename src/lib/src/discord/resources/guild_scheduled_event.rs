@@ -1,4 +1,7 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
+
+use crate::core::abstraction::commands::CommandArg;
 
 use super::user::User;
 
@@ -6,7 +9,7 @@ use super::user::User;
  * Guild Scheduled Event Structure
  * @docs https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildScheduledEvent {
     /// The id of the scheduled event
     pub id: u64,

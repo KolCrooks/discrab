@@ -1,20 +1,24 @@
+use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::discord::{
-    gateway::presence::PresenceUpdate,
-    resources::{
-        application::Application,
-        channel::{typing::ThreadMember, Channel},
-        emoji::Emoji,
-        guild::{
-            guild_member::GuildMember,
-            integration::{Account, IntegrationType},
-            role::Role,
+use crate::{
+    core::abstraction::commands::CommandArg,
+    discord::{
+        gateway::presence::PresenceUpdate,
+        resources::{
+            application::Application,
+            channel::{typing::ThreadMember, Channel},
+            emoji::Emoji,
+            guild::{
+                guild_member::GuildMember,
+                integration::{Account, IntegrationType},
+                role::Role,
+            },
+            user::User,
         },
-        user::User,
+        snowflake::Snowflake,
     },
-    snowflake::Snowflake,
 };
 
 /**
@@ -22,7 +26,7 @@ use crate::discord::{
  * Sent when a message is pinned or unpinned in a text channel. This is not sent when a pinned message is deleted.
  * @docs https://discord.com/developers/docs/topics/gateway#channel-pins-update
 */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ChannelPinsUpdate {
     /// the id of the guild
     pub guild_id: Option<Snowflake>,
@@ -36,7 +40,7 @@ pub struct ChannelPinsUpdate {
  * Thread List Sync Event Fields
  * @docs https://discord.com/developers/docs/topics/gateway#thread-list-sync-thread-list-sync-event-fields
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadListSync {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -52,7 +56,7 @@ pub struct ThreadListSync {
  * Thread Member Update
  * @docs https://discord.com/developers/docs/topics/gateway#thread-member-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadMemberUpdate {
     /// The id of the thread
     pub id: Snowflake,
@@ -70,7 +74,7 @@ pub struct ThreadMemberUpdate {
  * Thread Members Update Event Fields
  * @docs https://discord.com/developers/docs/topics/gateway#thread-members-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadMembersUpdate {
     /// The id of the thread
     pub id: Snowflake,
@@ -88,7 +92,7 @@ pub struct ThreadMembersUpdate {
  * Guild Member Update Event Fields
  * @docs https://discord.com/developers/docs/topics/gateway#guild-member-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberUpdate {
     /// The id of the guild
     pub guild_id: Snowflake,
@@ -118,7 +122,7 @@ pub struct GuildMemberUpdate {
  * Guild Ban Add or Remove
  * @docs https://discord.com/developers/docs/topics/gateway#guild-ban-add
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildBanAddRemove {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -130,7 +134,7 @@ pub struct GuildBanAddRemove {
  * Guild Emojis
  * @docs https://discord.com/developers/docs/topics/gateway#guild-emojis-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildEmojisUpdate {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -142,7 +146,7 @@ pub struct GuildEmojisUpdate {
  * Guild Stickers Update
  * @docs https://discord.com/developers/docs/topics/gateway#guild-stickers-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildStickersUpdate {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -154,7 +158,7 @@ pub struct GuildStickersUpdate {
  * Guild Integrations Update
  * @docs https://discord.com/developers/docs/topics/gateway#guild-integrations-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildIntegrationsUpdate {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -164,7 +168,7 @@ pub struct GuildIntegrationsUpdate {
  * Guild Member Add
  * @docs https://discord.com/developers/docs/topics/gateway#guild-member-add
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberAdd {
     /// The user this guild member represents
     pub user: Option<User>,
@@ -194,7 +198,7 @@ pub struct GuildMemberAdd {
  * Guild Member Remove
  * @docs https://discord.com/developers/docs/topics/gateway#guild-member-remove
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberRemove {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -206,7 +210,7 @@ pub struct GuildMemberRemove {
  * Guild Members
  * @docs https://discord.com/developers/docs/topics/gateway#guild-members-chunk
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMembersChunk {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -228,7 +232,7 @@ pub struct GuildMembersChunk {
  * Guild Role Create or Update or Delete
  * @docs https://discord.com/developers/docs/topics/gateway#guild-role-create
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildRoleCreateUpdateDelete {
     /// the id of the guild
     pub guild_id: Snowflake,
@@ -239,7 +243,7 @@ pub struct GuildRoleCreateUpdateDelete {
 /**
  * Guild Scheduled Event User Add or Remove
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildScheduledEventUserAddRemove {
     /// the id of the guild scheduled event
     pub guild_scheduled_event_id: Snowflake,
@@ -253,7 +257,7 @@ pub struct GuildScheduledEventUserAddRemove {
  * Integration Structure
  * @docs https://discord.com/developers/docs/topics/gateway#integrations
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct IntegrationCreateUpdate {
     /// The id of the integration
     pub id: u64,
@@ -294,7 +298,7 @@ pub struct IntegrationCreateUpdate {
  * Integration Delete
  * @docs https://discord.com/developers/docs/topics/gateway#integration-delete
 */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct IntegrationDelete {
     /// The id of the integration
     pub id: u64,
@@ -308,7 +312,7 @@ pub struct IntegrationDelete {
  * Invite Create
  * @docs https://discord.com/developers/docs/topics/gateway#invites
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct InviteCreate {
     /// the channel the invite is for
     pub channel_id: Snowflake,
@@ -351,7 +355,7 @@ pub enum InviteTargetType {
  * Invite Delete Event
  * @docs https://discord.com/developers/docs/topics/gateway#invite-delete
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct InviteDelete {
     /// the channel of the invite
     pub channel_id: Snowflake,
@@ -365,7 +369,7 @@ pub struct InviteDelete {
  * Message Delete
  * @docs https://discord.com/developers/docs/topics/gateway#message-delete
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageDelete {
     /// the id of the message
     pub id: Snowflake,
@@ -379,7 +383,7 @@ pub struct MessageDelete {
  * Message Delete Bulk
  * @docs https://discord.com/developers/docs/topics/gateway#message-delete-bulk
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageDeleteBulk {
     /// the ids of the messages
     pub ids: Vec<Snowflake>,
@@ -393,7 +397,7 @@ pub struct MessageDeleteBulk {
  * Message Reaction Add
  * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-add
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionAdd {
     /// the id of the user
     pub user_id: Snowflake,
@@ -413,7 +417,7 @@ pub struct MessageReactionAdd {
  * Message Reaction Remove
  * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemove {
     /// the id of the user
     pub user_id: Snowflake,
@@ -431,7 +435,7 @@ pub struct MessageReactionRemove {
  * Message Reaction Remove All
  * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove-all
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemoveAll {
     /// the id of the channel
     pub channel_id: Snowflake,
@@ -445,7 +449,7 @@ pub struct MessageReactionRemoveAll {
  * Message Reaction Remove Emoji
  * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove-emoji
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemoveEmoji {
     /// the id of the channel
     pub channel_id: Snowflake,
@@ -461,7 +465,7 @@ pub struct MessageReactionRemoveEmoji {
  * Typing Start
  * @docs https://discord.com/developers/docs/topics/gateway#typing-start
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct TypingStart {
     /// the id of the channel
     pub channel_id: Snowflake,
@@ -479,7 +483,7 @@ pub struct TypingStart {
  * Voice Server Update
  * @docs https://discord.com/developers/docs/topics/gateway#voice-server-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct VoiceServerUpdate {
     /// the voice connection token
     pub token: String,
@@ -493,7 +497,7 @@ pub struct VoiceServerUpdate {
  * Webhooks Update
  * @docs https://discord.com/developers/docs/topics/gateway#webhooks-update
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct WebhooksUpdate {
     /// the id of the guild
     pub guild_id: Snowflake,

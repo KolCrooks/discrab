@@ -1,9 +1,10 @@
+use discordrs_codegen::CommandArg;
 use hyper::{Body, Method, Request};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        abstraction::context::Context,
+        abstraction::{commands::CommandArg, context::Context},
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{image_formats, snowflake::Snowflake},
@@ -15,7 +16,7 @@ use super::UserFlags;
  * User Object
  * @docs https://discord.com/developers/docs/resources/user#user-object
  */
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct User {
     /**
      * The user's id

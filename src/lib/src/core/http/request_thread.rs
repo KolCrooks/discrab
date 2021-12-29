@@ -36,7 +36,10 @@ where
             let mut requests_sent: u64 = 0;
 
             // TODO: Clean the buckets at certain times, also clean the send_queue so that the hashmap doesn't continuously grow in size
-            let mut rate_buckets: HashMap<RequestRoute, request_bucket::Bucket> = HashMap::new();
+            let mut rate_buckets: HashMap<String, request_bucket::Bucket> = HashMap::new();
+            let mut route_to_bucket: HashMap<RequestRoute, String> = HashMap::new();
+
+            rate_buckets.insert("UNKNOWN".to_string(), request_bucket::Bucket::new());
 
             // Main Request Loop
             loop {
@@ -70,29 +73,29 @@ where
                     RequestRoute,
                     &mut request_future::HttpFuture,
                     ResponseFuture,
+                    String,
                 )> = Vec::new();
 
                 // Iterate through all of the requests in the queue, and add them to the futures vector if they can be executed
                 for route in sorted_routes {
                     // Get the bucket for this route, or create it if it doesn't exist
-                    let bucket = match rate_buckets.get_mut(&route) {
-                        Some(bucket) => bucket,
-                        None => {
-                            let new_bucket = request_bucket::Bucket::new();
-                            rate_buckets.insert(route.clone(), new_bucket);
-                            rate_buckets.get_mut(&route).unwrap()
-                        }
+                    let bucket = match route_to_bucket.get(&route) {
+                        None => (
+                            "UNKNOWN".to_string(),
+                            rate_buckets.get_mut("UNKNOWN").unwrap(),
+                        ),
+                        Some(bucket) => (bucket.to_string(), rate_buckets.get_mut(bucket).unwrap()),
                     };
 
                     // Reset the bucket if it is past the reset time
-                    if bucket.reset_at < chrono::Utc::now().timestamp() {
-                        bucket.remaining_requests = bucket.max_requests;
+                    if bucket.1.reset_at < chrono::Utc::now().timestamp() {
+                        bucket.1.remaining_requests = bucket.1.max_requests;
                     }
 
                     // get the queue for the route, and then get as many requests as possible from the queue
                     // This means it will take min(global_limit, bucket.remaining_requests) requests from the queue
                     let queue = http_queue.get_bucket_queue(&route).unwrap();
-                    while bucket.remaining_requests > 0 && global_allowance >= 1f64 {
+                    while bucket.1.remaining_requests > 0 && global_allowance >= 1f64 {
                         // Pop the front and add it to the futures vector if it exists, or break out if the queue is empty
                         match queue.pop() {
                             Some((_, req_future)) => {
@@ -102,10 +105,10 @@ where
                                     let mut shared_state = future_ptr.shared_state.lock().unwrap();
                                     client.request(shared_state.request.take().unwrap())
                                 };
-                                responses.push((route.clone(), future_ptr, req));
+                                responses.push((route.clone(), future_ptr, req, bucket.0.clone()));
                                 requests_sent += 1;
 
-                                bucket.remaining_requests -= 1;
+                                bucket.1.remaining_requests -= 1;
                                 global_allowance -= 1f64;
                             }
                             None => {
@@ -126,7 +129,7 @@ where
                 let mut last_date_map: HashMap<RequestRoute, i64> = HashMap::new();
 
                 // Collect the responses, and resolve all of the Request Futures
-                for (route, req, future) in responses {
+                for (route, req, future, bucket_name) in responses {
                     // Block execution until the future is resolved, and then process the rate limit information from the response
                     // TODO figure out how to make this run in parallel
                     let receives = match async_std::task::block_on(future) {
@@ -143,20 +146,44 @@ where
                             // Only update rate limit information if this request is more recent than the rest
                             if date > *last_date_map.get(&route).or(Some(&0)).unwrap() {
                                 last_date_map.insert(route.clone(), date);
-                                let bucket = rate_buckets.get_mut(&route).unwrap();
-                                bucket.remaining_requests = get_header_as::<i32>(
+
+                                let remaining_requests = get_header_as::<i32>(
                                     received.headers(),
                                     "X-RateLimit-Remaining",
                                 )
                                 .unwrap_or(0);
 
-                                bucket.max_requests =
+                                let max_requests =
                                     get_header_as::<i32>(received.headers(), "X-RateLimit-Limit")
                                         .unwrap_or(1);
 
-                                bucket.reset_at =
+                                let reset_at =
                                     get_header_as::<i64>(received.headers(), "X-RateLimit-Reset")
                                         .unwrap_or(0); // TODO make this an actual value
+
+                                let mut bucket = if bucket_name == "UNKNOWN" {
+                                    let bucket_name = get_header_as::<String>(
+                                        received.headers(),
+                                        "X-RateLimit-Bucket",
+                                    )
+                                    .expect("Bucket name not supplied in response headers");
+
+                                    rate_buckets.get_mut("UNKNOWN").unwrap().remaining_requests = 1;
+
+                                    route_to_bucket.insert(route.clone(), bucket_name.to_string());
+                                    rate_buckets.entry(bucket_name).or_insert_with(|| {
+                                        request_bucket::Bucket {
+                                            max_requests,
+                                            remaining_requests,
+                                            reset_at,
+                                        }
+                                    })
+                                } else {
+                                    rate_buckets.get_mut(&bucket_name).unwrap()
+                                };
+                                bucket.max_requests = max_requests;
+                                bucket.remaining_requests = remaining_requests;
+                                bucket.reset_at = reset_at;
                             }
                             Ok(received)
                         }

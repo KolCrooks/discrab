@@ -1,14 +1,14 @@
-use async_std::task::block_on;
-use futures_util::Future;
 use serde_json::json;
 
 use crate::{
     core::{
         http::{rate_limit_client::RLClient, request_queue::BasicHttpQueue},
         interactions::handler::{websocket::WebsocketEventHandler, SocketClient},
+        settings::Settings,
     },
     discord::resources::user::User,
-    Events, Registerable,
+    util::logger::print_debug,
+    Registerable,
 };
 
 use super::{context::Context, event_dispatcher::EventDispatcher};
@@ -31,14 +31,19 @@ impl BotBuilder {
         let ctx = Context {
             token: token.clone(),
             request_stream: client.get_req_sender(),
+            settings: Settings::default(),
             cache: (),
         };
-        let mut event_dispatcher = EventDispatcher::new();
+        let event_dispatcher = EventDispatcher::new();
         Self {
             ctx,
             event_dispatcher,
             token,
         }
+    }
+
+    pub fn settings(&mut self) -> &mut Settings {
+        &mut self.ctx.settings
     }
 
     pub fn register_all(&mut self, to_register: Vec<&dyn Registerable>) {
@@ -53,6 +58,10 @@ impl BotBuilder {
 }
 
 impl Bot {
+    pub fn builder(token: String) -> BotBuilder {
+        BotBuilder::new(token)
+    }
+
     pub fn create_with_builder(bldr: BotBuilder) -> Self {
         Bot {
             ctx: bldr.ctx,
@@ -64,6 +73,7 @@ impl Bot {
     pub async fn listen(&self) {
         let event_handler = WebsocketEventHandler::create(self.ctx.clone()).await;
 
+        print_debug("BOT", "Sending ".to_string());
         let cmd = json!({
             "op": 2,
             "d": {
@@ -77,6 +87,7 @@ impl Bot {
             }
         });
         event_handler.send_command(cmd.to_string());
+        print_debug("BOT", "Listening...".to_string());
 
         let cmds = event_handler.get_command_channel();
         while let Ok((command, data)) = cmds.recv() {
