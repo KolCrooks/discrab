@@ -4,7 +4,7 @@ mod util;
 
 pub use crate::core::abstraction::{
     bot::{Bot, BotBuilder},
-    commands::{ApplicationCommandHandler, EventHandler, Registerable, RegisterableImpl},
+    commands::{ApplicationCommandHandler, EventHandler, Registerable},
     context::Context,
     event_dispatcher::{EventDispatcher, Events},
 };

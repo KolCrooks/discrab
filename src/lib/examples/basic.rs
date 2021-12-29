@@ -14,8 +14,9 @@ use std::env;
 struct MsgEvent;
 
 #[async_trait]
-#[event_handler(Events::MessageCreate)]
+#[event_handler]
 impl EventHandler<Message> for MsgEvent {
+    const EVENT_TYPE: Events = Events::MessageCreate;
     async fn handler(ctx: Context, msg: Message) {
         if msg.content.starts_with("!ping") {
             Channel::send_message(ctx.clone(), msg.channel_id.to_string(), "pong".to_string())
@@ -28,8 +29,9 @@ impl EventHandler<Message> for MsgEvent {
 struct AppCmd;
 
 #[async_trait]
-#[application_command(ApplicationCommandType::ChatInput)]
+#[application_command]
 impl ApplicationCommandHandler for AppCmd {
+    const COMMAND_TYPE: ApplicationCommandType = ApplicationCommandType::Message;
     async fn handler(ctx: Context, msg: Interaction) {
         if msg.data.unwrap().starts_with("!ping") {
             Channel::send_message(
