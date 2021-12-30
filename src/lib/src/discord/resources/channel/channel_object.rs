@@ -5,11 +5,13 @@ use serde_json::Value;
 
 use crate::{
     core::{
-        abstraction::commands::CommandArg,
+        abstraction::abstraction_traits::CommandArg,
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{resources::user::User, snowflake::Snowflake},
-    Context,
+    resources::Message,
+    util::error::Error,
+    Context, BASE_URL,
 };
 
 use super::typing::{
@@ -77,7 +79,11 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub async fn send_message(ctx: Context, channel_id: String, content: String) -> Result<(), ()> {
+    pub async fn send_message(
+        ctx: Context,
+        channel_id: String,
+        content: String,
+    ) -> Result<Message, Error> {
         let route = RequestRoute {
             base_route: format!("/channels/{}/messages", channel_id.clone()),
             major_param: channel_id.clone(),
@@ -88,19 +94,14 @@ impl Channel {
         let request_builder = Request::builder()
             .method(Method::POST)
             .uri(format!(
-                "https://discord.com/api/channels/{}/messages",
+                "{}/channels/{}/messages",
+                BASE_URL,
                 channel_id.clone()
             ))
             .header("content-type", "application/json")
             .body(body)
             .unwrap();
 
-        match send_request::<Value>(ctx, route, request_builder).await {
-            Ok(_) => Ok(()),
-            Err(e) => {
-                println!("Error sending message {}", e);
-                Err(())
-            }
-        }
+        send_request(ctx, route, request_builder).await
     }
 }

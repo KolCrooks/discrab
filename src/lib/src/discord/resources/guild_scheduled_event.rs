@@ -1,7 +1,7 @@
 use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::core::abstraction::commands::CommandArg;
+use crate::{core::abstraction::abstraction_traits::CommandArg, Snowflake};
 
 use super::user::User;
 
@@ -12,9 +12,9 @@ use super::user::User;
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildScheduledEvent {
     /// The id of the scheduled event
-    pub id: u64,
+    pub id: Snowflake,
     /// The guild id which the scheduled event belongs to
-    pub guild_id: u64,
+    pub guild_id: Snowflake,
     /// The channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL
     pub channel_id: Option<u64>,
     /// The id of the user that created the scheduled event *

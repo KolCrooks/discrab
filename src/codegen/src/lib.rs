@@ -10,7 +10,7 @@ pub fn event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn application_command(_args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn command(_args: TokenStream, input: TokenStream) -> TokenStream {
     application_command::gen_event_handler(_args, input)
 }
 

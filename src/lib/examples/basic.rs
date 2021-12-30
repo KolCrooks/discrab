@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 
 use discord_rs::{
-    application_command,
+    command,
     command_args::Interaction,
     event_handler,
     resources::{Channel, Message},
-    ApplicationCommand, ApplicationCommandHandler, ApplicationCommandType, Context, EventHandler,
-    Events,
+    ApplicationCommandType, Bot, CommandHandler, Context, EventHandler, Events,
 };
 
 use std::env;
@@ -29,19 +28,20 @@ impl EventHandler<Message> for MsgEvent {
 struct AppCmd;
 
 #[async_trait]
-#[application_command]
-impl ApplicationCommandHandler for AppCmd {
-    const COMMAND_TYPE: ApplicationCommandType = ApplicationCommandType::Message;
-    async fn handler(ctx: Context, msg: Interaction) {
-        if msg.data.unwrap().starts_with("!ping") {
-            Channel::send_message(
-                ctx.clone(),
-                msg.channel_id.unwrap().to_string(),
-                "pong".to_string(),
-            )
-            .await
-            .unwrap();
-        }
+#[command]
+impl CommandHandler for AppCmd {
+    const COMMAND_TYPE: ApplicationCommandType = ApplicationCommandType::ChatInput;
+    const COMMAND_NAME: &'static str = "ping";
+    const COMMAND_DESCRIPTION: &'static str = "pong!";
+
+    async fn handler(ctx: Context, interaction: Interaction) {
+        Channel::send_message(
+            ctx.clone(),
+            interaction.channel_id.unwrap().to_string(),
+            "pong!".to_string(),
+        )
+        .await
+        .unwrap();
     }
 }
 
@@ -50,8 +50,8 @@ async fn main() {
     dotenv::from_filename(".local.env").ok();
     let token = env::var("TOKEN").unwrap();
 
-    let mut builder = discord_rs::BotBuilder::new(token);
-    builder.register_all(vec![&MsgEvent]);
-    let bot = builder.build();
-    bot.listen().await;
+    Bot::new(token)
+        .register_all(vec![&MsgEvent, &AppCmd])
+        .listen()
+        .await;
 }

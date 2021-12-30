@@ -1,6 +1,8 @@
 use std::{collections::HashMap, thread, time::Instant};
 
+use async_std::task::block_on;
 use crossbeam_channel::Receiver;
+use futures_util::StreamExt;
 use hyper::{client::ResponseFuture, Client};
 use hyper_tls::HttpsConnector;
 
@@ -165,25 +167,30 @@ where
                                     let bucket_name = get_header_as::<String>(
                                         received.headers(),
                                         "X-RateLimit-Bucket",
-                                    )
-                                    .expect("Bucket name not supplied in response headers");
+                                    );
 
                                     rate_buckets.get_mut("UNKNOWN").unwrap().remaining_requests = 1;
-
-                                    route_to_bucket.insert(route.clone(), bucket_name.to_string());
-                                    rate_buckets.entry(bucket_name).or_insert_with(|| {
-                                        request_bucket::Bucket {
-                                            max_requests,
-                                            remaining_requests,
-                                            reset_at,
-                                        }
-                                    })
+                                    if let Some(bucket_name) = bucket_name {
+                                        route_to_bucket
+                                            .insert(route.clone(), bucket_name.to_string());
+                                        Some(rate_buckets.entry(bucket_name).or_insert_with(|| {
+                                            request_bucket::Bucket {
+                                                max_requests,
+                                                remaining_requests,
+                                                reset_at,
+                                            }
+                                        }))
+                                    } else {
+                                        None
+                                    }
                                 } else {
-                                    rate_buckets.get_mut(&bucket_name).unwrap()
+                                    rate_buckets.get_mut(&bucket_name)
                                 };
-                                bucket.max_requests = max_requests;
-                                bucket.remaining_requests = remaining_requests;
-                                bucket.reset_at = reset_at;
+                                if let Some(bucket) = bucket {
+                                    bucket.remaining_requests = remaining_requests;
+                                    bucket.max_requests = max_requests;
+                                    bucket.reset_at = reset_at;
+                                }
                             }
                             Ok(received)
                         }

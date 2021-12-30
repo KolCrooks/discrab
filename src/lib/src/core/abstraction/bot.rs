@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use serde_json::json;
 
 use crate::{
@@ -11,21 +13,18 @@ use crate::{
     Registerable,
 };
 
-use super::{context::Context, event_dispatcher::EventDispatcher};
+use super::{
+    context::Context, event_dispatcher::EventDispatcher, interaction_router::InteractionRouter,
+};
 
-pub struct Bot {
+pub struct Bot<'a> {
     ctx: Context,
-    event_dispatcher: EventDispatcher,
+    event_dispatcher: EventDispatcher<'a>,
     token: String,
+    interaction_router: InteractionRouter,
 }
 
-pub struct BotBuilder {
-    ctx: Context,
-    pub event_dispatcher: EventDispatcher,
-    token: String,
-}
-
-impl BotBuilder {
+impl<'a> Bot<'a> {
     pub fn new(token: String) -> Self {
         let client = RLClient::new(BasicHttpQueue::new(60));
         let ctx = Context {
@@ -34,8 +33,11 @@ impl BotBuilder {
             settings: Settings::default(),
             cache: (),
         };
-        let event_dispatcher = EventDispatcher::new();
+        let mut event_dispatcher = EventDispatcher::new();
+        let mut interaction_router = InteractionRouter::new(ctx.clone());
+        interaction_router.attatch(&mut event_dispatcher);
         Self {
+            interaction_router,
             ctx,
             event_dispatcher,
             token,
@@ -46,28 +48,15 @@ impl BotBuilder {
         &mut self.ctx.settings
     }
 
-    pub fn register_all(&mut self, to_register: Vec<&dyn Registerable>) {
+    pub fn register_all(&mut self, to_register: Vec<&dyn Registerable>) -> &mut Self {
         for event in to_register.iter() {
-            event.register(&mut self.event_dispatcher);
+            event.register(
+                self.ctx.clone(),
+                &mut self.event_dispatcher,
+                &mut self.interaction_router,
+            );
         }
-    }
-
-    pub fn build(self) -> Bot {
-        Bot::create_with_builder(self)
-    }
-}
-
-impl Bot {
-    pub fn builder(token: String) -> BotBuilder {
-        BotBuilder::new(token)
-    }
-
-    pub fn create_with_builder(bldr: BotBuilder) -> Self {
-        Bot {
-            ctx: bldr.ctx,
-            event_dispatcher: bldr.event_dispatcher,
-            token: bldr.token,
-        }
+        self
     }
 
     pub async fn listen(&self) {

@@ -4,11 +4,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        abstraction::{commands::CommandArg, context::Context},
+        abstraction::{abstraction_traits::CommandArg, context::Context},
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{image_formats, snowflake::Snowflake},
     util::error::Error,
+    BASE_URL,
 };
 
 use super::UserFlags;
@@ -184,7 +185,7 @@ impl User {
         };
         let request_builder = Request::builder()
             .method(Method::GET)
-            .uri(format!("https://discord.com/api/users/{}", id))
+            .uri(format!("{}/users/{}", BASE_URL, id))
             .header("content-type", "application/json")
             .body(Body::empty())
             .unwrap();

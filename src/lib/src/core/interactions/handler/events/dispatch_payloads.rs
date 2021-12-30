@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
-    core::abstraction::commands::CommandArg,
+    core::abstraction::abstraction_traits::CommandArg,
     discord::{
         gateway::presence::PresenceUpdate,
         resources::{
@@ -260,7 +260,7 @@ pub struct GuildScheduledEventUserAddRemove {
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct IntegrationCreateUpdate {
     /// The id of the integration
-    pub id: u64,
+    pub id: Snowflake,
     /// The name of the integration
     pub name: String,
     /// The type of the integration

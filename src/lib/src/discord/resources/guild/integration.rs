@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::discord::resources::{application::Application, user::User};
+use crate::{
+    discord::resources::{application::Application, user::User},
+    Snowflake,
+};
 
 /**
  * Integration Structure
@@ -9,7 +12,7 @@ use crate::discord::resources::{application::Application, user::User};
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Integration {
     /// The id of the integration
-    pub id: u64,
+    pub id: Snowflake,
     /// The name of the integration
     pub name: String,
     /// The type of the integration

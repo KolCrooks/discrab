@@ -2,7 +2,7 @@ use core::panic;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, FnArg, ImplItem, Meta, NestedMeta, Type};
+use syn::{parse_macro_input, ImplItem};
 
 pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemImpl);
@@ -37,8 +37,8 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     let output = quote! {
         #input
         impl discord_rs::Registerable for #name {
-            fn register(&self, dispatcher: &mut discord_rs::EventDispatcher) {
-                dispatcher.get_observable(#name::EVENT_TYPE, "#event_type_str").subscribe(&move |ctx, val| async_std::task::block_on(#name::handler(ctx, val)));
+            fn register(&self,ctx: Context, dispatcher: &mut discord_rs::EventDispatcher, _: &mut discord_rs::InteractionRouter) {
+                dispatcher.get_observable(#name::EVENT_TYPE, stringify!(#event_type_str)).subscribe(&move |ctx, val| async_std::task::block_on(#name::handler(ctx, val)));
             }
         }
     };

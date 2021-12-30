@@ -3,10 +3,11 @@ mod discord;
 mod util;
 
 pub use crate::core::abstraction::{
-    bot::{Bot, BotBuilder},
-    commands::{ApplicationCommandHandler, EventHandler, Registerable},
+    abstraction_traits::{CommandHandler, CommandHandlerImpl, EventHandler, Registerable},
+    bot::Bot,
     context::Context,
     event_dispatcher::{EventDispatcher, Events},
+    interaction_router::InteractionRouter,
 };
 
 pub use discordrs_codegen::*;
@@ -33,3 +34,5 @@ pub use discord::interactions::application_command::{ApplicationCommand, Applica
 
 pub use discord::permissions::Permissions;
 pub use discord::snowflake::Snowflake;
+
+pub(crate) static BASE_URL: &str = "https://discord.com/api/v9";

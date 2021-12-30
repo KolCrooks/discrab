@@ -1,7 +1,7 @@
 use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::{core::abstraction::commands::CommandArg, discord::snowflake::Snowflake};
+use crate::{core::abstraction::abstraction_traits::CommandArg, discord::snowflake::Snowflake};
 
 use super::guild::guild_member::GuildMember;
 /**

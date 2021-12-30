@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::commands::CommandArg;
+use super::abstraction_traits::CommandArg;
 use super::context::Context;
 use crate::core::interactions::handler::events::dispatch_payloads::{
     ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
@@ -23,11 +23,11 @@ use crate::util::logger::print_debug;
 use serde_json::Value;
 use std::mem;
 
-pub struct Observable<T: Clone + CommandArg> {
-    subscribers: Vec<Box<dyn Fn(Context, T) + Send>>,
+pub struct Observable<'a, T: Clone + CommandArg> {
+    subscribers: Vec<&'a (dyn Fn(Context, T) + Send)>,
 }
 
-impl<T: Clone + CommandArg> Observable<T> {
+impl<'a, T: Clone + CommandArg> Observable<'a, T> {
     pub fn new() -> Self {
         Observable {
             subscribers: Vec::new(),
@@ -40,12 +40,12 @@ impl<T: Clone + CommandArg> Observable<T> {
         }
     }
 
-    pub fn subscribe(&mut self, listener: &'static (dyn Fn(Context, T) + Send + Sync)) {
-        self.subscribers.push(Box::new(listener));
+    pub fn subscribe(&mut self, listener: &'a (dyn Fn(Context, T) + Send + Sync)) {
+        self.subscribers.push(listener);
     }
 }
 
-impl<T: Clone + CommandArg> Default for Observable<T> {
+impl<'a, T: Clone + CommandArg> Default for Observable<'a, T> {
     fn default() -> Self {
         Observable::new()
     }
@@ -62,13 +62,13 @@ macro_rules! event_subscriptions {
         }
     ) => {
         $(#[$outer])*
-        pub struct $EventSubs {
+        pub struct $EventSubs<'a>{
             $(
                 $(#[$inner])*
-                pub $Flag: Observable<$x>,
+                pub $Flag: Observable<'a, $x>,
             )+
         }
-        impl $EventSubs {
+        impl<'a> $EventSubs<'a>{
             pub fn new() -> Self {
                 $EventSubs {
                     $(
@@ -92,7 +92,7 @@ macro_rules! event_subscriptions {
             }
 
             pub fn get_observable<T: Clone + CommandArg>(&mut self, event: Events, type_str: &str) -> &mut Observable<T> {
-                let ptr: &mut bool = unsafe {
+                unsafe {
                     match event {
                         $(
                             Events::$Flag => {
@@ -103,13 +103,23 @@ macro_rules! event_subscriptions {
                             },
                         )+
                     }
-                };
+                }
+            }
 
-                unsafe { mem::transmute(ptr) }
+            pub fn get_observable_no_check<T: Clone + CommandArg>(&mut self, event: Events) -> &mut Observable<T> {
+                unsafe {
+                    match event {
+                        $(
+                            Events::$Flag => {
+                                mem::transmute(&mut self.$Flag)
+                            },
+                        )+
+                    }
+                }
             }
         }
 
-        impl Default for $EventSubs {
+        impl<'a> Default for $EventSubs<'a>{
             fn default() -> Self {
                 $EventSubs::new()
             }

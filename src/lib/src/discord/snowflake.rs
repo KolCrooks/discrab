@@ -4,7 +4,7 @@ use bitfield::bitfield;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 bitfield! {
-    #[derive(Serialize, Clone)]
+    #[derive(Serialize, Clone, PartialEq, Eq, Hash)]
     pub struct Snowflake(u64);
     pub timestamp, _: 63, 22;
     pub worker_id, _: 21, 17;

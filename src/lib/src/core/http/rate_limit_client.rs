@@ -98,9 +98,9 @@ pub async fn send_request<T: DeserializeOwned>(
             ));
         }
     };
-    let mut bytes = hyper::body::to_bytes(res).await.unwrap().to_vec();
+    let mut bytes = hyper::body::to_bytes(res).await.unwrap();
 
-    simd_json::from_slice::<T>(&mut *bytes).map_err(|e| {
+    simd_json::from_slice::<T>(&mut *bytes.to_vec()).map_err(|e| {
         print_debug("REQUEST", format!("Error: {:?}", e));
         Error::new(format!("{:?}", e), crate::util::error::ErrorTypes::PARSE)
     })

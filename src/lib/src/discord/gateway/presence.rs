@@ -2,7 +2,7 @@ use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::abstraction::commands::CommandArg,
+    core::abstraction::abstraction_traits::CommandArg,
     discord::{resources::user::User, snowflake::Snowflake},
 };
 

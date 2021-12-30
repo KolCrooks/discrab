@@ -6,6 +6,7 @@ use crate::{
         http::rate_limit_client::{send_request, RequestRoute},
     },
     util::error::Error,
+    BASE_URL,
 };
 use serde::Deserialize;
 use simd_json;
@@ -48,7 +49,7 @@ pub async fn get_gateway(ctx: Context) -> Result<Gateway, Error> {
     };
     let request_builder = Request::builder()
         .method(Method::GET)
-        .uri("https://discord.com/api/gateway/bot")
+        .uri(format!("{}/gateway/bot", BASE_URL))
         .header("content-type", "application/json")
         .body(Body::empty())
         .unwrap();

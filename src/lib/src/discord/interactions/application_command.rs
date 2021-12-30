@@ -2,7 +2,7 @@ use crate::{
     core::http::rate_limit_client::{send_request, RequestRoute},
     resources::{application::Application, channel::typing::ChannelType, user::User},
     util::error::Error,
-    Context, Snowflake,
+    Context, Snowflake, BASE_URL,
 };
 use hyper::{Body, Method, Request};
 use serde::{self, Deserialize, Serialize};
@@ -21,9 +21,9 @@ pub struct ApplicationCommand {
     #[serde(rename = "type")]
     pub type_: ApplicationCommandType,
     /// The id of the parent application
-    pub application_id: u64,
+    pub application_id: Snowflake,
     /// The id of the guild the command is for
-    pub guild_id: Option<u64>,
+    pub guild_id: Option<Snowflake>,
     /// The name of the command
     pub name: String,
     /// The description of the command
@@ -40,7 +40,7 @@ pub struct ApplicationCommand {
  * Application Command Types
  * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
  */
-#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[derive(Serialize_repr, Deserialize_repr, Clone, PartialEq)]
 #[repr(u8)]
 pub enum ApplicationCommandType {
     ChatInput = 1,
@@ -127,7 +127,7 @@ pub struct CreateApplicationCommand {
     /// The name of the command
     pub name: String,
     /// The description of the command
-    pub description: Option<String>,
+    pub description: String,
     /// The options of the command
     pub options: Option<Vec<ApplicationCommandOption>>,
     /// Whether the command is enabled by default when the app is added to a guild
@@ -148,8 +148,8 @@ impl ApplicationCommand {
         let request_builder = Request::builder()
             .method(Method::GET)
             .uri(format!(
-                "https://discord.com/api/applications/{}/commands/{}/",
-                slf.id, id
+                "{}/applications/{}/commands/{}/",
+                BASE_URL, slf.id, id
             ))
             .header("content-type", "application/json")
             .body(Body::empty())
@@ -167,10 +167,7 @@ impl ApplicationCommand {
         };
         let request_builder = Request::builder()
             .method(Method::GET)
-            .uri(format!(
-                "https://discord.com/api/applications/{}/commands",
-                slf.id,
-            ))
+            .uri(format!("{}/applications/{}/commands", BASE_URL, slf.id))
             .header("content-type", "application/json")
             .body(Body::empty())
             .unwrap();
@@ -179,32 +176,27 @@ impl ApplicationCommand {
     }
 
     /**
-         * POST/applications/{application.id}/commands
-    Creating a command with the same name as an existing command for your application will overwrite the old command.
-    Create a new global command. New global commands will be available in all guilds after 1 hour. Returns 201 and an application command object.
-         */
+     * POST/applications/{application.id}/commands
+     * Creating a command with the same name as an existing command for your application will overwrite the old command.
+     * Create a new global command. New global commands will be available in all guilds after 1 hour. Returns 201 and an application command object.
+     */
     pub async fn create_global(
         ctx: Context,
         payload: CreateApplicationCommand,
-    ) -> Result<(), Error> {
+    ) -> Result<ApplicationCommand, Error> {
         let slf = Application::get_self(ctx.clone()).await?;
 
         let route = RequestRoute {
-            base_route: "/applications/{application.id}/commands/".to_string(),
+            base_route: "/applications/{application.id}/commands".to_string(),
             major_param: "".to_string(),
         };
         let request_builder = Request::builder()
             .method(Method::POST)
-            .uri(format!(
-                "https://discord.com/api/applications/{}/commands/",
-                slf.id
-            ))
+            .uri(format!("{}/applications/{}/commands", BASE_URL, slf.id))
             .header("content-type", "application/json")
             .body(Body::from(serde_json::to_string(&payload).unwrap()))
             .unwrap();
 
-        send_request::<Value>(ctx, route, request_builder)
-            .await
-            .map(|_| ())
+        send_request(ctx, route, request_builder).await
     }
 }

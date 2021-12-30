@@ -2,7 +2,7 @@ use crate::{
     core::http::rate_limit_client::{send_request, RequestRoute},
     discord::{snowflake::Snowflake, teams::Team},
     util::error::Error,
-    Context,
+    Context, BASE_URL,
 };
 
 use bitflags::bitflags;
@@ -91,7 +91,7 @@ impl Application {
         };
         let request_builder = Request::builder()
             .method(Method::GET)
-            .uri("https://discord.com/api/oauth2/applications/@me")
+            .uri(format!("{}/oauth2/applications/@me", BASE_URL))
             .header("content-type", "application/json")
             .body(Body::empty())
             .unwrap();

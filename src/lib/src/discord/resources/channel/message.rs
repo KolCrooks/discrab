@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     core::{
-        abstraction::commands::CommandArg,
+        abstraction::abstraction_traits::CommandArg,
         interactions::{message::MessageComponent, typing::Interaction},
     },
     discord::{

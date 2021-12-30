@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, FnArg, ImplItem, Meta, NestedMeta, Type};
+use syn::parse_macro_input;
 
 pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemImpl);
@@ -10,18 +10,16 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     let output = quote! {
         #input
         impl discord_rs::Registerable for #name {
-            fn register(&self, dispatcher: &mut discord_rs::EventDispatcher) {
-                dispatcher
-                    .get_observable(#name::EVENT_TYPE, "Interaction")
-                    .subscribe(&move |ctx, val| async_std::task::block_on(<#name as discord_rs::ApplicationCommandHandler>::handler(ctx, val)));
+            fn register(&self, ctx: Context, dispatcher: &mut discord_rs::EventDispatcher, interaction_router: &mut discord_rs::InteractionRouter) {
+                let id = async_std::task::block_on(discord_rs::InteractionRouter::get_id_or_register::<#name>(ctx.clone()));
+                interaction_router.register_command(id, &move |ctx, val| async_std::task::block_on(#name::handler(ctx, val)));
             }
         }
 
         #[async_trait]
-        impl discord_rs::EventHandler<discord_rs::command_args::Interaction> for #name {
-            const EVENT_TYPE: Events = Events::InteractionCreate;
+        impl discord_rs::CommandHandlerImpl for #name {
             async fn handler(ctx: Context, arg: Interaction) {
-                <#name as ApplicationCommandHandler>::handler(ctx, arg).await;
+                <#name as CommandHandler>::handler(ctx, arg).await;
             }
         }
     };
