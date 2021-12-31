@@ -15,7 +15,7 @@ use super::{
     SocketClient,
 };
 use async_std::task::block_on;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{internal::SelectHandle, unbounded, Receiver, Sender};
 
 use serde_json::Value;
 use simd_json::{self};
@@ -112,8 +112,15 @@ impl WebsocketEventHandler {
         let allowance_rate = 120.0 / 60.0;
 
         let mut allowance: f64 = 120.0;
+        let mut sel = crossbeam_channel::Select::new();
+
+        sel.recv(&to_send);
+        sel.recv(&to_send_heartbeat);
+
         loop {
             let start = std::time::Instant::now();
+
+            sel.ready();
 
             while let Ok(msg) = to_send_heartbeat.try_recv() {
                 if allowance <= 1.0 {

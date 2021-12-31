@@ -45,6 +45,10 @@ where
 
             // Main Request Loop
             loop {
+                if http_queue.is_empty() {
+                    let obj = receiver.recv().unwrap();
+                    http_queue.push(&obj.route, obj.future);
+                }
                 // Add incoming requests to the queue
                 while !receiver.is_empty() {
                     let obj = receiver.recv().unwrap();

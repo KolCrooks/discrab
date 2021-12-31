@@ -9,7 +9,7 @@ use crate::{
 
 pub struct InteractionRouter {
     ctx: Context,
-    pub commands: HashMap<Snowflake, &'static (dyn Fn(Context, Interaction) + Send + Sync)>,
+    pub commands: HashMap<Snowflake, Box<(dyn Fn(Context, Interaction) + Send + Sync)>>,
 }
 
 impl InteractionRouter {
@@ -23,7 +23,7 @@ impl InteractionRouter {
     pub fn register_command(
         &mut self,
         id: Snowflake,
-        command: &'static (dyn Fn(Context, Interaction) + Send + Sync),
+        command: Box<dyn Fn(Context, Interaction) + Send + Sync>,
     ) {
         self.commands.insert(id, command);
     }
@@ -37,7 +37,7 @@ impl InteractionRouter {
     pub fn listener(&self, ctx: Context, val: Interaction) {
         let command = self.commands.get(&val.id);
         if let Some(command) = command {
-            command(ctx, val);
+            (**command)(ctx, val);
         } else {
             print_debug(
                 "INTERACTIONS",

@@ -72,6 +72,7 @@ pub trait HttpQueue {
     fn get_bucket_queue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue>;
     fn notify_empty(&mut self, route: &RequestRoute);
     fn clean(&mut self);
+    fn is_empty(&self) -> bool;
 }
 
 impl HttpQueue for BasicHttpQueue {
@@ -121,5 +122,9 @@ impl HttpQueue for BasicHttpQueue {
     fn notify_empty(&mut self, route: &RequestRoute) {
         self.active_requests_set.remove(route);
         self.queue_map.get_mut(route).unwrap().time_of_empty = Instant::now()
+    }
+
+    fn is_empty(&self) -> bool {
+        !self.queue_map.iter().any(|v| !v.1.is_empty())
     }
 }
