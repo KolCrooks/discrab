@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
     core::{
         abstraction::abstraction_traits::CommandArg,
-        interactions::{message::MessageComponent, typing::Interaction},
+        interactions::{
+            message::MessageComponent,
+            typing::{Interaction, InteractionType},
+        },
     },
     discord::{
         resources::{
@@ -89,7 +92,7 @@ pub struct Message {
     /// The message associated with the message_reference
     pub referenced_message: Option<Box<Message>>,
     /// Sent if the message is a response to an Interaction
-    pub interaction: Option<Box<Interaction>>,
+    pub interaction: Option<Box<MessageInteraction>>,
     /// The thread that was started from this message, includes thread member object
     pub thread: Option<Channel>,
     /// Sent if the message contains components like buttons, action rows, or other interactive components
@@ -104,4 +107,21 @@ impl Message {
     pub fn is_webhook(&self) -> bool {
         self.webhook_id.is_some()
     }
+}
+
+/**
+ * Message Interaction Structure
+ * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure
+*/
+#[derive(Serialize, Deserialize, Clone)]
+pub struct MessageInteraction {
+    /// id of the interaction
+    pub id: Snowflake,
+    /// the type of interaction
+    #[serde(rename = "type")]
+    pub type_: InteractionType,
+    /// the name of the application command
+    pub name: String,
+    /// the user who invoked the interaction
+    pub user: User,
 }

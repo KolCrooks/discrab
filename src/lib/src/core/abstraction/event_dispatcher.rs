@@ -79,10 +79,11 @@ macro_rules! event_subscriptions {
             }
 
             pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
+
                 match event.as_str() {
                     $(
                         $EventName => {
-                            let data = serde_json::from_value::<$x>(data).unwrap();
+                            let data = serde_json::from_value::<$x>(data).expect("Unable to deserialize event data!");
                             self.$Flag.notify(ctx, data).await;
                         }
                     )+

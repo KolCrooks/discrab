@@ -100,8 +100,44 @@ pub async fn send_request<T: DeserializeOwned>(
     };
     let bytes = hyper::body::to_bytes(res).await.unwrap();
 
-    simd_json::from_slice::<T>(&mut *bytes.to_vec()).map_err(|e| {
+    serde_json::from_slice::<T>(&bytes.to_vec()).map_err(|e| {
         print_debug("REQUEST", format!("Error: {:?}", e));
         Error::new(format!("{:?}", e), crate::util::error::ErrorTypes::PARSE)
     })
+}
+
+/**
+ * Send a request. This will queue the request and then execute when it is able to.
+ * This function will not try to parse the response
+ * @param route The route identifier that the request belongs to
+ * @param request The request to send
+ * @return The response from discord
+ */
+pub async fn send_request_noparse(
+    ctx: Context,
+    route: RequestRoute,
+    mut request: Request<Body>,
+) -> Result<(), Error> {
+    request
+        .headers_mut()
+        .insert(AUTHORIZATION, format!("Bot {}", ctx.token).parse().unwrap());
+
+    let mut future = request_future::HttpFuture::new(request);
+    // TODO Maybe use req_thread.unpark() to reduce cpu load while the thread is waiting for requests.
+    // This would have the downside of increasing the power required make a request since we have to attempt to unpark it every time.
+    // We could maybe get around this by having a parked flag, but this would require a mutex which also increases the power required.
+    ctx.request_stream
+        .send(RequestObject::new(route, &mut future as *mut _))
+        .unwrap();
+
+    match future.await {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            print_debug("REQUEST", format!("Error: {:?}", e));
+            return Err(Error::new(
+                format!("{:?}", e),
+                crate::util::error::ErrorTypes::REQUEST,
+            ));
+        }
+    }
 }

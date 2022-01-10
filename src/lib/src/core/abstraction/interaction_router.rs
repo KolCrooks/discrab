@@ -31,7 +31,6 @@ impl<'a> EventHandlerImpl<Interaction> for InteractionRouter<'a> {
                 "INTERACTIONS",
                 format!("Unable to route interaction {}", id),
             );
-            println!("{:?}", self.commands.keys());
         }
     }
 }

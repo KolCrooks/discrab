@@ -5,7 +5,7 @@ use serde_json::Value;
 use crate::{
     core::{
         abstraction::abstraction_traits::CommandArg,
-        http::rate_limit_client::{send_request, RequestRoute},
+        http::rate_limit_client::{send_request, send_request_noparse, RequestRoute},
     },
     resources::{guild::guild_member::GuildMember, user::User, Message},
     util::error::Error,
@@ -112,7 +112,7 @@ impl InteractionCreate {
             .body(Body::from(serde_json::to_string(&payload).unwrap()))
             .unwrap();
 
-        send_request::<Value>(self.ctx.clone(), route, request_builder)
+        send_request_noparse(self.ctx.clone(), route, request_builder)
             .await
             .map(|v| println!("{:?}", v))
     }
