@@ -3,7 +3,7 @@ mod discord;
 mod util;
 
 pub use crate::core::abstraction::{
-    abstraction_traits::{CommandHandler, EventHandler, EventHandlerImpl, Registerable},
+    abstraction_traits::{CommandHandler, EventHandler, Registerable},
     bot::Bot,
     context::Context,
     event_dispatcher::{EventDispatcher, Events},
@@ -12,12 +12,25 @@ pub use crate::core::abstraction::{
 
 pub use discordrs_codegen::*;
 
+/**
+ * For internal use only. Is public because it is used by the proc macros
+ */
+pub mod __internal__ {
+    pub use crate::core::abstraction::abstraction_traits::InternalEventHandler;
+}
+
+/**
+ * Common Resources that will often be used
+ */
 pub mod resources {
     pub use crate::discord::resources::channel::message::Message;
     pub use crate::discord::resources::channel::Channel;
     pub use crate::discord::resources::*;
 }
 
+/**
+ * Objects associated with different events
+ */
 pub mod command_args {
     pub use crate::core::interactions::handler::events::dispatch_payloads::*;
     pub use crate::core::interactions::{

@@ -1,10 +1,10 @@
 #[derive(Clone, Default)]
 pub struct Settings {
-    debug_logging: bool,
+    pub debug: bool,
 }
 
 impl Settings {
-    pub fn set_debug_logging(&mut self, debug_logging: bool) {
-        self.debug_logging = debug_logging;
+    pub fn set_debug(&mut self, debug: bool) {
+        self.debug = debug;
     }
 }

@@ -138,6 +138,8 @@ pub struct CreateApplicationCommand {
 }
 
 impl ApplicationCommand {
+    /// Gets a global application command
+    /// @param id The id of the command
     pub async fn get_global(ctx: Context, id: Snowflake) -> Result<ApplicationCommand, Error> {
         let slf = Application::get_self(ctx.clone()).await?;
 
@@ -158,6 +160,7 @@ impl ApplicationCommand {
         send_request(ctx, route, request_builder).await
     }
 
+    /// Lists the global application commands associated with the application
     pub async fn list_global(ctx: Context) -> Result<Vec<ApplicationCommand>, Error> {
         let slf = Application::get_self(ctx.clone()).await?;
 
@@ -176,9 +179,11 @@ impl ApplicationCommand {
     }
 
     /**
-     * POST/applications/{application.id}/commands
+     * Creates a global application command
+     *
      * Creating a command with the same name as an existing command for your application will overwrite the old command.
      * Create a new global command. New global commands will be available in all guilds after 1 hour. Returns 201 and an application command object.
+     * @param payload Payload of information for the command
      */
     pub async fn create_global(
         ctx: Context,

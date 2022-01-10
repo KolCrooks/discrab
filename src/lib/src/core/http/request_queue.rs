@@ -5,8 +5,31 @@ use std::{
 
 use super::{rate_limit_client::RequestRoute, request_future};
 
+/// This is a generic queue that supplies the http client with requests in a given order as designated by the queue.
+pub trait HttpQueue {
+    /**
+     * Add a request to the queue
+     * @param route The route of the request
+     * @param future The request
+     */
+    fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture);
+    /// Get the requests as sorted by the queue
+    fn get_sorted_requests(&self) -> Vec<RequestRoute>;
+    /// Get the queue for a given route
+    fn get_bucket_queue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue>;
+    /// This function is called when the bucket for a given route becomes empty
+    fn notify_empty(&mut self, route: &RequestRoute);
+    /// This function is called periodically, and should be used to clean up any expired buckets
+    fn clean(&mut self);
+    /// This function should return if the queue is empty
+    fn is_empty(&self) -> bool;
+}
+
+/// Queue of requests to be made for a given bucket. This allows for unique ordering of requests that prioritize different things.
 pub struct BucketQueue {
+    /// The time that the bucket became empty
     time_of_empty: Instant,
+    /// The queue of requests
     queue: LinkedList<(u64, *mut request_future::HttpFuture)>,
 }
 
@@ -18,22 +41,31 @@ impl BucketQueue {
         }
     }
 
+    /**
+     * Add a request to the queue.
+     * @param time The time that the request was added
+     * @param future The request future
+     */
     pub fn push(&mut self, time: u64, future: *mut request_future::HttpFuture) {
         self.queue.push_back((time, future));
     }
 
+    /// Get the oldest request in the queue
     pub fn get_oldest(&self) -> Option<&(u64, *mut request_future::HttpFuture)> {
         self.queue.front()
     }
 
+    /// Removes the first request in the queue, and returns the request
     pub fn pop(&mut self) -> Option<(u64, *mut request_future::HttpFuture)> {
         self.queue.pop_front()
     }
 
+    /// Returns true if the queue is empty
     pub fn is_empty(&self) -> bool {
         self.queue.is_empty()
     }
 
+    /// Returns the time that the bucket became empty
     pub fn get_time_of_empty(&self) -> Instant {
         self.time_of_empty
     }
@@ -44,10 +76,16 @@ impl Default for BucketQueue {
     }
 }
 
+/// A queue of all requests that are waiting to be made.
+/// It is a basic implementation that prioritizes requests based on the time
 pub struct BasicHttpQueue {
+    /// This field is used to give a unique request id to each request by incrementing it after each request is added
     req_id_cnt: u64,
+    /// If a bucket is empty for a period of time, it will be removed from this map
     inactive_bucket_timeout: u64,
+    /// The map of buckets to queues
     queue_map: HashMap<RequestRoute, BucketQueue>,
+
     active_requests_set: HashSet<RequestRoute>,
 }
 unsafe impl Send for BasicHttpQueue {}
@@ -66,16 +104,8 @@ impl BasicHttpQueue {
     }
 }
 
-pub trait HttpQueue {
-    fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture);
-    fn get_sorted_requests(&self) -> Vec<RequestRoute>;
-    fn get_bucket_queue(&mut self, route: &RequestRoute) -> Option<&mut BucketQueue>;
-    fn notify_empty(&mut self, route: &RequestRoute);
-    fn clean(&mut self);
-    fn is_empty(&self) -> bool;
-}
-
 impl HttpQueue for BasicHttpQueue {
+    /// Add a request to the queue
     fn push(&mut self, route: &RequestRoute, future: *mut request_future::HttpFuture) {
         let queue = self
             .queue_map

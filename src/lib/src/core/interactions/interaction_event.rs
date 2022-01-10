@@ -47,6 +47,7 @@ pub struct InteractionCreate {
 }
 
 impl InteractionCreate {
+    /// Creates a new interactionCreate object from an Interaction
     pub fn from_interaction(ctx: Context, int: Interaction) -> Self {
         Self {
             ctx,
@@ -64,6 +65,7 @@ impl InteractionCreate {
         }
     }
 
+    /// Responds to an interaction with a loading state.
     pub async fn respond_loading(&self) -> Result<(), Error> {
         self.respond(
             format!(
@@ -78,6 +80,7 @@ impl InteractionCreate {
         .await
     }
 
+    // Responds to an interaction with a message
     pub async fn respond_message(&self, msg: InteractionCallbackData) -> Result<(), Error> {
         self.respond(
             format!(
@@ -92,6 +95,7 @@ impl InteractionCreate {
         .await
     }
 
+    // Update the response that was sent with a new response
     pub async fn update_response(&self, response: InteractionResponse) -> Result<(), Error> {
         self.respond(
             format!("{}/interactions/{}/{}/m", BASE_URL, self.id, self.token),
@@ -100,6 +104,7 @@ impl InteractionCreate {
         .await
     }
 
+    // TODO I think I have to move this into the individual thread because the requests have to be different for each one
     async fn respond(&self, uri: String, payload: InteractionResponse) -> Result<(), Error> {
         let route = RequestRoute {
             base_route: "interactions/<interaction_id>/<interaction_token>".to_string(),

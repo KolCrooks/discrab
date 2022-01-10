@@ -84,6 +84,7 @@ impl<'de> Deserialize<'de> for ApplicationFlags {
 }
 
 impl Application {
+    /// Gets the application associated with the bot
     pub async fn get_self(ctx: Context) -> Result<Application, Error> {
         let route = RequestRoute {
             base_route: "/oauth2/applications".to_string(),

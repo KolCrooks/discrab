@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::abstraction_traits::{CommandArg, EventHandlerImpl};
+use super::abstraction_traits::CommandArg;
 use super::context::Context;
 use crate::core::interactions::handler::events::dispatch_payloads::{
     ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
@@ -20,38 +20,32 @@ use crate::discord::resources::guild_scheduled_event::GuildScheduledEvent;
 use crate::discord::resources::user::User;
 use crate::discord::resources::voice::VoiceState;
 use crate::util::logger::print_debug;
-use crate::EventHandler;
 use serde_json::Value;
 use std::mem;
 
-pub struct Observable<'a, T: Clone + CommandArg> {
-    pub subscribers: Vec<&'a (dyn EventHandlerImpl<T>)>,
+use super::observer::Observable;
+
+/**
+This code will generate an `observable` for each event.
+To see exactly what it does, here is a minimal example:
+```rust
+event_subscriptions! {
+   pub struct EventDispatcher {
+       const ChannelCreate: Channel = "CHANNEL_CREATE";
+   }
 }
+```
+It will generate:
+* an EventDispatcher struct with a ChannelCreate field
+* Impl EventDispatcher with functions:
+    * `fn new() -> Self // A default constructor for creating a new EventDispatcher`
+    * `fn route_event(ctx: Context, event: String, data: serde::Value) // given ctx, the event name, and the event data, it will parse the data and then dispatch the event correctly`
+    * `fn get_observable(event: Events, type_str: &str) -> &mut Observable<EventDispatcher> // returns a mutable reference to the `Observable` for this event type, and also checks to make sure that the event type matches the event via string comparison`
+    * `fn get_observable_by_name(event: &str) -> &mut Observable<EventDispatcher> // returns a mutable reference to the `Observable` for this event type without checking that`
+* A Default impl of EventDispatcher that just calls `EventDispatcher::new()`
+* An enum containing all of the events that can be dispatched
 
-impl<'a, T: Clone + CommandArg> Observable<'a, T> {
-    pub fn new() -> Self {
-        Observable {
-            subscribers: Vec::new(),
-        }
-    }
-
-    pub async fn notify(&self, ctx: Context, data: T) {
-        for listener in &self.subscribers {
-            listener.handler(ctx.clone(), data.clone());
-        }
-    }
-
-    pub fn subscribe(&mut self, listener: &'a dyn EventHandlerImpl<T>) {
-        self.subscribers.push(listener);
-    }
-}
-
-impl<'a, T: Clone + CommandArg> Default for Observable<'a, T> {
-    fn default() -> Self {
-        Observable::new()
-    }
-}
-
+*/
 macro_rules! event_subscriptions {
     (
         $(#[$outer:meta])*
@@ -62,6 +56,8 @@ macro_rules! event_subscriptions {
             )+
         }
     ) => {
+        // This code will generate an `observable` for each event.
+        #[doc="Contains an observable for each event, so that you can subscribe to events with an `InternalEventHandler`"]
         $(#[$outer])*
         pub struct $EventSubs<'a>{
             $(
@@ -70,6 +66,7 @@ macro_rules! event_subscriptions {
             )+
         }
         impl<'a> $EventSubs<'a>{
+            #[doc="Creates a new EventDispatcher with empty Observables"]
             pub fn new() -> Self {
                 $EventSubs {
                     $(
@@ -78,25 +75,31 @@ macro_rules! event_subscriptions {
                 }
             }
 
-            pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
 
+            #[doc="Given a Context, the event name, and the event data, it will parse the data and then dispatch the event correctly"]
+            pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
                 match event.as_str() {
                     $(
+                        // Match the event name
                         $EventName => {
                             let data = serde_json::from_value::<$x>(data).expect("Unable to deserialize event data!");
                             self.$Flag.notify(ctx, data).await;
                         }
                     )+
                     _ => {
-                        print_debug("EVENT_HANDLER", format!("Unhandled event: {}", event));
+                        if ctx.settings.debug {
+                            print_debug("EVENT_HANDLER", format!("Unhandled event: {}", event));
+                        }
                     }
                 }
             }
 
+            #[doc="Returns a mutable reference to the `Observable` for this event type, and also checks to make sure that the event type matches the event via string comparison"]
             pub fn get_observable<T: Clone + CommandArg>(&mut self, event: Events, type_str: &str) -> &mut Observable<T> {
                 match event {
                     $(
                         Events::$Flag => {
+                            // Check to make sure that the event type matches the required event type
                             if stringify!($x) != type_str {
                                 panic!("Event type mismatch! Expected type: `{}`, recieved: `{}`", stringify!($x), type_str);
                             }
@@ -105,27 +108,19 @@ macro_rules! event_subscriptions {
                     )+
                 }
             }
-
-            pub fn get_observable_no_check<T: Clone + CommandArg>(&mut self, event: Events) -> &mut Observable<T> {
-                match event {
-                    $(
-                        Events::$Flag => {
-                            unsafe { mem::transmute(&mut self.$Flag) }
-                        },
-                    )+
-                }
-            }
         }
 
         impl<'a> Default for $EventSubs<'a>{
+            #[doc="Creates a new EventDispatcher with empty Observables"]
             fn default() -> Self {
                 $EventSubs::new()
             }
         }
 
+        #[doc="An enum containing all of the events that can be dispatched"]
         pub enum Events {
             $(
-                #[doc=stringify!($x)]
+                $(#[$inner])*
                 $Flag,
             )+
         }

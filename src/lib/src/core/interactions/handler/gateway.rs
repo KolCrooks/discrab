@@ -41,6 +41,10 @@ pub struct SessionStartLimit {
     pub max_concurrency: u64,
 }
 
+/**
+ * Get the gateway for the bot
+ * @docs https://discord.com/developers/docs/topics/gateway#get-gateway-bot
+ */
 pub async fn get_gateway(ctx: Context) -> Result<Gateway, Error> {
     let route = RequestRoute {
         base_route: "/gateway/bot".to_string(),

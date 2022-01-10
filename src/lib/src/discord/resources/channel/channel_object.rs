@@ -78,6 +78,10 @@ pub struct Channel {
 }
 
 impl Channel {
+    /// Sends a message to a given channel.
+    /// @param channel_id The id of the channel to send the message to.
+    /// @param content The content of the message.
+    /// @docs https://discord.com/developers/docs/resources/channel#create-message
     pub async fn send_message(
         ctx: Context,
         channel_id: String,

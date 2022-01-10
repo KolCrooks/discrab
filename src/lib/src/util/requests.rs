@@ -1,3 +1,6 @@
+/**
+ * Gets a header from the HeaderMap as a given type
+ */
 pub fn get_header_as<T>(headers: &hyper::header::HeaderMap, key: &str) -> Option<T>
 where
     T: std::str::FromStr,

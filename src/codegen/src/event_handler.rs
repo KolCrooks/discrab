@@ -24,6 +24,7 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     };
 
     let output = quote! {
+        #[async_trait::async_trait]
         #input
         impl<'a> discord_rs::Registerable<'a> for #name {
             fn register(
@@ -36,7 +37,7 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
             }
         }
 
-        impl discord_rs::EventHandlerImpl<#event_type_str> for #name {
+        impl discord_rs::__internal__::InternalEventHandler<#event_type_str> for #name {
             fn handler(&self, ctx: discord_rs::Context, val: #event_type_str) {
                 async_std::task::block_on(discord_rs::EventHandler::<#event_type_str>::handler(
                     self, ctx, val,

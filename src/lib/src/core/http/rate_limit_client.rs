@@ -20,6 +20,8 @@ pub struct RequestRoute {
     pub major_param: String,
 }
 
+unsafe impl Send for RequestRoute {}
+
 pub struct RequestObject {
     pub route: RequestRoute,
     pub future: *mut request_future::HttpFuture,
@@ -91,7 +93,9 @@ pub async fn send_request<T: DeserializeOwned>(
     let res = match future.await {
         Ok(res) => res,
         Err(e) => {
-            print_debug("REQUEST", format!("Error: {:?}", e));
+            if ctx.settings.debug {
+                print_debug("REQUEST", format!("Error: {:?}", e));
+            }
             return Err(Error::new(
                 format!("{:?}", e),
                 crate::util::error::ErrorTypes::REQUEST,
@@ -101,7 +105,9 @@ pub async fn send_request<T: DeserializeOwned>(
     let bytes = hyper::body::to_bytes(res).await.unwrap();
 
     serde_json::from_slice::<T>(&bytes.to_vec()).map_err(|e| {
-        print_debug("REQUEST", format!("Error: {:?}", e));
+        if ctx.settings.debug {
+            print_debug("REQUEST", format!("Error: {:?}", e));
+        }
         Error::new(format!("{:?}", e), crate::util::error::ErrorTypes::PARSE)
     })
 }
@@ -133,7 +139,9 @@ pub async fn send_request_noparse(
     match future.await {
         Ok(_) => Ok(()),
         Err(e) => {
-            print_debug("REQUEST", format!("Error: {:?}", e));
+            if ctx.settings.debug {
+                print_debug("REQUEST", format!("Error: {:?}", e));
+            }
             return Err(Error::new(
                 format!("{:?}", e),
                 crate::util::error::ErrorTypes::REQUEST,

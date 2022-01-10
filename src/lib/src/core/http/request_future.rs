@@ -7,11 +7,15 @@ use std::{
 
 use hyper::{Body, Error, Request};
 
+/// This future is used by the http client to transfer data about a request between threads.
+/// The future will initially be send to the http client, and then the http client will make the request, send the request response to the future,
+/// and then wake the future up. This will unblock the request method, and then the future will unblock.
 pub struct HttpFuture {
     /// State of the request
     pub shared_state: Arc<Mutex<RequestState>>,
 }
 
+/// State of the request to be shared between threads
 pub struct RequestState {
     /// The request
     pub request: Option<Request<Body>>,
@@ -24,6 +28,7 @@ pub struct RequestState {
 }
 
 impl RequestState {
+    /// Commits data to the request state, and then wakes up the task so that the async block can unblock
     pub fn commit(&mut self, response: Result<hyper::Response<Body>, Error>) {
         self.response = Some(response);
         if let Some(waker) = self.waker.as_ref() {
@@ -33,6 +38,7 @@ impl RequestState {
 }
 
 impl HttpFuture {
+    /// Creates a new future with the given request
     pub fn new(request: Request<Body>) -> Self {
         let shared_state = Arc::new(Mutex::new(RequestState {
             request: Some(request),

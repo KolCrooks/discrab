@@ -178,6 +178,8 @@ impl User {
         })
     }
 
+    /// Gets the user with a given id
+    /// @param id The id of the user
     pub async fn get(ctx: Context, id: String) -> Result<User, Error> {
         let route = RequestRoute {
             base_route: "/users".to_string(),
@@ -193,6 +195,7 @@ impl User {
         send_request::<User>(ctx, route, request_builder).await
     }
 
+    /// Gets the bot's user object
     pub async fn get_self(ctx: Context) -> Result<User, Error> {
         User::get(ctx, "@me".to_string()).await
     }

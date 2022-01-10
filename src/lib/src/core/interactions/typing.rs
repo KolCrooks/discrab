@@ -125,7 +125,7 @@ pub enum InteractionCallbackData {
 }
 
 impl InteractionCallbackData {
-    pub fn message_str(msg: String) -> Self {
+    pub fn message_from_str(msg: String) -> Self {
         InteractionCallbackData::Message(MessageData {
             content: Some(msg),
             tts: None,
