@@ -1,12 +1,12 @@
 use crate::{
     core::http::rate_limit_client::{send_request, RequestRoute},
-    resources::{application::Application, channel::typing::ChannelType, user::User},
+    resources::{application::Application, channel::typing::ChannelType},
     util::error::Error,
     Context, Snowflake, BASE_URL,
 };
 use hyper::{Body, Method, Request};
 use serde::{self, Deserialize, Serialize};
-use serde_json::Value;
+
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**

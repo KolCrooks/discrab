@@ -1,21 +1,44 @@
 use std::collections::HashMap;
 
 use crate::{
-    core::interactions::typing::Interaction,
+    core::interactions::{interaction_event::InteractionCreate, typing::Interaction},
     discord::interactions::application_command::CreateApplicationCommand,
-    util::logger::print_debug, ApplicationCommand, ApplicationCommandType, CommandHandler, Context,
-    EventDispatcher, Events, Registerable, Snowflake,
+    util::logger::print_debug,
+    ApplicationCommand, CommandHandler, Context, EventDispatcher, Snowflake,
 };
 
-pub struct InteractionRouter {
-    ctx: Context,
-    pub commands: HashMap<Snowflake, Box<(dyn Fn(Context, Interaction) + Send + Sync)>>,
+use super::abstraction_traits::EventHandlerImpl;
+
+pub struct InteractionRouter<'a> {
+    pub commands: HashMap<Snowflake, &'a dyn EventHandlerImpl<InteractionCreate>>,
 }
 
-impl InteractionRouter {
-    pub fn new(ctx: Context) -> Self {
+impl<'a> EventHandlerImpl<Interaction> for InteractionRouter<'a> {
+    fn handler(&self, ctx: Context, interaction: Interaction) {
+        let id = interaction
+            .data
+            .as_ref()
+            .expect("Interaction doesn't have ID!")
+            .id;
+        let command = self.commands.get(&id);
+        if let Some(command) = command {
+            command.handler(
+                ctx.clone(),
+                InteractionCreate::from_interaction(ctx, interaction),
+            );
+        } else {
+            print_debug(
+                "INTERACTIONS",
+                format!("Unable to route interaction {}", id),
+            );
+            println!("{:?}", self.commands.keys());
+        }
+    }
+}
+
+impl<'a> InteractionRouter<'a> {
+    pub fn new() -> Self {
         Self {
-            ctx,
             commands: HashMap::new(),
         }
     }
@@ -23,27 +46,9 @@ impl InteractionRouter {
     pub fn register_command(
         &mut self,
         id: Snowflake,
-        command: Box<dyn Fn(Context, Interaction) + Send + Sync>,
+        cmd: &'a dyn EventHandlerImpl<InteractionCreate>,
     ) {
-        self.commands.insert(id, command);
-    }
-
-    pub fn attatch(&mut self, event_dispatcher: &mut EventDispatcher) {
-        event_dispatcher
-            .get_observable_no_check(Events::InteractionCreate)
-            .subscribe(&move |ctx, val| self.listener(ctx, val));
-    }
-
-    pub fn listener(&self, ctx: Context, val: Interaction) {
-        let command = self.commands.get(&val.id);
-        if let Some(command) = command {
-            (**command)(ctx, val);
-        } else {
-            print_debug(
-                "INTERACTIONS",
-                format!("Unable to route interaction {}", val.id),
-            );
-        }
+        self.commands.insert(id, cmd);
     }
 
     pub async fn get_id_or_register<T: CommandHandler>(ctx: Context) -> Snowflake {
@@ -82,7 +87,7 @@ impl InteractionRouter {
                         name: T::COMMAND_NAME.to_string(),
                         description: T::COMMAND_DESCRIPTION.to_string(),
                         options,
-                        default_permission: None, // TODO make this user changeable
+                        default_permission: Some(true), // TODO make this user changeable
                         type_: Some(T::COMMAND_TYPE),
                     },
                 )

@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -5,12 +6,17 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::{
     core::abstraction::abstraction_traits::CommandArg,
     discord::{
-        interactions::application_command::ApplicationCommandOptionType,
+        interactions::application_command::{
+            ApplicationCommandOptionChoice, ApplicationCommandOptionType,
+        },
         resources::{channel::message::Message, guild::guild_member::GuildMember, user::User},
         snowflake::Snowflake,
     },
+    resources::channel::{attachment::Attachment, embed::Embed},
     ApplicationCommandType,
 };
+
+use super::message::MessageComponent;
 
 /**
  * Interaction
@@ -98,4 +104,128 @@ pub struct InteractionDataOption {
     pub options: Option<Vec<InteractionDataOption>>,
     /// true if this option is the currently focused option for autocomplete
     pub focused: Option<bool>,
+}
+
+/**
+ * Interaction Response Structure
+ * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
+ */
+#[derive(Clone, Deserialize, Serialize)]
+pub struct InteractionResponse {
+    #[serde(rename = "type")]
+    pub type_: InteractionCallbackType,
+    pub data: Option<InteractionCallbackData>,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum InteractionCallbackData {
+    Message(MessageData),
+    Autocomplete(AutocompleteData),
+}
+
+impl InteractionCallbackData {
+    pub fn message_str(msg: String) -> Self {
+        InteractionCallbackData::Message(MessageData {
+            content: Some(msg),
+            tts: None,
+            embeds: None,
+            allowed_mentions: None,
+            flags: None,
+            components: None,
+            attachments: None,
+        })
+    }
+}
+
+/**
+ * Interaction Callback Type
+ * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
+ */
+#[derive(Clone, Deserialize, Serialize)]
+pub struct AutocompleteData {
+    /// autocomplete choices (max of 25 choices)
+    pub choices: ApplicationCommandOptionChoice,
+}
+
+/**
+ * Messages
+ * Not all message fields are currently supported.
+ * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
+ */
+#[derive(Clone, Deserialize, Serialize)]
+pub struct MessageData {
+    /// is the response TTS
+    pub tts: Option<bool>,
+    /// message content
+    pub content: Option<String>,
+    /// supports up to 10 embeds
+    pub embeds: Option<Vec<Embed>>,
+    /// allowed mentions object
+    pub allowed_mentions: Option<AllowedMentions>,
+    /// interaction callback data flags
+    pub flags: Option<u64>,
+    /// message components
+    pub components: Option<Vec<MessageComponent>>,
+    /// attachment objects with filename and description
+    pub attachments: Option<Vec<Attachment>>,
+}
+
+bitflags! {
+    /// Interaction Callback Data Flags
+    /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-flags
+    pub struct MessageDataFlags: u64 {
+        /// only the user receiving the message can see it
+        const EPHEMERAL = 1 << 6;
+    }
+}
+
+/**
+ * Allowed Mention Types
+ * @docs https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
+ */
+#[derive(Clone, Deserialize, Serialize)]
+pub enum AllowedMentionType {
+    #[serde(rename = "roles")]
+    Roles,
+    #[serde(rename = "users")]
+    Users,
+    #[serde(rename = "everyone")]
+    Everyone,
+}
+
+/**
+ * Allowed Mention Object
+ * @docs https://discord.com/developers/docs/resources/channel#allowed-mentions-object
+ */
+#[derive(Clone, Deserialize, Serialize)]
+pub struct AllowedMentions {
+    /// An array of allowed mention types to parse from the content.
+    pub parse: Vec<String>,
+    /// Array of role_ids to mention (Max size of 100)
+    pub roles: Vec<Snowflake>,
+    /// Array of user_ids to mention (Max size of 100)
+    pub users: Vec<Snowflake>,
+    /// For replies, whether to mention the author of the message being replied to (default false)
+    pub replied_user: bool,
+}
+
+/**
+ * Interaction Callback Type
+ */
+#[derive(Clone, Debug, Deserialize_repr, Serialize_repr)]
+#[repr(u8)]
+pub enum InteractionCallbackType {
+    /// ACK a Ping
+    Pong = 1,
+    /// respond to an interaction with a message
+    ChannelMessageWithSource = 4,
+    /// ACK an interaction and edit a response later, the user sees a loading state
+    DeferredChannelMessageWithSource = 5,
+    /// ACK an interaction and edit the original message later; the user does not see a loading state
+    DeferredUpdateMessage = 6,
+    /// for components, ACK an interaction and edit the original message later; the user does not see a loading state
+    UpdateMessage = 7,
+    /// respond to an autocomplete interaction with suggested choices
+    ApplicationCommandAutocompleteResult = 8,
 }

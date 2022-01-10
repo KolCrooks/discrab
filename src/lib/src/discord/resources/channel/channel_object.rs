@@ -1,7 +1,6 @@
 use discordrs_codegen::CommandArg;
 use hyper::{Body, Method, Request};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 use crate::{
     core::{

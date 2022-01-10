@@ -9,7 +9,6 @@ use crate::{
     BASE_URL,
 };
 use serde::Deserialize;
-use simd_json;
 
 /**
  * Gateway Object

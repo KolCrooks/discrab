@@ -1,8 +1,6 @@
 use std::{collections::HashMap, thread, time::Instant};
 
-use async_std::task::block_on;
 use crossbeam_channel::Receiver;
-use futures_util::StreamExt;
 use hyper::{client::ResponseFuture, Client};
 use hyper_tls::HttpsConnector;
 

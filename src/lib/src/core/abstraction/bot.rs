@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use serde_json::json;
 
 use crate::{
@@ -21,7 +19,7 @@ pub struct Bot<'a> {
     ctx: Context,
     event_dispatcher: EventDispatcher<'a>,
     token: String,
-    interaction_router: InteractionRouter,
+    interaction_router: InteractionRouter<'a>,
 }
 
 impl<'a> Bot<'a> {
@@ -33,9 +31,9 @@ impl<'a> Bot<'a> {
             settings: Settings::default(),
             cache: (),
         };
-        let mut event_dispatcher = EventDispatcher::new();
-        let mut interaction_router = InteractionRouter::new(ctx.clone());
-        interaction_router.attatch(&mut event_dispatcher);
+        let event_dispatcher = EventDispatcher::new();
+        let interaction_router = InteractionRouter::new();
+
         Self {
             interaction_router,
             ctx,
@@ -48,7 +46,7 @@ impl<'a> Bot<'a> {
         &mut self.ctx.settings
     }
 
-    pub fn register_all(&mut self, to_register: Vec<&dyn Registerable>) -> &mut Self {
+    pub fn register_all(&mut self, to_register: Vec<&'a dyn Registerable<'a>>) -> &mut Self {
         for event in to_register.iter() {
             event.register(
                 self.ctx.clone(),
@@ -59,8 +57,11 @@ impl<'a> Bot<'a> {
         self
     }
 
-    pub async fn listen(&self) {
+    pub async fn listen(&'a mut self) {
         let event_handler = WebsocketEventHandler::create(self.ctx.clone()).await;
+        self.event_dispatcher
+            .InteractionCreate
+            .subscribe(&self.interaction_router);
 
         print_debug("BOT", "Identifying Self".to_string());
         let cmd = json!({

@@ -98,7 +98,7 @@ pub async fn send_request<T: DeserializeOwned>(
             ));
         }
     };
-    let mut bytes = hyper::body::to_bytes(res).await.unwrap();
+    let bytes = hyper::body::to_bytes(res).await.unwrap();
 
     simd_json::from_slice::<T>(&mut *bytes.to_vec()).map_err(|e| {
         print_debug("REQUEST", format!("Error: {:?}", e));

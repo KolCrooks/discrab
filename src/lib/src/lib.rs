@@ -3,7 +3,7 @@ mod discord;
 mod util;
 
 pub use crate::core::abstraction::{
-    abstraction_traits::{CommandHandler, CommandHandlerImpl, EventHandler, Registerable},
+    abstraction_traits::{CommandHandler, EventHandler, EventHandlerImpl, Registerable},
     bot::Bot,
     context::Context,
     event_dispatcher::{EventDispatcher, Events},
@@ -20,7 +20,9 @@ pub mod resources {
 
 pub mod command_args {
     pub use crate::core::interactions::handler::events::dispatch_payloads::*;
-    pub use crate::core::interactions::typing::Interaction;
+    pub use crate::core::interactions::{
+        interaction_event::InteractionCreate, typing::Interaction,
+    };
     pub use crate::discord::gateway::presence::PresenceUpdate;
     pub use crate::resources::guild::guild_object::{Guild, UnavailableGuild};
     pub use crate::resources::guild::stage_instance::StageInstance;

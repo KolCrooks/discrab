@@ -15,7 +15,7 @@ use super::{
     SocketClient,
 };
 use async_std::task::block_on;
-use crossbeam_channel::{internal::SelectHandle, unbounded, Receiver, Sender};
+use crossbeam_channel::{unbounded, Receiver, Sender};
 
 use serde_json::Value;
 use simd_json::{self};

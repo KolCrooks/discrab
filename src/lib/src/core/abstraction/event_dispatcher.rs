@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::abstraction_traits::CommandArg;
+use super::abstraction_traits::{CommandArg, EventHandlerImpl};
 use super::context::Context;
 use crate::core::interactions::handler::events::dispatch_payloads::{
     ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
@@ -20,11 +20,12 @@ use crate::discord::resources::guild_scheduled_event::GuildScheduledEvent;
 use crate::discord::resources::user::User;
 use crate::discord::resources::voice::VoiceState;
 use crate::util::logger::print_debug;
+use crate::EventHandler;
 use serde_json::Value;
 use std::mem;
 
 pub struct Observable<'a, T: Clone + CommandArg> {
-    subscribers: Vec<&'a (dyn Fn(Context, T) + Send)>,
+    pub subscribers: Vec<&'a (dyn EventHandlerImpl<T>)>,
 }
 
 impl<'a, T: Clone + CommandArg> Observable<'a, T> {
@@ -36,11 +37,11 @@ impl<'a, T: Clone + CommandArg> Observable<'a, T> {
 
     pub async fn notify(&self, ctx: Context, data: T) {
         for listener in &self.subscribers {
-            listener(ctx.clone(), data.clone());
+            listener.handler(ctx.clone(), data.clone());
         }
     }
 
-    pub fn subscribe(&mut self, listener: &'a (dyn Fn(Context, T) + Send + Sync)) {
+    pub fn subscribe(&mut self, listener: &'a dyn EventHandlerImpl<T>) {
         self.subscribers.push(listener);
     }
 }
@@ -78,7 +79,7 @@ macro_rules! event_subscriptions {
             }
 
             pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
-                match event.as_ref() {
+                match event.as_str() {
                     $(
                         $EventName => {
                             let data = serde_json::from_value::<$x>(data).unwrap();
@@ -92,29 +93,25 @@ macro_rules! event_subscriptions {
             }
 
             pub fn get_observable<T: Clone + CommandArg>(&mut self, event: Events, type_str: &str) -> &mut Observable<T> {
-                unsafe {
-                    match event {
-                        $(
-                            Events::$Flag => {
-                                if stringify!($x) != type_str {
-                                    panic!("Event type mismatch! Expected type: `{}`, recieved: `{}`", stringify!($x), type_str);
-                                }
-                                mem::transmute(&mut self.$Flag)
-                            },
-                        )+
-                    }
+                match event {
+                    $(
+                        Events::$Flag => {
+                            if stringify!($x) != type_str {
+                                panic!("Event type mismatch! Expected type: `{}`, recieved: `{}`", stringify!($x), type_str);
+                            }
+                            unsafe { mem::transmute(&mut self.$Flag) }
+                        },
+                    )+
                 }
             }
 
             pub fn get_observable_no_check<T: Clone + CommandArg>(&mut self, event: Events) -> &mut Observable<T> {
-                unsafe {
-                    match event {
-                        $(
-                            Events::$Flag => {
-                                mem::transmute(&mut self.$Flag)
-                            },
-                        )+
-                    }
+                match event {
+                    $(
+                        Events::$Flag => {
+                            unsafe { mem::transmute(&mut self.$Flag) }
+                        },
+                    )+
                 }
             }
         }
@@ -127,7 +124,7 @@ macro_rules! event_subscriptions {
 
         pub enum Events {
             $(
-                #[doc="$x"]
+                #[doc=stringify!($x)]
                 $Flag,
             )+
         }

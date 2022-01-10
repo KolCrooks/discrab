@@ -9,17 +9,23 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
 
     let output = quote! {
         #input
-        impl discord_rs::Registerable for #name {
-            fn register(&self, ctx: Context, dispatcher: &mut discord_rs::EventDispatcher, interaction_router: &mut discord_rs::InteractionRouter) {
-                let id = async_std::task::block_on(discord_rs::InteractionRouter::get_id_or_register::<#name>(ctx.clone()));
-                interaction_router.register_command(id, Box::new(move |ctx, val| async_std::task::block_on(#name::handler(ctx, val))));
+        impl<'a> discord_rs::Registerable<'a> for #name {
+            fn register(
+                &'a self,
+                ctx: discord_rs::Context,
+                _: &mut discord_rs::EventDispatcher<'a>,
+                interaction_router: &mut discord_rs::InteractionRouter<'a>,
+            ){
+                let id = async_std::task::block_on(discord_rs::InteractionRouter::get_id_or_register::<#name>(ctx));
+                interaction_router.register_command(id, self);
             }
         }
 
-        #[async_trait]
-        impl discord_rs::CommandHandlerImpl for #name {
-            async fn handler(ctx: Context, arg: Interaction) {
-                <#name as CommandHandler>::handler(ctx, arg).await;
+        impl discord_rs::EventHandlerImpl<discord_rs::command_args::InteractionCreate> for #name {
+            fn handler(&self, ctx: discord_rs::Context, val: discord_rs::command_args::InteractionCreate) {
+                async_std::task::block_on(discord_rs::CommandHandler::handler(
+                    self, ctx, val,
+                ))
             }
         }
     };

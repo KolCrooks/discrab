@@ -1,10 +1,10 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 use bitfield::bitfield;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 bitfield! {
-    #[derive(Serialize, Clone, PartialEq, Eq, Hash)]
+    #[derive(Serialize, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Snowflake(u64);
     pub timestamp, _: 63, 22;
     pub worker_id, _: 21, 17;
@@ -15,6 +15,12 @@ bitfield! {
 impl Display for Snowflake {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+impl Debug for Snowflake {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Snowflake").field(&self.0).finish()
     }
 }
 
