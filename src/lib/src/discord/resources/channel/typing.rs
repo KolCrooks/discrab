@@ -5,7 +5,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
  * Channel Types
- * @docs https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+ * @docs <https://discord.com/developers/docs/resources/channel#channel-object-channel-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -36,7 +36,7 @@ pub enum ChannelType {
 
 /**
  * Message Types
- * @docs https://discord.com/developers/docs/resources/channel#message-object-message-types
+ * @docs <https://discord.com/developers/docs/resources/channel#message-object-message-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -69,7 +69,7 @@ pub enum MessageType {
 
 /**
  * Message Activity Types
- * @docs https://discord.com/developers/docs/resources/channel#message-object-message-activity-types
+ * @docs <https://discord.com/developers/docs/resources/channel#message-object-message-activity-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -82,7 +82,7 @@ pub enum MessageActivityType {
 
 /**
  * Message Activity Object
- * @docs https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#message-object-message-activity-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageActivity {
@@ -95,7 +95,7 @@ pub struct MessageActivity {
 
 /**
  * Message Reference Object
- * @docs https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageReference {
@@ -111,7 +111,7 @@ pub struct MessageReference {
 
 bitflags! {
     /// Message Flags
-    /// @docs https://discord.com/developers/docs/resources/channel#message-object-message-flags
+    /// @docs <https://discord.com/developers/docs/resources/channel#message-object-message-flags>
     #[derive(Serialize)]
     pub struct MessageFlags: u64 {
         const CROSSPOSTED = 1 << 0;
@@ -140,7 +140,7 @@ impl<'de> Deserialize<'de> for MessageFlags {
 /**
  * Overwrite Object
  * See permissions for more information about the allow and deny fields.
- * @docs https://discord.com/developers/docs/resources/channel#overwrite-object-overwrite-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#overwrite-object-overwrite-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PermissionsOverwriteObject {
@@ -158,7 +158,7 @@ pub struct PermissionsOverwriteObject {
 /**
 * Thread Metadata Object
 * The thread metadata object contains a number of thread-specific channel fields that are not needed by other channel types.
-* @docs https://discord.com/developers/docs/resources/channel#message-object-thread-metadata-structure
+* @docs <https://discord.com/developers/docs/resources/channel#message-object-thread-metadata-structure>
 */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ThreadMetadata {
@@ -177,7 +177,7 @@ pub struct ThreadMetadata {
 /**
  * Thread Member Object
  * A thread member is used to indicate whether a user has joined a thread or not.
-* @docs https://discord.com/developers/docs/resources/channel#message-object-thread-member-structure
+* @docs <https://discord.com/developers/docs/resources/channel#message-object-thread-member-structure>
 */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ThreadMember {
@@ -193,7 +193,7 @@ pub struct ThreadMember {
 
 /**
  * Video Quality
- * @docs https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes
+ * @docs <https://discord.com/developers/docs/resources/channel#channel-object-video-quality-modes>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]

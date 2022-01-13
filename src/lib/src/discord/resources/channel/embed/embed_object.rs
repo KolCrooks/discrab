@@ -2,15 +2,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::discord::color::Color;
 
-use super::typing::{
-    EmbedAuthor, EmbedField, EmbedFooter, EmbedImage, EmbedProvider, EmbedThumbnail, EmbedType,
-    EmbedVideo,
+use super::{
+    typing::{
+        EmbedAuthor, EmbedField, EmbedFooter, EmbedImage, EmbedProvider, EmbedThumbnail, EmbedType,
+        EmbedVideo,
+    },
+    EmbedBuilder,
 };
 
-// TODO create embed builder
 /**
  * Embed Object
- * @docs https://discord.com/developers/docs/resources/channel#embed-object
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Embed {
@@ -41,4 +43,10 @@ pub struct Embed {
     pub author: Option<EmbedAuthor>,
     /// fields information
     pub fields: Option<Vec<EmbedField>>,
+}
+
+impl Embed {
+    pub fn builder() -> EmbedBuilder {
+        EmbedBuilder::new()
+    }
 }

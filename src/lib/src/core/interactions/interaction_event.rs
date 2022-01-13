@@ -3,13 +3,13 @@ use hyper::{Body, Method, Request};
 use serde_json::Value;
 
 use crate::{
+    api::{guild::guild_member::GuildMember, user::User, Message, Snowflake},
     core::{
         abstraction::abstraction_traits::CommandArg,
         http::rate_limit_client::{send_request, send_request_noparse, RequestRoute},
     },
-    resources::{guild::guild_member::GuildMember, user::User, Message},
     util::error::Error,
-    Context, Snowflake, BASE_URL,
+    Context, BASE_URL,
 };
 
 use super::typing::{

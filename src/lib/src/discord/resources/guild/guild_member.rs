@@ -4,7 +4,7 @@ use crate::discord::{resources::user::User, snowflake::Snowflake};
 
 /**
  * guild member object
- * @docs https://discord.com/developers/docs/resources/guild#guild-member-object
+ * @docs <https://discord.com/developers/docs/resources/guild#guild-member-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct GuildMember {

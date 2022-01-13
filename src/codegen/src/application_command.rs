@@ -26,8 +26,8 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
         }
 
         // Add the hook for the struct to convert the async handler to a sync one
-        impl discord_rs::__internal__::InternalEventHandler<discord_rs::command_args::InteractionCreate> for #name {
-            fn handler(&self, ctx: discord_rs::Context, val: discord_rs::command_args::InteractionCreate) {
+        impl discord_rs::__internal__::InternalEventHandler<discord_rs::events::InteractionCreate> for #name {
+            fn handler(&self, ctx: discord_rs::Context, val: discord_rs::events::InteractionCreate) {
                 async_std::task::block_on(discord_rs::CommandHandler::handler(
                     self, ctx, val,
                 ))

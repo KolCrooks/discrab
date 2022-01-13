@@ -5,7 +5,7 @@ use crate::discord::resources::emoji::Emoji;
 
 /**
  * Message Component Object
- * @docs https://discord.com/developers/docs/interactions/message-components#component-object
+ * @docs <https://discord.com/developers/docs/interactions/message-components#component-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageComponent {
@@ -74,7 +74,7 @@ pub struct MessageComponent {
 
 /**
  * Component Type
- * @docs https://discord.com/developers/docs/interactions/message-components#component-object-component-types
+ * @docs <https://discord.com/developers/docs/interactions/message-components#component-object-component-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -89,7 +89,7 @@ pub enum MessageComponentType {
 
 /**
  * Button Styles
- * @docs https://discord.com/developers/docs/interactions/message-components#button-object-button-styles
+ * @docs <https://discord.com/developers/docs/interactions/message-components#button-object-button-styles>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -123,7 +123,7 @@ pub enum MessageButtonStyle {
 
 /**
  * Select Option
- * @docs https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure
+ * @docs <https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageSelectOption {

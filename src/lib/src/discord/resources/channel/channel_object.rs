@@ -3,23 +3,26 @@ use hyper::{Body, Method, Request};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    api::Message,
     core::{
         abstraction::abstraction_traits::CommandArg,
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{resources::user::User, snowflake::Snowflake},
-    resources::Message,
     util::error::Error,
     Context, BASE_URL,
 };
 
-use super::typing::{
-    ChannelType, PermissionsOverwriteObject, ThreadMember, ThreadMetadata, VideoQualityMode,
+use super::{
+    message_builder::MessageBuilder,
+    typing::{
+        ChannelType, PermissionsOverwriteObject, ThreadMember, ThreadMetadata, VideoQualityMode,
+    },
 };
 
 /**
  * Represents a guild or DM channel within Discord.
- * @docs https://discord.com/developers/docs/resources/channel#channel-object-channel-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#channel-object-channel-structure>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Channel {
@@ -81,18 +84,18 @@ impl Channel {
     /// Sends a message to a given channel.
     /// @param channel_id The id of the channel to send the message to.
     /// @param content The content of the message.
-    /// @docs https://discord.com/developers/docs/resources/channel#create-message
+    /// @docs <https://discord.com/developers/docs/resources/channel#create-message>
     pub async fn send_message(
         ctx: Context,
         channel_id: String,
-        content: String,
+        message: MessageBuilder,
     ) -> Result<Message, Error> {
         let route = RequestRoute {
             base_route: format!("/channels/{}/messages", channel_id.clone()),
             major_param: channel_id.clone(),
         };
 
-        let body = Body::from(format!("{{\"content\": \"{}\"}}", content));
+        let body = Body::from(serde_json::to_string(&message).unwrap());
 
         let request_builder = Request::builder()
             .method(Method::POST)

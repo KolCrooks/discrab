@@ -4,9 +4,11 @@ use async_trait::async_trait;
 use futures_util::Future;
 
 use crate::{
+    api::ApplicationCommandType,
+    api::Snowflake,
     core::interactions::{interaction_event::InteractionCreate, typing::Interaction},
     discord::interactions::application_command::ApplicationCommandOption,
-    ApplicationCommandType, Context, Events, Snowflake,
+    Context, Events,
 };
 
 use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRouter};

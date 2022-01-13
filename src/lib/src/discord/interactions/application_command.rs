@@ -1,8 +1,8 @@
 use crate::{
+    api::{application::Application, channel::typing::ChannelType, Snowflake},
     core::http::rate_limit_client::{send_request, RequestRoute},
-    resources::{application::Application, channel::typing::ChannelType},
     util::error::Error,
-    Context, Snowflake, BASE_URL,
+    Context, BASE_URL,
 };
 use hyper::{Body, Method, Request};
 use serde::{self, Deserialize, Serialize};
@@ -11,7 +11,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
  * Application Command Structure
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ApplicationCommand {
@@ -38,7 +38,7 @@ pub struct ApplicationCommand {
 
 /**
  * Application Command Types
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone, PartialEq)]
 #[repr(u8)]
@@ -50,7 +50,7 @@ pub enum ApplicationCommandType {
 
 /**
  * Application Command Option Structure
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ApplicationCommandOption {
@@ -79,7 +79,7 @@ pub struct ApplicationCommandOption {
 
 /**
  * Application Command Option Type
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -102,7 +102,7 @@ pub enum ApplicationCommandOptionType {
 
 /**
  * Application Command Option Choice Structure
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ApplicationCommandOptionChoice {

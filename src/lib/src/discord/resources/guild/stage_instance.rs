@@ -6,7 +6,7 @@ use crate::{core::abstraction::abstraction_traits::CommandArg, discord::snowflak
 
 /**
  * Stage Instance Structure
- * @docs https://discord.com/developers/docs/resources/stage-instance#stage-instance-object
+ * @docs <https://discord.com/developers/docs/resources/stage-instance#stage-instance-object>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct StageInstance {
@@ -26,7 +26,7 @@ pub struct StageInstance {
 
 /**
  * Privacy Level
- * @docs https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level
+ * @docs <https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-privacy-level>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]

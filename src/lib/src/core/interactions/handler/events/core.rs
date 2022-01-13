@@ -7,7 +7,7 @@ use super::PayloadData;
 #[derive(Serialize, Deserialize)]
 /**
    Sent on connection to the websocket. Defines the heartbeat interval that the client should heartbeat to.
-   @docs https://discord.com/developers/docs/topics/gateway#hello
+   @docs <https://discord.com/developers/docs/topics/gateway#hello>
 */
 pub struct HelloPayloadData {
     /// the interval (in milliseconds) the client should heartbeat with

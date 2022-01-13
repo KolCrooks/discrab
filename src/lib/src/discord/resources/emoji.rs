@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::discord::snowflake::Snowflake;
 /**
  * Emoji Object
- * @docs https://discord.com/developers/docs/resources/emoji#emoji-object
+ * @docs <https://discord.com/developers/docs/resources/emoji#emoji-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Emoji {

@@ -9,7 +9,7 @@ use crate::discord::resources::user::User;
  *
  * `guilds` are the guilds of which your bot is a member. They start out as unavailable when you connect to the gateway. As they become available, your bot will be notified via Guild Create events.
  *
- * @docs https://discord.com/developers/docs/topics/gateway#ready
+ * @docs <https://discord.com/developers/docs/topics/gateway#ready>
  */
 pub struct ReadyPayloadData {
     /// gateway version

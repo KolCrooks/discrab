@@ -2,7 +2,7 @@ use core::panic;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, ImplItem};
+use syn::parse_macro_input;
 
 pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemImpl);

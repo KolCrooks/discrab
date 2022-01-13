@@ -13,7 +13,7 @@ use super::user::User;
 
 /**
  * Represents a Discord application.
- * https://discord.com/developers/docs/resources/application#application-object-application-structure
+ * @docs <https://discord.com/developers/docs/resources/application#application-object-application-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Application {
@@ -57,7 +57,7 @@ pub struct Application {
 
 bitflags! {
     /// Application Flags
-    /// @docs https://discord.com/developers/docs/resources/application#application-object-application-flags
+    /// @docs <https://discord.com/developers/docs/resources/application#application-object-application-flags>
     #[derive(Serialize)]
     pub struct ApplicationFlags: u64 {
         const GATEWAY_PRESENCE = 1 << 12;

@@ -1,6 +1,15 @@
 use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
+pub use super::message_builder::*;
+use super::{
+    attachment::Attachment,
+    embed::Embed,
+    mention::ChannelMention,
+    reaction::Reaction,
+    typing::{MessageActivity, MessageFlags, MessageReference, MessageType},
+    Channel,
+};
 use crate::{
     core::{
         abstraction::abstraction_traits::CommandArg,
@@ -16,22 +25,13 @@ use crate::{
         snowflake::Snowflake,
     },
 };
-
-use super::{
-    attachment::Attachment,
-    embed::Embed,
-    mention::ChannelMention,
-    reaction::Reaction,
-    typing::{MessageActivity, MessageFlags, MessageReference, MessageType},
-    Channel,
-};
 /**
  * Message Object
  * Represents a message sent in a channel within Discord.
  *
  * Message Structure
  * content, embeds, attachments, and components will require a privileged intent in 2022. Learn more here.
- * @docs https://discord.com/developers/docs/resources/channel#message-object
+ * @docs <https://discord.com/developers/docs/resources/channel#message-object>
 */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Message {
@@ -104,11 +104,14 @@ impl Message {
     pub fn is_webhook(&self) -> bool {
         self.webhook_id.is_some()
     }
+    pub fn builder() -> MessageBuilder {
+        MessageBuilder::new()
+    }
 }
 
 /**
  * Message Interaction Structure
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object-message-interaction-structure>
 */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct MessageInteraction {

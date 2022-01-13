@@ -17,7 +17,7 @@ use super::{
 
 /**
  * Guild Structure
- * @docs https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+ * @docs <https://discord.com/developers/docs/resources/guild#guild-object-guild-structure>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Guild {

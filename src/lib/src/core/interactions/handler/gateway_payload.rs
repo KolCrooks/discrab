@@ -28,7 +28,7 @@ impl<T: PayloadData> PayloadBase<T> {
 
 /**
  * Gateway Opcodes
- * @docs https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes
+ * @docs <https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes>
  */
 #[derive(Serialize_repr, Deserialize_repr, PartialEq, Debug)]
 #[repr(u8)]

@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
+    api::channel::{attachment::Attachment, embed::Embed},
+    api::ApplicationCommandType,
     core::abstraction::abstraction_traits::CommandArg,
     discord::{
         interactions::application_command::{
@@ -12,15 +14,13 @@ use crate::{
         resources::{channel::message::Message, guild::guild_member::GuildMember, user::User},
         snowflake::Snowflake,
     },
-    resources::channel::{attachment::Attachment, embed::Embed},
-    ApplicationCommandType,
 };
 
 use super::message::MessageComponent;
 
 /**
  * Interaction
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct Interaction {
@@ -63,7 +63,7 @@ pub enum InteractionType {
 
 /**
  * Interaction Data Structure
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data-structure
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-data-structure>
 */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct InteractionData {
@@ -89,7 +89,7 @@ pub struct InteractionData {
 /**
  * Application Command Interaction Data Option
  * All options have names, and an option can either be a parameter and input value--in which case value will be set--or it can denote a subcommand or group--in which case it will contain a top-level key and another array of options.
- * @docs https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-interaction-data-option-structure
+ * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-interaction-data-option-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct InteractionDataOption {
@@ -108,7 +108,7 @@ pub struct InteractionDataOption {
 
 /**
  * Interaction Response Structure
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-response-structure>
  */
 #[derive(Clone, Deserialize, Serialize)]
 pub struct InteractionResponse {
@@ -140,7 +140,7 @@ impl InteractionCallbackData {
 
 /**
  * Interaction Callback Type
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete>
  */
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AutocompleteData {
@@ -151,7 +151,7 @@ pub struct AutocompleteData {
 /**
  * Messages
  * Not all message fields are currently supported.
- * @docs https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages
+ * @docs <https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages>
  */
 #[derive(Clone, Deserialize, Serialize)]
 pub struct MessageData {
@@ -182,7 +182,7 @@ bitflags! {
 
 /**
  * Allowed Mention Types
- * @docs https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types
+ * @docs <https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mention-types>
  */
 #[derive(Clone, Deserialize, Serialize)]
 pub enum AllowedMentionType {
@@ -196,7 +196,7 @@ pub enum AllowedMentionType {
 
 /**
  * Allowed Mention Object
- * @docs https://discord.com/developers/docs/resources/channel#allowed-mentions-object
+ * @docs <https://discord.com/developers/docs/resources/channel#allowed-mentions-object>
  */
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AllowedMentions {

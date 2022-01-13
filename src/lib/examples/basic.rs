@@ -1,10 +1,10 @@
 use discord_rs::{
-    command,
-    command_args::InteractionCreate,
+    api::{channel::message::MessageBuilder, embed::EmbedField, Snowflake},
+    api::{ApplicationCommandType, Channel, Message},
     core::interactions::typing::InteractionCallbackData,
-    event_handler,
-    resources::{Channel, Message},
-    ApplicationCommandType, Bot, CommandHandler, Context, EventHandler, Events,
+    events::InteractionCreate,
+    macros::{command, event_handler},
+    Bot, CommandHandler, Context, EventHandler, Events,
 };
 
 use std::env;
@@ -19,9 +19,24 @@ impl EventHandler<Message> for MsgEvent {
     /// This function is called when the bot receives event with Self::EVENT_TYPE
     async fn handler(&self, ctx: Context, msg: Message) {
         if msg.content.starts_with("!ping") {
-            Channel::send_message(ctx.clone(), msg.channel_id.to_string(), "pong".to_string())
-                .await
-                .unwrap();
+            Channel::send_message(
+                ctx.clone(),
+                msg.channel_id.to_string(),
+                MessageBuilder::new()
+                    .set_content("Pong!")
+                    .add_embed(|builder| {
+                        builder
+                            .set_title("Embed Title")
+                            .set_description("Embed Description")
+                            .add_field(EmbedField {
+                                name: "Field Name".to_string(),
+                                value: "Embed Field Value".to_string(),
+                                inline: false,
+                            });
+                    }),
+            )
+            .await
+            .unwrap();
         }
     }
 }
@@ -44,8 +59,6 @@ impl CommandHandler for AppCmd {
             .await
             .unwrap();
     }
-
-    const GUILD_ID: Option<discord_rs::Snowflake> = None;
 }
 
 #[tokio::main]

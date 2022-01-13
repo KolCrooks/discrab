@@ -6,7 +6,7 @@ use crate::discord::snowflake::Snowflake;
 use super::user::User;
 /**
  * Sticker Object
- * @docs https://discord.com/developers/docs/resources/sticker#sticker-item-object
+ * @docs <https://discord.com/developers/docs/resources/sticker#sticker-item-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Sticker {
@@ -43,7 +43,7 @@ pub struct Sticker {
 /**
  * Sticker Item Object
  * The smallest amount of data required to render a sticker. A partial sticker object.
- * @docs https://discord.com/developers/docs/resources/sticker#sticker-item-object
+ * @docs <https://discord.com/developers/docs/resources/sticker#sticker-item-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct StickerItem {
@@ -57,7 +57,7 @@ pub struct StickerItem {
 
 /**
  * Sticker Types
- * @docs https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types
+ * @docs <https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -70,7 +70,7 @@ pub enum StickerType {
 
 /**
  * Sticker Format Types
- * @docs https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types
+ * @docs <https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-format-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]

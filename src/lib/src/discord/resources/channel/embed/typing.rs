@@ -6,41 +6,40 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 /**
  * Embed Types
  * Embed types are "loosely defined" and, for the most part, are not used by our clients for rendering. Embed attributes power what is rendered. Embed types should be considered deprecated and might be removed in a future API version.
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-types
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>
  */
-#[derive(Clone, Debug, Deserialize_repr, Serialize_repr)]
-#[repr(u8)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum EmbedType {
     /// generic embed rendered from embed attributes
-    Rich = 0,
+    rich,
     /// image embed
-    Image = 1,
+    image,
     /// video embed
-    Video = 2,
+    video,
     /// animated gif image embed rendered as a video embed
-    GifV = 3,
+    gifv,
     /// article embed
-    Article = 4,
+    article,
     /// link embed
-    Link = 5,
+    link,
 }
 
 impl Display for EmbedType {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         match self {
-            EmbedType::Rich => write!(f, "rich"),
-            EmbedType::Image => write!(f, "image"),
-            EmbedType::Video => write!(f, "video"),
-            EmbedType::GifV => write!(f, "gifv"),
-            EmbedType::Article => write!(f, "article"),
-            EmbedType::Link => write!(f, "link"),
+            EmbedType::rich => write!(f, "rich"),
+            EmbedType::image => write!(f, "image"),
+            EmbedType::video => write!(f, "video"),
+            EmbedType::gifv => write!(f, "gifv"),
+            EmbedType::article => write!(f, "article"),
+            EmbedType::link => write!(f, "link"),
         }
     }
 }
 
 /**
  * Embed Thumbnail Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-thumbnail-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedThumbnail {
@@ -49,14 +48,14 @@ pub struct EmbedThumbnail {
     /// A proxied url of the thumbnail
     pub proxy_url: Option<String>,
     /// Height of thumbnail
-    pub height: Option<i32>,
+    pub height: Option<u32>,
     /// Width of thumbnail
-    pub width: Option<i32>,
+    pub width: Option<u32>,
 }
 
 /**
  * Embed Image Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-image-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedImage {
@@ -65,14 +64,14 @@ pub struct EmbedImage {
     /// A proxied url of the image
     pub proxy_url: Option<String>,
     /// Height of image
-    pub height: Option<i32>,
+    pub height: Option<u32>,
     /// Width of image
-    pub width: Option<i32>,
+    pub width: Option<u32>,
 }
 
 /**
  * Embed Footer Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-footer-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedFooter {
@@ -86,7 +85,7 @@ pub struct EmbedFooter {
 
 /**
  * Embed Video Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-video-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-video-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedVideo {
@@ -102,7 +101,7 @@ pub struct EmbedVideo {
 
 /**
  * Embed Provider Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-provider-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedProvider {
@@ -114,7 +113,7 @@ pub struct EmbedProvider {
 
 /**
  * Embed Author Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-author-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedAuthor {
@@ -130,7 +129,7 @@ pub struct EmbedAuthor {
 
 /**
  * Embed Field Structure
- * @docs https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
+ * @docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure>
  */
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EmbedField {

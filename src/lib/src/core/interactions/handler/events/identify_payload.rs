@@ -6,7 +6,7 @@ use crate::discord::gateway::presence::PresenceUpdate;
 #[derive(Serialize, Deserialize)]
 /**
  * Used to trigger the initial handshake with the gateway.
- * @docs https://discord.com/developers/docs/topics/gateway#identify-identify-structure
+ * @docs <https://discord.com/developers/docs/topics/gateway#identify-identify-structure>
 */
 pub struct IdentifyPayloadData {
     pub token: String,

@@ -6,7 +6,7 @@ use crate::discord::{resources::emoji::Emoji, snowflake::Snowflake};
 
 /**
  * Activity Object
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Activity {
@@ -45,7 +45,7 @@ pub struct Activity {
 
 /**
  * Activity Type
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-types
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -72,7 +72,7 @@ pub enum ActivityType {
 
 /**
  * Activity Party
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object-party-object
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-party-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityParty {
@@ -84,7 +84,7 @@ pub struct ActivityParty {
 
 /**
  * Timestamps for when the activity started and ended
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-timestamps
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-timestamps>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityTimestamps {
@@ -96,7 +96,7 @@ pub struct ActivityTimestamps {
 
 /**
 * Activity Assets
-* @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-assets
+* @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-assets>
 */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityAssets {
@@ -112,7 +112,7 @@ pub struct ActivityAssets {
 
 /**
  * Activity Secrets
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-secrets
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-secrets>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ActivitySecrets {
@@ -128,7 +128,7 @@ pub struct ActivitySecrets {
 bitflags! {
     /**
      * Activity Flags
-     * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-flags
+     * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-flags>
      */
     #[derive(Serialize)]
     pub struct ActivityFlags: u64 {
@@ -159,7 +159,7 @@ impl<'de> Deserialize<'de> for ActivityFlags {
 /**
  * Activity Buttons
  * When received over the gateway, the buttons field is an array of strings, which are the button labels. Bots cannot access a user's activity button URLs. When sending, the buttons field must be an array of the below object:
- * @docs https://discord.com/developers/docs/topics/gateway#activity-object-activity-buttons
+ * @docs <https://discord.com/developers/docs/topics/gateway#activity-object-activity-buttons>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ActivityButton {

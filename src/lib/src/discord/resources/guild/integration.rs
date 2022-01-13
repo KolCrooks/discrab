@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    api::Snowflake,
     discord::resources::{application::Application, user::User},
-    Snowflake,
 };
 
 /**
  * Integration Structure
- * @docs https://discord.com/developers/docs/resources/guild#integration-object
+ * @docs <https://discord.com/developers/docs/resources/guild#integration-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Integration {
@@ -53,7 +53,7 @@ pub enum IntegrationType {
 
 /**
  * Integration Account
- * @docs https://discord.com/developers/docs/resources/guild#integration-account-object
+ * @docs <https://discord.com/developers/docs/resources/guild#integration-account-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Account {

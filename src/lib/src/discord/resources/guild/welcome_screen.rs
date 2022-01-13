@@ -4,7 +4,7 @@ use crate::discord::snowflake::Snowflake;
 
 /**
  * Welcome Screen Object
- * @docs https://discord.com/developers/docs/resources/guild#welcome-screen-object
+ * @docs <https://discord.com/developers/docs/resources/guild#welcome-screen-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WelcomeScreen {
@@ -16,7 +16,7 @@ pub struct WelcomeScreen {
 
 /**
  * Welcome Screen Channel Structure
- * @docs https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure
+ * @docs <https://discord.com/developers/docs/resources/guild#welcome-screen-object-welcome-screen-channel-structure>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct WelcomeScreenChannel {

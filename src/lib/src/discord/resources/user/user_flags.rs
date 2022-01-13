@@ -4,7 +4,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 bitflags! {
     /**
      * User Flags.
-     * @docs https://discord.com/developers/docs/resources/user#user-object-user-flags
+     * @docs <https://discord.com/developers/docs/resources/user#user-object-user-flags>
      */
     #[derive(Serialize)]
     pub struct UserFlags: u64 {

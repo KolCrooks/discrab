@@ -4,7 +4,7 @@ use crate::discord::resources::emoji::Emoji;
 
 /**
  * Reaction Object
- * @docs https://discord.com/developers/docs/resources/channel#reaction-object
+ * @docs <https://discord.com/developers/docs/resources/channel#reaction-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Reaction {

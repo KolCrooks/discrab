@@ -10,7 +10,7 @@ use super::activity::Activity;
 
 /**
  * Presence Update Event
- * @docs https://discord.com/developers/docs/topics/gateway#presence-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#presence-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct PresenceUpdate {

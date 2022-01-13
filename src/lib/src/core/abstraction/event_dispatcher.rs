@@ -121,9 +121,11 @@ macro_rules! event_subscriptions {
         pub enum Events {
             $(
                 $(#[$inner])*
+                #[doc=concat!("Expects `", stringify!($x), "` as the event data")]
                 $Flag,
             )+
         }
+
    };
 }
 

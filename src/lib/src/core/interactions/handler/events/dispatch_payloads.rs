@@ -24,7 +24,7 @@ use crate::{
 /**
  * Channel Pins Update
  * Sent when a message is pinned or unpinned in a text channel. This is not sent when a pinned message is deleted.
- * @docs https://discord.com/developers/docs/topics/gateway#channel-pins-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#channel-pins-update>
 */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ChannelPinsUpdate {
@@ -38,7 +38,7 @@ pub struct ChannelPinsUpdate {
 
 /**
  * Thread List Sync Event Fields
- * @docs https://discord.com/developers/docs/topics/gateway#thread-list-sync-thread-list-sync-event-fields
+ * @docs <https://discord.com/developers/docs/topics/gateway#thread-list-sync-thread-list-sync-event-fields>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadListSync {
@@ -54,7 +54,7 @@ pub struct ThreadListSync {
 
 /**
  * Thread Member Update
- * @docs https://discord.com/developers/docs/topics/gateway#thread-member-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#thread-member-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadMemberUpdate {
@@ -72,7 +72,7 @@ pub struct ThreadMemberUpdate {
 
 /**
  * Thread Members Update Event Fields
- * @docs https://discord.com/developers/docs/topics/gateway#thread-members-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#thread-members-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct ThreadMembersUpdate {
@@ -90,7 +90,7 @@ pub struct ThreadMembersUpdate {
 
 /**
  * Guild Member Update Event Fields
- * @docs https://discord.com/developers/docs/topics/gateway#guild-member-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-member-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberUpdate {
@@ -120,7 +120,7 @@ pub struct GuildMemberUpdate {
 
 /**
  * Guild Ban Add or Remove
- * @docs https://discord.com/developers/docs/topics/gateway#guild-ban-add
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-ban-add>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildBanAddRemove {
@@ -132,7 +132,7 @@ pub struct GuildBanAddRemove {
 
 /**
  * Guild Emojis
- * @docs https://discord.com/developers/docs/topics/gateway#guild-emojis-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-emojis-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildEmojisUpdate {
@@ -144,7 +144,7 @@ pub struct GuildEmojisUpdate {
 
 /**
  * Guild Stickers Update
- * @docs https://discord.com/developers/docs/topics/gateway#guild-stickers-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-stickers-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildStickersUpdate {
@@ -156,7 +156,7 @@ pub struct GuildStickersUpdate {
 
 /**
  * Guild Integrations Update
- * @docs https://discord.com/developers/docs/topics/gateway#guild-integrations-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-integrations-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildIntegrationsUpdate {
@@ -166,7 +166,7 @@ pub struct GuildIntegrationsUpdate {
 
 /**
  * Guild Member Add
- * @docs https://discord.com/developers/docs/topics/gateway#guild-member-add
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-member-add>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberAdd {
@@ -196,7 +196,7 @@ pub struct GuildMemberAdd {
 
 /**
  * Guild Member Remove
- * @docs https://discord.com/developers/docs/topics/gateway#guild-member-remove
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-member-remove>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMemberRemove {
@@ -208,7 +208,7 @@ pub struct GuildMemberRemove {
 
 /**
  * Guild Members
- * @docs https://discord.com/developers/docs/topics/gateway#guild-members-chunk
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-members-chunk>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildMembersChunk {
@@ -230,7 +230,7 @@ pub struct GuildMembersChunk {
 
 /**
  * Guild Role Create or Update or Delete
- * @docs https://discord.com/developers/docs/topics/gateway#guild-role-create
+ * @docs <https://discord.com/developers/docs/topics/gateway#guild-role-create>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildRoleCreateUpdateDelete {
@@ -255,7 +255,7 @@ pub struct GuildScheduledEventUserAddRemove {
 
 /**
  * Integration Structure
- * @docs https://discord.com/developers/docs/topics/gateway#integrations
+ * @docs <https://discord.com/developers/docs/topics/gateway#integrations>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct IntegrationCreateUpdate {
@@ -296,7 +296,7 @@ pub struct IntegrationCreateUpdate {
 
 /**
  * Integration Delete
- * @docs https://discord.com/developers/docs/topics/gateway#integration-delete
+ * @docs <https://discord.com/developers/docs/topics/gateway#integration-delete>
 */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct IntegrationDelete {
@@ -310,7 +310,7 @@ pub struct IntegrationDelete {
 
 /**
  * Invite Create
- * @docs https://discord.com/developers/docs/topics/gateway#invites
+ * @docs <https://discord.com/developers/docs/topics/gateway#invites>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct InviteCreate {
@@ -342,7 +342,7 @@ pub struct InviteCreate {
 
 /**
  * Invite Target
- * @docs https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types
+ * @docs <https://discord.com/developers/docs/resources/invite#invite-object-invite-target-types>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]
@@ -353,7 +353,7 @@ pub enum InviteTargetType {
 
 /**
  * Invite Delete Event
- * @docs https://discord.com/developers/docs/topics/gateway#invite-delete
+ * @docs <https://discord.com/developers/docs/topics/gateway#invite-delete>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct InviteDelete {
@@ -367,7 +367,7 @@ pub struct InviteDelete {
 
 /**
  * Message Delete
- * @docs https://discord.com/developers/docs/topics/gateway#message-delete
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-delete>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageDelete {
@@ -381,7 +381,7 @@ pub struct MessageDelete {
 
 /**
  * Message Delete Bulk
- * @docs https://discord.com/developers/docs/topics/gateway#message-delete-bulk
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-delete-bulk>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageDeleteBulk {
@@ -395,7 +395,7 @@ pub struct MessageDeleteBulk {
 
 /**
  * Message Reaction Add
- * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-add
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-reaction-add>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionAdd {
@@ -415,7 +415,7 @@ pub struct MessageReactionAdd {
 
 /**
  * Message Reaction Remove
- * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-reaction-remove>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemove {
@@ -433,7 +433,7 @@ pub struct MessageReactionRemove {
 
 /**
  * Message Reaction Remove All
- * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove-all
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-reaction-remove-all>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemoveAll {
@@ -447,7 +447,7 @@ pub struct MessageReactionRemoveAll {
 
 /**
  * Message Reaction Remove Emoji
- * @docs https://discord.com/developers/docs/topics/gateway#message-reaction-remove-emoji
+ * @docs <https://discord.com/developers/docs/topics/gateway#message-reaction-remove-emoji>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct MessageReactionRemoveEmoji {
@@ -463,7 +463,7 @@ pub struct MessageReactionRemoveEmoji {
 
 /**
  * Typing Start
- * @docs https://discord.com/developers/docs/topics/gateway#typing-start
+ * @docs <https://discord.com/developers/docs/topics/gateway#typing-start>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct TypingStart {
@@ -481,7 +481,7 @@ pub struct TypingStart {
 
 /**
  * Voice Server Update
- * @docs https://discord.com/developers/docs/topics/gateway#voice-server-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#voice-server-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct VoiceServerUpdate {
@@ -495,7 +495,7 @@ pub struct VoiceServerUpdate {
 
 /**
  * Webhooks Update
- * @docs https://discord.com/developers/docs/topics/gateway#webhooks-update
+ * @docs <https://discord.com/developers/docs/topics/gateway#webhooks-update>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct WebhooksUpdate {

@@ -5,7 +5,7 @@ use super::{resources::user::User, snowflake::Snowflake};
 
 /**
  * Team Object
- * @docs https://discord.com/developers/docs/topics/teams#data-models-team-object
+ * @docs <https://discord.com/developers/docs/topics/teams#data-models-team-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Team {
@@ -23,7 +23,7 @@ pub struct Team {
 
 /**
  * Team Member Object
- * @docs https://discord.com/developers/docs/topics/teams#data-models-team-member-object
+ * @docs <https://discord.com/developers/docs/topics/teams#data-models-team-member-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TeamMember {
@@ -39,7 +39,7 @@ pub struct TeamMember {
 
 /**
  * Membership State Enum
- * @docs https://discord.com/developers/docs/topics/teams#data-models-team-member-object-membership-state
+ * @docs <https://discord.com/developers/docs/topics/teams#data-models-team-member-object-membership-state>
  */
 #[derive(Serialize_repr, Deserialize_repr, Clone)]
 #[repr(u8)]

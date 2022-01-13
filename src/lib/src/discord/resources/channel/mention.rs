@@ -6,7 +6,7 @@ use super::typing::ChannelType;
 
 /**
  * Channel Mention Object
- * @docs https://discord.com/developers/docs/resources/channel#channel-mention-object
+ * @docs <https://discord.com/developers/docs/resources/channel#channel-mention-object>
  */
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ChannelMention {

@@ -16,7 +16,7 @@ use super::UserFlags;
 
 /**
  * User Object
- * @docs https://discord.com/developers/docs/resources/user#user-object
+ * @docs <https://discord.com/developers/docs/resources/user#user-object>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct User {

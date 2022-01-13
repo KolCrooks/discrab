@@ -6,7 +6,7 @@ use crate::{core::abstraction::abstraction_traits::CommandArg, discord::snowflak
 use super::guild::guild_member::GuildMember;
 /**
  * Voice State
- * @docs https://discord.com/developers/docs/resources/voice#voice-state-object
+ * @docs <https://discord.com/developers/docs/resources/voice#voice-state-object>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct VoiceState {

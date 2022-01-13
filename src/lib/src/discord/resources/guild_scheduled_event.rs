@@ -1,13 +1,13 @@
 use discordrs_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::{core::abstraction::abstraction_traits::CommandArg, Snowflake};
+use crate::{api::Snowflake, core::abstraction::abstraction_traits::CommandArg};
 
 use super::user::User;
 
 /**
  * Guild Scheduled Event Structure
- * @docs https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event
+ * @docs <https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event>
  */
 #[derive(Serialize, Deserialize, Clone, CommandArg)]
 pub struct GuildScheduledEvent {

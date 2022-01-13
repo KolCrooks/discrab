@@ -12,7 +12,7 @@ use serde::Deserialize;
 
 /**
  * Gateway Object
- * @docs https://discord.com/developers/docs/topics/gateway#get-gateway-bot
+ * @docs <https://discord.com/developers/docs/topics/gateway#get-gateway-bot>
  */
 #[derive(Deserialize)]
 
@@ -27,7 +27,7 @@ pub struct Gateway {
 
 /**
  * Session Start Limit Object
- * @docs https://discord.com/developers/docs/topics/gateway#session-start-limit-object
+ * @docs <https://discord.com/developers/docs/topics/gateway#session-start-limit-object>
  */
 #[derive(Deserialize)]
 pub struct SessionStartLimit {
@@ -43,7 +43,7 @@ pub struct SessionStartLimit {
 
 /**
  * Get the gateway for the bot
- * @docs https://discord.com/developers/docs/topics/gateway#get-gateway-bot
+ * @docs <https://discord.com/developers/docs/topics/gateway#get-gateway-bot>
  */
 pub async fn get_gateway(ctx: Context) -> Result<Gateway, Error> {
     let route = RequestRoute {
