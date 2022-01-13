@@ -1,5 +1,8 @@
 [package]
 name = "discrab_codegen"
+description = "proc macros for Discrab (a discord bot wrapper)"
+repository = "https://github.com/KolCrooks/discrab"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
 
