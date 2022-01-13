@@ -25,7 +25,7 @@ impl<'a> InternalEventHandler<Interaction> for InteractionRouter<'a> {
             .as_ref()
             .expect("Interaction doesn't have ID!")
             .id;
-        /// Get the handler and then call it
+        // Get the handler and then call it
         let command = self.commands.get(&id);
         if let Some(command) = command {
             command.handler(

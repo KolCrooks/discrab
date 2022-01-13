@@ -165,7 +165,7 @@ where
                                     get_header_as::<i64>(received.headers(), "X-RateLimit-Reset")
                                         .unwrap_or(0); // TODO make this an actual value
 
-                                let mut bucket = if bucket_name == "UNKNOWN" {
+                                let bucket = if bucket_name == "UNKNOWN" {
                                     let bucket_name = get_header_as::<String>(
                                         received.headers(),
                                         "X-RateLimit-Bucket",

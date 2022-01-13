@@ -1,12 +1,11 @@
 use discrab_codegen::CommandArg;
 use hyper::{Body, Method, Request};
-use serde_json::Value;
 
 use crate::{
     api::{guild::guild_member::GuildMember, user::User, Message, Snowflake},
     core::{
         abstraction::abstraction_traits::CommandArg,
-        http::rate_limit_client::{send_request, send_request_noparse, RequestRoute},
+        http::rate_limit_client::{send_request_noparse, RequestRoute},
     },
     util::error::Error,
     Context, BASE_URL,
@@ -14,7 +13,7 @@ use crate::{
 
 use super::typing::{
     Interaction, InteractionCallbackData, InteractionCallbackType, InteractionData,
-    InteractionResponse, InteractionType, MessageData,
+    InteractionResponse, InteractionType,
 };
 
 #[derive(CommandArg)]

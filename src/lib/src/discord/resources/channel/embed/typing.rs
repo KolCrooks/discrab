@@ -1,7 +1,7 @@
+#![allow(non_camel_case_types)]
 use std::fmt::{Display, Error, Formatter};
 
 use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
  * Embed Types

@@ -3,7 +3,7 @@ name = "discrab"
 description = "A simple Discord bot wrapper"
 repository = "https://github.com/KolCrooks/discrab"
 license = "MIT"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 
@@ -19,7 +19,6 @@ crossbeam-channel = "0.5"
 tokio-tungstenite = { version = "0.16.1", features = ["native-tls"] }
 futures-util = "0.3.19"
 termcolor = "1.1"
-simd-json = "0.4.8"
 serde_json = "1.0"
 serde_repr = "0.1"
 serde = { version = "1.0", features = ["derive"] }

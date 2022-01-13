@@ -17,13 +17,11 @@ use super::{
 use async_std::task::block_on;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 
-use serde_json::Value;
-use simd_json::{self};
-
 use futures_util::{
     stream::{SplitSink, SplitStream, StreamExt},
     SinkExt,
 };
+use serde_json::Value;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
@@ -73,7 +71,7 @@ impl WebsocketEventHandler {
         let mut hello_msg = socket.next().await.unwrap().unwrap().into_data();
 
         let hello_payload: PayloadBase<HelloPayloadData> =
-            simd_json::from_slice(&mut *hello_msg).unwrap();
+            serde_json::from_slice(&mut *hello_msg).unwrap();
 
         // Split the socket so that different threads can handle different parts of the websocket
         let (socket_sink, socket_recv) = socket.split();
@@ -176,7 +174,7 @@ impl WebsocketEventHandler {
     ) {
         loop {
             let seq = *sequence_num.lock().unwrap();
-            let heartbeat = Message::Text(simd_json::to_string(&PayloadBase::new(seq)).unwrap());
+            let heartbeat = Message::Text(serde_json::to_string(&PayloadBase::new(seq)).unwrap());
             socket_send.send(heartbeat).unwrap();
             thread::sleep(std::time::Duration::from_millis(heartbeat_interval));
         }
@@ -193,7 +191,7 @@ impl WebsocketEventHandler {
         while let Ok(message) = socket_recv.next().await.unwrap() {
             // Parse the payload
             let payload: PayloadBase<Value> =
-                simd_json::from_slice(&mut *message.into_data()).unwrap();
+                serde_json::from_slice(&mut *message.into_data()).unwrap();
 
             // Handle the payload depending on the opcode
             match payload.op_code {
@@ -209,7 +207,7 @@ impl WebsocketEventHandler {
                     // Send a heartbeat if it is requested
                     let seq = *sequence_num.lock().unwrap();
                     let heartbeat =
-                        Message::Text(simd_json::to_string(&PayloadBase::new(seq)).unwrap());
+                        Message::Text(serde_json::to_string(&PayloadBase::new(seq)).unwrap());
                     socket_send.send(heartbeat).unwrap();
                 }
                 PayloadOpcode::Reconnect => {}

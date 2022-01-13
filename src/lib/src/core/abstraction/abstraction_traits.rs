@@ -1,15 +1,9 @@
-use std::fmt::{Debug, Display};
-
-use async_trait::async_trait;
-use futures_util::Future;
-
 use crate::{
-    api::ApplicationCommandType,
-    api::Snowflake,
-    core::interactions::{interaction_event::InteractionCreate, typing::Interaction},
-    discord::interactions::application_command::ApplicationCommandOption,
-    Context, Events,
+    api::ApplicationCommandType, api::Snowflake,
+    core::interactions::interaction_event::InteractionCreate,
+    discord::interactions::application_command::ApplicationCommandOption, Context, Events,
 };
+use async_trait::async_trait;
 
 use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRouter};
 
