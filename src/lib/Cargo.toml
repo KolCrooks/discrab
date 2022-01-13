@@ -30,5 +30,5 @@ async-trait = "0.1.52"
 dotenv = "0.15.0"
 
 [dependencies.discrab_codegen]
-version = "*"
+version = "0.1.0"
 path = "../codegen"
