@@ -11,7 +11,7 @@ pub use crate::core::abstraction::{
 };
 
 pub mod macros {
-    pub use discordrs_codegen::*;
+    pub use discrab_codegen::*;
 }
 
 /**

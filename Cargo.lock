@@ -312,7 +312,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "discord_rs"
+name = "discrab"
 version = "0.1.0"
 dependencies = [
  "async-std",
@@ -321,7 +321,7 @@ dependencies = [
  "bitflags",
  "chrono",
  "crossbeam-channel",
- "discordrs_codegen",
+ "discrab_codegen",
  "dotenv",
  "futures-util",
  "hyper",
@@ -337,7 +337,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "discordrs_codegen"
+name = "discrab_codegen"
 version = "0.1.0"
 dependencies = [
  "quote",

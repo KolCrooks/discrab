@@ -1,4 +1,4 @@
-use discordrs_codegen::CommandArg;
+use discrab_codegen::CommandArg;
 use hyper::{Body, Method, Request};
 use serde_json::Value;
 

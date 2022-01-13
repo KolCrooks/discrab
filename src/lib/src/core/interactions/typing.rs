@@ -1,5 +1,5 @@
 use bitflags::bitflags;
-use discordrs_codegen::CommandArg;
+use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 

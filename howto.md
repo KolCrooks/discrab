@@ -4,7 +4,7 @@
 
 Create a bot with:
 ```rust
-use discord_rs::Bot;
+use discrab::Bot;
 
 let bot = Bot::new("TOKEN");
 ```
@@ -13,7 +13,7 @@ let bot = Bot::new("TOKEN");
 
 This is an example of a message create event listener.
 ```rust
-use discord_rs::{EventHandler, macros::event_handler, api::Channel, Events};
+use discrab::{EventHandler, macros::event_handler, api::Channel, Events};
 
 struct MsgEvent;
 

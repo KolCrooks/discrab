@@ -1,4 +1,4 @@
-use discord_rs::{
+use discrab::{
     api::{channel::message::MessageBuilder, embed::EmbedField, Snowflake},
     api::{ApplicationCommandType, Channel, Message},
     core::interactions::typing::InteractionCallbackData,

@@ -1,4 +1,4 @@
-use discordrs_codegen::CommandArg;
+use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
 use crate::{api::Snowflake, core::abstraction::abstraction_traits::CommandArg};

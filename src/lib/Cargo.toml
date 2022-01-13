@@ -1,5 +1,5 @@
 [package]
-name = "discord_rs"
+name = "discrab"
 version = "0.1.0"
 edition = "2021"
 
@@ -26,6 +26,6 @@ async-trait = "0.1.52"
 [dev-dependencies]
 dotenv = "0.15.0"
 
-[dependencies.discordrs_codegen]
+[dependencies.discrab_codegen]
 version = "*"
 path = "../codegen"

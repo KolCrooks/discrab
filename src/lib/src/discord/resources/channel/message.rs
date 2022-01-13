@@ -1,4 +1,4 @@
-use discordrs_codegen::CommandArg;
+use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
 pub use super::message_builder::*;

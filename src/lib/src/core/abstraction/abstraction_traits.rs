@@ -30,15 +30,15 @@ use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRo
 /// struct MyStruct;
 /// impl EventHandlerImpl<InteractionCreate> for MyStruct { ... }
 ///
-/// impl<'a> discord_rs::Registerable<'a> for MyStruct {
+/// impl<'a> discrab::Registerable<'a> for MyStruct {
 ///     fn register(
 ///         &'a self,
-///         ctx: discord_rs::Context,
-///         _: &mut discord_rs::EventDispatcher<'a>,
-///         interaction_router: &mut discord_rs::InteractionRouter<'a>,
+///         ctx: discrab::Context,
+///         _: &mut discrab::EventDispatcher<'a>,
+///         interaction_router: &mut discrab::InteractionRouter<'a>,
 ///     ){
 ///         // Get the id of the interaction handler, or create a new one if it doesn't exist
-///         let id = async_std::task::block_on(discord_rs::InteractionRouter::get_id_or_register::<MyStruct>(ctx));
+///         let id = async_std::task::block_on(discrab::InteractionRouter::get_id_or_register::<MyStruct>(ctx));
 ///         // Register the handler
 ///         interaction_router.register_command(id, self);
 ///     }
@@ -50,12 +50,12 @@ use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRo
 /// struct MyStruct;
 /// impl EventHandlerImpl<InteractionCreate> for MyStruct { ... }
 ///
-/// impl<'a> discord_rs::Registerable<'a> for MyStruct {
+/// impl<'a> discrab::Registerable<'a> for MyStruct {
 ///     fn register(
 ///         &'a self,
-///         ctx: discord_rs::Context,
-///         dispatcher: &mut discord_rs::EventDispatcher<'a>,
-///         _: &mut discord_rs::InteractionRouter<'a>,
+///         ctx: discrab::Context,
+///         dispatcher: &mut discrab::EventDispatcher<'a>,
+///         _: &mut discrab::InteractionRouter<'a>,
 ///     ) {
 ///         dispatcher.get_observable(MyStruct::EVENT_TYPE, "InteractionCreate").subscribe(self);
 ///     }
