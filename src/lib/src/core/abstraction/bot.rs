@@ -80,7 +80,7 @@ impl<'a> Bot<'a> {
 
         // Register the interaction router
         self.event_dispatcher
-            .InteractionCreate
+            .InteractionCtx
             .subscribe(&self.interaction_router);
 
         if self.ctx.settings.debug {

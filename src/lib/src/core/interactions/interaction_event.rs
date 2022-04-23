@@ -1,6 +1,6 @@
 use discrab_codegen::CommandArg;
 use hyper::{Body, Method, Request};
-
+use serde;
 use crate::{
     api::{guild::guild_member::GuildMember, user::User, Message, Snowflake},
     core::{
@@ -17,9 +17,7 @@ use super::typing::{
 };
 
 #[derive(CommandArg)]
-pub struct InteractionCreate {
-    /// Context
-    ctx: Context,
+pub struct InteractionCtx {
     // has_resolved: Option,
     /// The id of the interaction
     pub id: Snowflake,
@@ -43,13 +41,15 @@ pub struct InteractionCreate {
     pub version: u32,
     /// For components, the message they were attached to
     pub message: Option<Box<Message>>,
+    /// internal context object
+    pub __ctx__: Context,
 }
 
-impl InteractionCreate {
-    /// Creates a new interactionCreate object from an Interaction
+impl InteractionCtx {
+    /// Creates a new InteractionCtx object from an Interaction
     pub fn from_interaction(ctx: Context, int: Interaction) -> Self {
         Self {
-            ctx,
+            __ctx__: ctx,
             application_id: int.application_id,
             channel_id: int.channel_id,
             data: int.data,
@@ -116,8 +116,15 @@ impl InteractionCreate {
             .body(Body::from(serde_json::to_string(&payload).unwrap()))
             .unwrap();
 
-        send_request_noparse(self.ctx.clone(), route, request_builder)
-            .await
-            .map(|v| println!("{:?}", v))
+        let req = send_request_noparse(self.__ctx__.clone(), route, request_builder)
+            .await;
+        if let Err(e) = &req {
+            println!("{:?}", e);
+        }
+        req
     }
+
+    // async fn route_down(&self, handler: &CommandHandler<'_>) -> Result<(), Error> {
+    //     handler.
+    // }
 }

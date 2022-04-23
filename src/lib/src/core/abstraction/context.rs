@@ -1,6 +1,6 @@
 use crossbeam_channel::Sender;
 
-use crate::core::{http::rate_limit_client::RequestObject, settings::Settings};
+use crate::{core::{http::rate_limit_client::RequestObject, settings::Settings}, events::Message};
 
 /// Context object that is passed to all parts of the bot
 /// It contains key information so that methods can create requests to discord, and also contains settings for those functions

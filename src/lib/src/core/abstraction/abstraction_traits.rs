@@ -1,11 +1,28 @@
 use crate::{
-    api::ApplicationCommandType, api::Snowflake,
-    core::interactions::interaction_event::InteractionCreate,
+    api::ApplicationCommandType, api::{Snowflake, ApplicationCommandOptionType},
+    core::interactions::{interaction_event::InteractionCtx, typing::{InteractionData}},
     discord::interactions::application_command::ApplicationCommandOption, Context, Events,
 };
 use async_trait::async_trait;
 
 use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRouter};
+
+pub enum RegisterableType {
+    Event,
+    Command,
+    SubCommandGroup,
+    SubCommand
+}
+
+impl From<RegisterableType> for ApplicationCommandOptionType {
+    fn from(rt: RegisterableType) -> Self {
+       match rt {
+           RegisterableType::SubCommandGroup => Self::SubCommandGroup,
+           RegisterableType::SubCommand => Self::SubCommand,
+           _ => panic!("This enum value is not convertable!")
+       }
+    }
+}
 
 /// Used to allow structs to be registered as event handlers for either interactions or general events.
 ///
@@ -22,7 +39,7 @@ use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRo
 /// #### Event Handler
 /// ```rust,no_run
 /// struct MyStruct;
-/// impl EventHandlerImpl<InteractionCreate> for MyStruct { ... }
+/// impl EventHandlerImpl<InteractionCtx> for MyStruct { ... }
 ///
 /// impl<'a> discrab::Registerable<'a> for MyStruct {
 ///     fn register(
@@ -42,7 +59,7 @@ use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRo
 /// #### Interaction
 /// ```rust,no_run
 /// struct MyStruct;
-/// impl EventHandlerImpl<InteractionCreate> for MyStruct { ... }
+/// impl EventHandlerImpl<InteractionCtx> for MyStruct { ... }
 ///
 /// impl<'a> discrab::Registerable<'a> for MyStruct {
 ///     fn register(
@@ -51,7 +68,7 @@ use super::{event_dispatcher::EventDispatcher, interaction_router::InteractionRo
 ///         dispatcher: &mut discrab::EventDispatcher<'a>,
 ///         _: &mut discrab::InteractionRouter<'a>,
 ///     ) {
-///         dispatcher.get_observable(MyStruct::EVENT_TYPE, "InteractionCreate").subscribe(self);
+///         dispatcher.get_observable(MyStruct::EVENT_TYPE, "InteractionCtx").subscribe(self);
 ///     }
 /// }
 /// ```
@@ -63,6 +80,19 @@ pub trait Registerable<'a> {
         dispatcher: &mut EventDispatcher<'a>,
         interaction_router: &mut InteractionRouter<'a>,
     );
+    
+    /// @returns the registerable type, applications type, name, and description
+    fn get_info(&self) -> (RegisterableType, ApplicationCommandType, &'static str, Option<&'static str>) {
+        (RegisterableType::Event, ApplicationCommandType::ChatInput, "", None)
+    }
+
+    fn get_name(&self) -> &'static str {
+        self.get_info().2
+    }
+
+    fn get_options(&self) -> Vec<ApplicationCommandOption> {
+        vec![]
+    }
 }
 
 /// This trait is used to help users create event handlers for the event dispatcher.
@@ -84,7 +114,20 @@ pub trait InternalEventHandler<T: CommandArg> {
 }
 
 #[async_trait]
-pub trait CommandHandler {
+pub trait SubHandler: Sync {
+    async fn handler(&self, _: InteractionCtx);
+}
+
+#[async_trait]
+pub trait SubCommandGroup<'a>: SubHandler {}
+
+#[async_trait]
+pub trait SubCommand<'a>: SubHandler { }
+
+pub trait SubRegisterable<'a>: SubHandler + Registerable<'a> {}
+
+#[async_trait]
+pub trait CommandHandler<'a> {
     /// The type of the command.
     ///
     /// **ChatInput**: Slash commands; a text-based command that shows up when a user types `/`
@@ -107,7 +150,54 @@ pub trait CommandHandler {
     }
 
     /// This function is called when the interaction associated with the command is triggered.
-    async fn handler(&self, _: Context, _: InteractionCreate);
+    /// By default, this function will route the interaction down to any subcommands. If
+    /// this function doesn't have any subcommands to route down to, it will panic.
+    /// @param ctx The context of the interaction.
+    async fn handler(&self, ctx: InteractionCtx) {
+        if self.get_subs().is_empty() {
+            panic!("Command Handler for {} is not implimented!", Self::COMMAND_NAME);
+        }
+        self.route_down(ctx).await;
+    }
+
+    /// This function is called when the command is registered, and also every time a command
+    /// is routed down to the appropriate subcommand.
+    fn get_subs(&self) -> Vec<&'a dyn SubRegisterable<'a>> {
+        Vec::new()
+    }
+
+    async fn route_down(&self, ictx: InteractionCtx) {
+        let sub: Vec<_> = ictx
+        .data.as_ref().expect("Interaction has no data!")
+        .options.as_ref().expect("Interaction has no subroutes!")
+        .iter().filter(|opt| {
+            opt.type_ == ApplicationCommandOptionType::SubCommandGroup ||
+            opt.type_ == ApplicationCommandOptionType::SubCommand
+        }).collect();
+        
+        if sub.is_empty() {
+            panic!("Expected subroutes, but interaction did not reply with any!");
+        } else if sub.len() > 1 {
+            panic!("Expected only one subroute, but interaction replied with more than one!");
+        } else {
+            let s = sub.get(0).unwrap();
+            let subs = self.get_subs();
+            let handler = 
+                subs.iter()
+                .find(|h|h.get_name() == s.name.as_str())
+                .unwrap_or_else(|| panic!("Sub-Route {} not found!", s.name));
+            
+            let sub_ctx = InteractionCtx {
+                data: Some(InteractionData {
+                    options: s.options.clone(),
+                    name: s.name.clone(),
+                    ..ictx.data.clone().unwrap()
+                }),
+                ..ictx
+            };
+            handler.handler(sub_ctx).await;
+        }
+    }
 }
 
 /// Makes the user only able to use structs that implement CommandArg in their EventHandler

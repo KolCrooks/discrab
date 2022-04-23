@@ -35,6 +35,9 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
             ) {
                 dispatcher.get_observable(#name::EVENT_TYPE, stringify!(#event_type_str)).subscribe(self);
             }
+            fn get_options(&self) -> Vec<discrab::api::ApplicationCommandOption> {
+                vec![]
+            }
         }
 
         impl discrab::__internal__::InternalEventHandler<#event_type_str> for #name {
@@ -44,6 +47,8 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
                 ))
             }
         }
+        
+        
     };
     output.into()
 }

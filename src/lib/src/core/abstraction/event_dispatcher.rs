@@ -231,7 +231,7 @@ event_subscriptions! {
         /// guild integration was deleted
         const IntegrationDelete: IntegrationDelete = "INTEGRATION_DELETE";
         /// user used an interaction, such as an Application Command
-        const InteractionCreate: Interaction = "INTERACTION_CREATE";
+        const InteractionCtx: Interaction = "INTERACTION_CREATE";
         /// invite to a channel was created
         const InviteCreate: InviteCreate = "INVITE_CREATE";
         /// invite to a channel was deleted

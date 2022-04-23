@@ -80,6 +80,7 @@ pub struct Channel {
     pub permissions: Option<String>,
 }
 
+
 impl Channel {
     /// Sends a message to a given channel.
     /// @param channel_id The id of the channel to send the message to.

@@ -191,7 +191,7 @@ impl WebsocketEventHandler {
         while let Ok(message) = socket_recv.next().await.unwrap() {
             // Parse the payload
             let payload: PayloadBase<Value> =
-                serde_json::from_slice(&mut *message.into_data()).unwrap();
+                serde_json::from_slice(&*message.into_data()).unwrap();
 
             // Handle the payload depending on the opcode
             match payload.op_code {

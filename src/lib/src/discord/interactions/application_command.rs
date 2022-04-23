@@ -1,12 +1,11 @@
 use crate::{
     api::{application::Application, channel::typing::ChannelType, Snowflake},
-    core::http::rate_limit_client::{send_request, RequestRoute},
+    core::{http::rate_limit_client::{send_request, RequestRoute}},
     util::error::Error,
     Context, BASE_URL,
 };
 use hyper::{Body, Method, Request};
 use serde::{self, Deserialize, Serialize};
-
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /**
@@ -70,18 +69,36 @@ pub struct ApplicationCommandOption {
     /// if the option is a channel type, the channels shown will be restricted to these types
     pub channel_types: Option<Vec<ChannelType>>,
     /// if the option is an INTEGER or NUMBER type, the minimum value permitted
-    pub min_value: Option<u64>,
+    pub min_value: Option<f64>,
     /// if the option is an INTEGER or NUMBER type, the maximum value permitted
-    pub max_value: Option<u64>,
+    pub max_value: Option<f64>,
     /// enable autocomplete interactions for this option
     pub autocomplete: bool,
 }
+
+impl Default for ApplicationCommandOption {
+    fn default() -> Self {
+        Self {
+            type_: ApplicationCommandOptionType::Boolean,
+            name: "".to_string(),
+            description: None,
+            required: false,
+            choices: None,
+            options: None,
+            channel_types: None,
+            min_value: None,
+            max_value: None,
+            autocomplete: false,
+        }
+    }
+}
+
 
 /**
  * Application Command Option Type
  * @docs <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type>
  */
-#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[derive(Serialize_repr, Deserialize_repr, Clone, PartialEq)]
 #[repr(u8)]
 pub enum ApplicationCommandOptionType {
     SubCommand = 1,
@@ -110,6 +127,21 @@ pub struct ApplicationCommandOptionChoice {
     pub name: String,
     /// value of the choice, up to 100 characters if string
     pub value: ApplicationCommandOptionChoiceValue,
+}
+
+impl ApplicationCommandOptionChoice {
+    pub fn new(name: String, value: ApplicationCommandOptionChoiceValue) -> Self {
+        Self { name, value }
+    }
+    pub fn new_str(name: String, value: String) -> Self {
+        Self { name, value: ApplicationCommandOptionChoiceValue::String(value) }
+    }
+    pub fn new_int(name: String, value: i64) -> Self {
+        Self { name, value: ApplicationCommandOptionChoiceValue::Integer(value) }
+    }
+    pub fn new_num(name: String, value: f64) -> Self {
+        Self { name, value: ApplicationCommandOptionChoiceValue::Number(value) }
+    }
 }
 
 /**

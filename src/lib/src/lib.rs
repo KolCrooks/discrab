@@ -14,6 +14,11 @@ pub mod macros {
     pub use discrab_codegen::*;
 }
 
+pub mod builders {
+    pub use crate::core::abstraction::option_builder::*;
+    pub use crate::api::channel::message::MessageBuilder;
+}
+
 /**
  * For internal use only. Is public because it is used by the proc macros
  */
@@ -27,7 +32,7 @@ pub mod __internal__ {
  */
 pub mod api {
     pub use crate::discord::interactions::application_command::{
-        ApplicationCommand, ApplicationCommandType,
+        ApplicationCommand, ApplicationCommandType, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionChoiceValue, ApplicationCommandOptionType
     };
     pub use crate::discord::permissions::Permissions;
     pub use crate::discord::resources::channel::embed;
@@ -49,7 +54,7 @@ pub mod events {
     pub use crate::api::{Channel, Message};
     pub use crate::core::interactions::handler::events::dispatch_payloads::*;
     pub use crate::core::interactions::{
-        interaction_event::InteractionCreate, typing::Interaction,
+        interaction_event::InteractionCtx, typing::Interaction,
     };
     pub use crate::discord::gateway::presence::PresenceUpdate;
 }

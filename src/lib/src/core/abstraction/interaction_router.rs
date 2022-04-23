@@ -2,18 +2,18 @@ use std::collections::HashMap;
 
 use crate::{
     api::ApplicationCommand,
-    api::Snowflake,
-    core::interactions::{interaction_event::InteractionCreate, typing::Interaction},
+    api::{Snowflake, ApplicationCommandOption, ApplicationCommandType},
+    core::interactions::{interaction_event::InteractionCtx, typing::Interaction},
     discord::interactions::application_command::CreateApplicationCommand,
     util::logger::print_debug,
-    CommandHandler, Context,
+    CommandHandler, Context, Registerable,
 };
 
 use super::abstraction_traits::InternalEventHandler;
 
 /// This is used to dispatch interaction events to the correct handler
 pub struct InteractionRouter<'a> {
-    pub commands: HashMap<Snowflake, &'a dyn InternalEventHandler<InteractionCreate>>,
+    pub commands: HashMap<Snowflake, &'a dyn InternalEventHandler<InteractionCtx>>,
 }
 
 impl<'a> InternalEventHandler<Interaction> for InteractionRouter<'a> {
@@ -30,12 +30,12 @@ impl<'a> InternalEventHandler<Interaction> for InteractionRouter<'a> {
         if let Some(command) = command {
             command.handler(
                 ctx.clone(),
-                InteractionCreate::from_interaction(ctx, interaction),
+                InteractionCtx::from_interaction(ctx, interaction),
             );
         } else if ctx.settings.debug {
             print_debug(
                 "INTERACTIONS",
-                format!("Unable to route interaction {}", id),
+                format!("Unable to route interaction {}, interactions: {:?}", id, self.commands.keys()),
             );
         }
     }
@@ -53,13 +53,13 @@ impl<'a> InteractionRouter<'a> {
     pub fn register_command(
         &mut self,
         id: Snowflake,
-        cmd: &'a dyn InternalEventHandler<InteractionCreate>,
+        cmd: &'a dyn InternalEventHandler<InteractionCtx>,
     ) {
         self.commands.insert(id, cmd);
     }
 
     /// Gets the id of the interaction handler if it exists. If it doesn't exist, it registers a new one and returns the id
-    pub async fn get_id_or_register<T: CommandHandler>(ctx: Context) -> Snowflake {
+    pub async fn get_id_or_register<T: CommandHandler<'a> + Registerable<'a>>(ctx: Context, handler: &T) -> Snowflake {
         if ctx.settings.debug {
             print_debug(
                 "INTERACTIONS",
@@ -92,12 +92,29 @@ impl<'a> InteractionRouter<'a> {
                     );
                 }
                 // Get the information from the command handler
-                let options_raw = T::get_options();
-                let options = if options_raw.is_empty() {
+                let mut options_raw = handler.get_options();
+                let options = 
+                if options_raw.is_empty() && handler.get_subs().is_empty() {
                     None
                 } else {
+                    for sub in handler.get_subs() {
+                        let (reg_type, _, name, description) = sub.get_info();
+                        let sub_options = sub.get_options();
+                        options_raw.push(ApplicationCommandOption {
+                            name: name.to_string(),
+                            description: description.map(&str::to_string),
+                            type_: reg_type.into(),
+                            options: if sub_options.is_empty() {
+                                None
+                            } else {
+                                Some(sub_options)
+                            },
+                            ..Default::default()
+                        });
+                    }
                     Some(options_raw)
                 };
+                
 
                 let cmd = ApplicationCommand::create_global(
                     ctx,

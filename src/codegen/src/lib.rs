@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::DeriveInput;
+use quote::{quote, __private::ext::RepToTokensExt};
+use syn::{DeriveInput, parse_macro_input};
 mod application_command;
 mod event_handler;
 
