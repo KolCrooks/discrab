@@ -1,8 +1,10 @@
 use proc_macro::TokenStream;
-use quote::{quote, __private::ext::RepToTokensExt};
-use syn::{DeriveInput, parse_macro_input};
+use quote::quote;
+use syn::DeriveInput;
 mod application_command;
 mod event_handler;
+mod application_subgroup;
+mod application_subcommand;
 
 #[proc_macro_attribute]
 /// Generates additional code needed to register an EventHandler
@@ -11,9 +13,21 @@ pub fn event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-/// Generates additional code needed to register a CommandHandler
+/// Generates additional code needed to register a Command
 pub fn command(_args: TokenStream, input: TokenStream) -> TokenStream {
     application_command::gen_event_handler(_args, input)
+}
+
+#[proc_macro_attribute]
+/// Generates additional code needed to register a Subcommand Group
+pub fn subcommand_group(_args: TokenStream, input: TokenStream) -> TokenStream {
+    application_subgroup::gen_subgroup_handler(_args, input)
+}
+
+#[proc_macro_attribute]
+/// Generates additional code needed to register a Subcommand
+pub fn subcommand(_args: TokenStream, input: TokenStream) -> TokenStream {
+    application_subcommand::gen_sub_handler(_args, input)
 }
 
 #[proc_macro_derive(CommandArg)]

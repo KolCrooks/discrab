@@ -7,7 +7,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
  * Channel Types
  * @docs <https://discord.com/developers/docs/resources/channel#channel-object-channel-types>
  */
-#[derive(Serialize_repr, Deserialize_repr, Clone)]
+#[derive(Serialize_repr, Deserialize_repr, Clone, PartialEq, Eq, Debug, Hash)]
 #[repr(u8)]
 pub enum ChannelType {
     /// A text channel within a server

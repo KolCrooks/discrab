@@ -2,7 +2,7 @@ use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::{core::abstraction::abstraction_traits::CommandArg, discord::snowflake::Snowflake};
+use crate::{core::abstraction::traits::CommandArg, discord::snowflake::Snowflake};
 
 /**
  * Stage Instance Structure

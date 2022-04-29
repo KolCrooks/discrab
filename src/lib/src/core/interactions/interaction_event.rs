@@ -1,10 +1,10 @@
 use discrab_codegen::CommandArg;
 use hyper::{Body, Method, Request};
-use serde;
+
 use crate::{
-    api::{guild::guild_member::GuildMember, user::User, Message, Snowflake},
+    api::{guild::guild_member::GuildMember, user::User, Message, Snowflake, ApplicationCommandOptionValue},
     core::{
-        abstraction::abstraction_traits::CommandArg,
+        abstraction::traits::CommandArg,
         http::rate_limit_client::{send_request_noparse, RequestRoute},
     },
     util::error::Error,
@@ -13,7 +13,7 @@ use crate::{
 
 use super::typing::{
     Interaction, InteractionCallbackData, InteractionCallbackType, InteractionData,
-    InteractionResponse, InteractionType,
+    InteractionResponse, InteractionType, InteractionDataOption,
 };
 
 #[derive(CommandArg)]
@@ -43,6 +43,46 @@ pub struct InteractionCtx {
     pub message: Option<Box<Message>>,
     /// internal context object
     pub __ctx__: Context,
+}
+
+pub struct InteractionOption<T>{
+    pub name: String,
+    pub value: T,
+}
+
+impl From<InteractionDataOption> for InteractionOption<String> {
+    fn from(value: InteractionDataOption) -> Self {
+        match value.value.unwrap() {
+            ApplicationCommandOptionValue::String(v) => InteractionOption {
+                name: value.name,
+                value: v,
+            },
+            _ => panic!("InteractionOption::from() - InteractionDataOption::value is not a String"),
+        }
+    }
+}
+impl From<InteractionDataOption> for InteractionOption<i64> {
+    fn from(value: InteractionDataOption) -> Self {
+        match value.value.unwrap() {
+            ApplicationCommandOptionValue::Integer(v) => InteractionOption {
+                name: value.name,
+                value: v,
+            },
+            _ => panic!("InteractionOption::from() - InteractionDataOption::value is not an Integer"),
+        }
+    }
+}
+
+impl From<InteractionDataOption> for InteractionOption<f64> {
+    fn from(value: InteractionDataOption) -> Self {
+        match value.value.unwrap() {
+            ApplicationCommandOptionValue::Number(v) => InteractionOption {
+                name: value.name,
+                value: v,
+            },
+            _ => panic!("InteractionOption::from() - InteractionDataOption::value is not an Float"),
+        }
+    }
 }
 
 impl InteractionCtx {
@@ -124,7 +164,13 @@ impl InteractionCtx {
         req
     }
 
-    // async fn route_down(&self, handler: &CommandHandler<'_>) -> Result<(), Error> {
-    //     handler.
-    // }
+    /// Gets an option from the interaction as type T. Panics if there is a data type mismatch.
+    pub fn get_option<T>(&self, name: &str) -> Option<InteractionOption<T>>
+    where InteractionOption<T>: From<InteractionDataOption> {
+        self.data
+        .as_ref()?.options
+        .as_ref()?.iter().
+        find(|o|o.name == name)
+        .map(|o|o.to_owned().into())
+    }
 }

@@ -1,7 +1,7 @@
 use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
-use crate::{api::Snowflake, core::abstraction::abstraction_traits::CommandArg};
+use crate::{api::Snowflake, core::abstraction::traits::CommandArg};
 
 use super::user::User;
 

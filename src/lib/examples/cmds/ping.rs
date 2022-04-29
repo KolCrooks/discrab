@@ -1,5 +1,5 @@
 use discrab::CommandHandler;
-use discrab::api::{ApplicationCommandType, ApplicationCommandOption};
+use discrab::api::ApplicationCommandType;
 use discrab::core::interactions::typing::InteractionCallbackData;
 use discrab::events::InteractionCtx;
 use discrab::macros::*;
@@ -9,10 +9,10 @@ pub struct PingSlashCmd {
 }
 
 #[command]
-impl CommandHandler<'_> for PingSlashCmd {
+impl CommandHandler for PingSlashCmd {
     const COMMAND_TYPE: ApplicationCommandType = ApplicationCommandType::ChatInput;
-    const COMMAND_NAME: &'static str = "ping";
-    const COMMAND_DESCRIPTION: &'static str = "pong!";
+    const NAME: &'static str = "ping";
+    const DESCRIPTION: &'static str = "pong!";
 
     async fn handler(&self, interaction: InteractionCtx) {
         interaction

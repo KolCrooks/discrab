@@ -1,14 +1,16 @@
-use crate::Context;
+use std::{sync::Arc, panic::{self, RefUnwindSafe, UnwindSafe}};
 
-use super::abstraction_traits::{CommandArg, InternalEventHandler};
+use crate::{Context, util::logger::print_debug};
+
+use super::traits::{CommandArg, __InternalEventHandler};
 
 /// This struct can be subscribed to, and when it is notified, it will call the subscribers
-pub struct Observable<'a, T: Clone + CommandArg> {
+pub struct Observable<T: Clone + CommandArg + UnwindSafe + RefUnwindSafe> {
     /// The subscribers to the observable
-    pub subscribers: Vec<&'a (dyn InternalEventHandler<T>)>,
+    pub subscribers: Vec<Arc<dyn __InternalEventHandler<T>>>,
 }
 
-impl<'a, T: Clone + CommandArg> Observable<'a, T> {
+impl<T: Clone + CommandArg + UnwindSafe + RefUnwindSafe> Observable<T> {
     /// Creates a new observable
     pub fn new() -> Self {
         Observable {
@@ -17,19 +19,23 @@ impl<'a, T: Clone + CommandArg> Observable<'a, T> {
     }
 
     /// Notifies all subscribers with given data
-    pub async fn notify(&self, ctx: Context, data: T) {
+    pub fn notify(&self, ctx: Context, data: T) {
         for listener in &self.subscribers {
-            listener.handler(ctx.clone(), data.clone());
+            panic::catch_unwind(|| {
+                listener.handler(ctx.clone(), data.clone());
+            }).unwrap_or_else(|t| {
+                println!("Unhandled panic in observable: {:?}", t);
+            });
         }
     }
 
     /// Subscribes a listener to the observable
-    pub fn subscribe(&mut self, listener: &'a dyn InternalEventHandler<T>) {
+    pub fn subscribe(&mut self, listener: Arc<dyn __InternalEventHandler<T>>) {
         self.subscribers.push(listener);
     }
 }
 
-impl<'a, T: Clone + CommandArg> Default for Observable<'a, T> {
+impl<T: Clone + CommandArg + UnwindSafe + RefUnwindSafe> Default for Observable<T> {
     fn default() -> Self {
         Observable::new()
     }

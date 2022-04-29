@@ -1,9 +1,10 @@
+#![feature(in_band_lifetimes)]
 pub mod core;
 mod discord;
 mod util;
 
 pub use crate::core::abstraction::{
-    abstraction_traits::{CommandHandler, EventHandler, Registerable},
+    traits::{CommandHandler, EventHandler, Registerable, RegFns, SubRegisterable, SubsVector, CommonHandler},
     bot::Bot,
     context::Context,
     event_dispatcher::{EventDispatcher, Events},
@@ -24,7 +25,7 @@ pub mod builders {
  */
 #[doc(hidden)]
 pub mod __internal__ {
-    pub use crate::core::abstraction::abstraction_traits::InternalEventHandler;
+    pub use crate::core::abstraction::traits::__InternalEventHandler;
 }
 
 /**
@@ -32,7 +33,9 @@ pub mod __internal__ {
  */
 pub mod api {
     pub use crate::discord::interactions::application_command::{
-        ApplicationCommand, ApplicationCommandType, ApplicationCommandOption, ApplicationCommandOptionChoice, ApplicationCommandOptionChoiceValue, ApplicationCommandOptionType
+        ApplicationCommand, ApplicationCommandType,
+        ApplicationCommandOption, ApplicationCommandOptionChoice,
+        ApplicationCommandOptionValue, ApplicationCommandOptionType,
     };
     pub use crate::discord::permissions::Permissions;
     pub use crate::discord::resources::channel::embed;
@@ -54,7 +57,7 @@ pub mod events {
     pub use crate::api::{Channel, Message};
     pub use crate::core::interactions::handler::events::dispatch_payloads::*;
     pub use crate::core::interactions::{
-        interaction_event::InteractionCtx, typing::Interaction,
+        interaction_event::InteractionCtx, typing::Interaction
     };
     pub use crate::discord::gateway::presence::PresenceUpdate;
 }

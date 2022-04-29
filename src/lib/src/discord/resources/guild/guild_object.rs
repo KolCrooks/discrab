@@ -2,7 +2,7 @@ use discrab_codegen::CommandArg;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::abstraction::abstraction_traits::CommandArg,
+    core::abstraction::traits::CommandArg,
     discord::{
         gateway::presence::PresenceUpdate,
         resources::{channel::Channel, emoji::Emoji, sticker::Sticker, voice::VoiceState},

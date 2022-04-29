@@ -1,4 +1,4 @@
-use crate::api::{ApplicationCommandOptionType, ApplicationCommandOption, channel::typing::ChannelType, ApplicationCommandOptionChoice, ApplicationCommandOptionChoiceValue};
+use crate::api::{ApplicationCommandOptionType, ApplicationCommandOption, channel::typing::ChannelType, ApplicationCommandOptionChoice, ApplicationCommandOptionValue};
 use paste::paste;
 
 pub struct OptionBuilder {}
@@ -10,13 +10,13 @@ macro_rules! OptionBuilderBuilder {
             option: ApplicationCommandOption,
         }
         impl $builder {
-            pub fn new(name: String) -> Self {
+            pub fn new(name: String, description: String) -> Self {
                 return Self {
                     option: ApplicationCommandOption {
                         autocomplete: false,
                         channel_types: None,
                         choices: None,
-                        description: None,
+                        description,
                         max_value: None,
                         min_value: None,
                         name,
@@ -42,7 +42,7 @@ macro_rules! OptionBuilderBuilder {
             /// Sets the description of the option
             #[must_use]
             pub fn description(mut self, description:String) -> Self {
-                self.option.description = Some(description);
+                self.option.description = description;
                 self
             }
 
@@ -57,8 +57,8 @@ macro_rules! OptionBuilderBuilder {
                 $(
                 /// Creates a new builder option builder for the given type
                 /// @param name the name of the option
-                pub fn [<new_ $name>](name: String) -> $builder {
-                    return $builder::new(name);
+                pub fn [<new_ $name>](name: String, description: String) -> $builder {
+                    return $builder::new(name, description);
                 }
                 )+
             }
@@ -69,8 +69,8 @@ macro_rules! OptionBuilderBuilder {
                 $(
                 /// Creates a new builder option builder for the given type
                 /// @param name the name of the option
-                pub fn [<builder_ $name>](name: String) -> $builder {
-                    return $builder::new(name);
+                pub fn [<builder_ $name>](name: String, description: String) -> $builder {
+                    return $builder::new(name, description);
                 }
                 )+
             }
@@ -111,7 +111,7 @@ impl From<LimitedOptionChoice<String>> for ApplicationCommandOptionChoice {
     fn from(choice: LimitedOptionChoice<String>) -> Self {
         Self {
             name: choice.name,
-            value: ApplicationCommandOptionChoiceValue::String(choice.value),
+            value: ApplicationCommandOptionValue::String(choice.value),
         }
     }
 }
@@ -119,7 +119,7 @@ impl From<LimitedOptionChoice<i64>> for ApplicationCommandOptionChoice {
     fn from(choice: LimitedOptionChoice<i64>) -> Self {
         Self {
             name: choice.name,
-            value: ApplicationCommandOptionChoiceValue::Integer(choice.value),
+            value: ApplicationCommandOptionValue::Integer(choice.value),
         }
     }
 }
@@ -127,7 +127,7 @@ impl From<LimitedOptionChoice<f64>> for ApplicationCommandOptionChoice {
     fn from(choice: LimitedOptionChoice<f64>) -> Self {
         Self {
             name: choice.name,
-            value: ApplicationCommandOptionChoiceValue::Number(choice.value),
+            value: ApplicationCommandOptionValue::Number(choice.value),
         }
     }
 }

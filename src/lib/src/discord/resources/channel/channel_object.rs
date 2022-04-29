@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     api::Message,
     core::{
-        abstraction::abstraction_traits::CommandArg,
+        abstraction::traits::CommandArg,
         http::rate_limit_client::{send_request, RequestRoute},
     },
     discord::{resources::user::User, snowflake::Snowflake},

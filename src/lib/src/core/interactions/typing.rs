@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
-    api::channel::{attachment::Attachment, embed::Embed},
+    api::{channel::{attachment::Attachment, embed::Embed}, ApplicationCommandOptionValue},
     api::ApplicationCommandType,
-    core::abstraction::abstraction_traits::CommandArg,
+    core::abstraction::traits::CommandArg,
     discord::{
         interactions::application_command::{
             ApplicationCommandOptionChoice, ApplicationCommandOptionType,
@@ -99,7 +99,7 @@ pub struct InteractionDataOption {
     #[serde(rename = "type")]
     pub type_: ApplicationCommandOptionType,
     /// The value of the option resulting from user input
-    pub value: Option<String>,
+    pub value: Option<ApplicationCommandOptionValue>,
     /// Present if this option is a group or subcommand
     pub options: Option<Vec<InteractionDataOption>>,
     /// true if this option is the currently focused option for autocomplete

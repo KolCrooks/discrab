@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use super::abstraction_traits::CommandArg;
+use super::traits::CommandArg;
 use super::context::Context;
 use crate::core::interactions::handler::events::dispatch_payloads::{
     ChannelPinsUpdate, GuildBanAddRemove, GuildEmojisUpdate, GuildIntegrationsUpdate,
@@ -11,7 +11,8 @@ use crate::core::interactions::handler::events::dispatch_payloads::{
     MessageReactionRemoveEmoji, ThreadListSync, ThreadMemberUpdate, ThreadMembersUpdate,
     TypingStart, VoiceServerUpdate, WebhooksUpdate,
 };
-use crate::core::interactions::typing::Interaction;
+use crate::core::interactions::{handler::events::ready_payload::ReadyPayloadData, typing::Interaction};
+
 use crate::discord::gateway::presence::PresenceUpdate;
 use crate::discord::resources::channel::{message::Message, Channel};
 use crate::discord::resources::guild::guild_object::{Guild, UnavailableGuild};
@@ -22,6 +23,7 @@ use crate::discord::resources::voice::VoiceState;
 use crate::util::logger::print_debug;
 use serde_json::Value;
 use std::mem;
+use std::panic::{RefUnwindSafe, UnwindSafe};
 
 use super::observer::Observable;
 
@@ -59,13 +61,13 @@ macro_rules! event_subscriptions {
         // This code will generate an `observable` for each event.
         #[doc="Contains an observable for each event, so that you can subscribe to events with an `InternalEventHandler`"]
         $(#[$outer])*
-        pub struct $EventSubs<'a>{
+        pub struct $EventSubs{
             $(
                 $(#[$inner])*
-                pub $Flag: Observable<'a, $x>,
+                pub $Flag: Observable<$x>,
             )+
         }
-        impl<'a> $EventSubs<'a>{
+        impl $EventSubs {
             #[doc="Creates a new EventDispatcher with empty Observables"]
             pub fn new() -> Self {
                 $EventSubs {
@@ -77,13 +79,18 @@ macro_rules! event_subscriptions {
 
 
             #[doc="Given a Context, the event name, and the event data, it will parse the data and then dispatch the event correctly"]
-            pub async fn route_event(&self, ctx: Context, event: String, data: Value) {
+            pub fn route_event(&self, ctx: Context, event: String, data: Value) {
                 match event.as_str() {
                     $(
                         // Match the event name
                         $EventName => {
-                            let data = serde_json::from_value::<$x>(data).expect("Unable to deserialize event data!");
-                            self.$Flag.notify(ctx, data).await;
+                            let data = serde_json::from_value::<$x>(data.clone()).unwrap_or_else(|e| {
+                                if ctx.settings.debug {
+                                    print_debug("EVENT_HANDLER", format!("Error parsing event data: {}", data));
+                                }
+                                panic!("Unable to deserialize event data! {}", e)
+                            });
+                            self.$Flag.notify(ctx, data);
                         }
                     )+
                     _ => {
@@ -94,15 +101,11 @@ macro_rules! event_subscriptions {
                 }
             }
 
-            #[doc="Returns a mutable reference to the `Observable` for this event type, and also checks to make sure that the event type matches the event via string comparison"]
-            pub fn get_observable<T: Clone + CommandArg>(&mut self, event: Events, type_str: &str) -> &mut Observable<T> {
+            #[doc="Returns a mutable reference to the `Observable` for this event type"]
+            pub fn get_observable<T: Clone + CommandArg + UnwindSafe + RefUnwindSafe>(&mut self, event: Events) -> &mut Observable<T> {
                 match event {
                     $(
                         Events::$Flag => {
-                            // Check to make sure that the event type matches the required event type
-                            if stringify!($x) != type_str {
-                                panic!("Event type mismatch! Expected type: `{}`, recieved: `{}`", stringify!($x), type_str);
-                            }
                             unsafe { mem::transmute(&mut self.$Flag) }
                         },
                     )+
@@ -110,7 +113,7 @@ macro_rules! event_subscriptions {
             }
         }
 
-        impl<'a> Default for $EventSubs<'a>{
+        impl Default for $EventSubs {
             #[doc="Creates a new EventDispatcher with empty Observables"]
             fn default() -> Self {
                 $EventSubs::new()
@@ -270,5 +273,7 @@ event_subscriptions! {
         const VoiceServerUpdate: VoiceServerUpdate = "VOICE_SERVER_UPDATE";
         /// guild channel webhook was created, update, or deleted
         const WebhooksUpdate: WebhooksUpdate = "WEBHOOKS_UPDATE";
+        /// Triggered when the bot is fully connected to the gateway.
+        const Ready: ReadyPayloadData = "READY"; 
     }
 }

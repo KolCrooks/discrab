@@ -8,6 +8,9 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     let input = parse_macro_input!(input as syn::ItemImpl);
 
     let name = &*input.self_ty;
+    let impl_ = &input.impl_token;
+    let impl_generics = &mut input.generics.clone();
+
     let event_type_str = if let syn::PathArguments::AngleBracketed(a) = &input
         .trait_
         .as_ref()
@@ -26,21 +29,24 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     let output = quote! {
         #[async_trait::async_trait]
         #input
-        impl<'a> discrab::Registerable<'a> for #name {
-            fn register(
-                &'a self,
-                ctx: discrab::Context,
-                dispatcher: &mut discrab::EventDispatcher<'a>,
-                _: &mut discrab::InteractionRouter<'a>,
-            ) {
-                dispatcher.get_observable(#name::EVENT_TYPE, stringify!(#event_type_str)).subscribe(self);
+
+        #impl_ #impl_generics discrab::Registerable for #name {
+            fn get_reg_type(&self) ->  discrab::core::abstraction::traits::RegisterableType {
+                discrab::core::abstraction::traits::RegisterableType::Event
             }
-            fn get_options(&self) -> Vec<discrab::api::ApplicationCommandOption> {
-                vec![]
+        
+            fn get_event_type(&self) -> Option<discrab::Events> {
+                Some(#name::EVENT_TYPE)
             }
         }
 
-        impl discrab::__internal__::InternalEventHandler<#event_type_str> for #name {
+        #impl_ #impl_generics discrab::RegFns for #name {
+            fn reg_event(self: &std::sync::Arc<Self>, dispatcher: &mut discrab::EventDispatcher) {
+                dispatcher.get_observable(#name::EVENT_TYPE).subscribe(self.clone());
+            }
+        }
+
+        #impl_ #impl_generics discrab::__internal__::__InternalEventHandler<#event_type_str> for #name {
             fn handler(&self, ctx: discrab::Context, val: #event_type_str) {
                 async_std::task::block_on(discrab::EventHandler::<#event_type_str>::handler(
                     self, ctx, val,

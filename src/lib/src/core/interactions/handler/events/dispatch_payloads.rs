@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 use crate::{
-    core::abstraction::abstraction_traits::CommandArg,
+    core::abstraction::traits::CommandArg,
     discord::{
         gateway::presence::PresenceUpdate,
         resources::{

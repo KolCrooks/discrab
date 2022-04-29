@@ -3,7 +3,7 @@ use proc_macro::{TokenStream};
 use quote::quote;
 use syn::parse_macro_input;
 
-pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn gen_sub_handler(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as syn::ItemImpl);
 
     // Name of the struct that the macro is attached to
@@ -14,14 +14,11 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
     let output = quote! {
         #[async_trait::async_trait]
         #input
+
         // Add the hook for the struct to be registerable by the interaction handler
         #impl_ #impl_generics discrab::Registerable for #name {
             fn get_reg_type(&self) -> discrab::core::abstraction::traits::RegisterableType {
-                discrab::core::abstraction::traits::RegisterableType::Command
-            }
-
-            fn get_application_command_type(&self) -> Option<discrab::api::ApplicationCommandType> {
-                Some(Self::COMMAND_TYPE)
+                discrab::core::abstraction::traits::RegisterableType::SubCommand
             }
             
             fn get_name(&self) -> Option<&'static str> {
@@ -39,21 +36,18 @@ pub fn gen_event_handler(_args: TokenStream, input: TokenStream) -> TokenStream 
 
         #impl_ #impl_generics discrab::RegFns for #name {
             fn reg_command(self: &std::sync::Arc<Self>, ctx: discrab::Context, router: std::sync::Arc<discrab::InteractionRouter>) {
-                // Get the id of the interaction handler, or create a new one if it doesn't exist
-                let id = async_std::task::block_on(discrab::InteractionRouter::get_id_or_register(ctx, self.clone()));
-                // Register the handler
-                router.register_command(id, self.clone());
+                panic!("Subcommands shouldn't be registered by the bot (add them as subs inside a command)!");
             }
         }
 
-        // Add the hook for the struct to convert the async handler to a sync one
-        #impl_ #impl_generics discrab::__internal__::__InternalEventHandler<discrab::events::InteractionCtx> for #name {
-            fn handler(&self, ctx: discrab::Context, val: discrab::events::InteractionCtx) {
-                async_std::task::block_on(discrab::CommandHandler::handler(
-                    self, val,
-                ))
+        #[async_trait::async_trait]
+        #impl_ #impl_generics discrab::CommonHandler for #name {
+            async fn handler(&self, ictx: discrab::events::InteractionCtx) {
+                discrab::CommandHandler::handler(self, ictx).await
             }
         }
+        
+        #impl_ #impl_generics discrab::SubRegisterable for #name {}
     };
     output.into()
 }

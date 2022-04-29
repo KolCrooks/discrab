@@ -12,7 +12,7 @@ use super::{
 };
 use crate::{
     core::{
-        abstraction::abstraction_traits::CommandArg,
+        abstraction::traits::CommandArg,
         interactions::{message::MessageComponent, typing::InteractionType},
     },
     discord::{
