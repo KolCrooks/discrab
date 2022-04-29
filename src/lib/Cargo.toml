@@ -3,7 +3,7 @@ name = "discrab"
 description = "A simple Discord bot wrapper"
 repository = "https://github.com/KolCrooks/discrab"
 license = "MIT"
-version = "0.1.1"
+version = "0.5.0"
 edition = "2021"
 
 
@@ -31,5 +31,5 @@ paste = "1.0"
 dotenv = "0.15.0"
 
 [dependencies.discrab_codegen]
-version = "0.1.0"
+version = "0.5.0"
 path = "../codegen"
